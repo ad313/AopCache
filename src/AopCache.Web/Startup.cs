@@ -47,6 +47,18 @@ namespace AopCache.Web
             //返回IServiceProvider，由 AspectCore接管
             return services.AddAopCacheUseDefaultMemoryProvider();
 
+            //此方法的内部实现，这里包装一层
+            //if (setupAction == null)
+            //{
+            //    services.AddMemoryCache();
+            //}
+            //else
+            //{
+            //    services.AddMemoryCache(setupAction);
+            //}
+            //services.AddSingleton<IAopCacheProvider, DefaultAopCacheProvider>();
+            //services.ConfigureDynamicProxy();
+            //return services.BuildAspectInjectorProvider();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

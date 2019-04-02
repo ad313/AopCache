@@ -26,7 +26,10 @@ namespace AopCache.Web.Controllers
             AopCacheProvider = aopCacheProvider;
         }
 
-
+        /// <summary>
+        /// 点击首页，清除某个key
+        /// </summary>
+        /// <returns></returns>
         public IActionResult Index()
         {
             //在这里清除某个key
@@ -36,6 +39,7 @@ namespace AopCache.Web.Controllers
             return View();
         }
 
+        
         public async Task<IActionResult> Privacy()
         {
             //第一次获取值 生成的key是  aaa
