@@ -38,7 +38,6 @@ namespace AopCache.Web
             services.AddTransient<ITestService, TestService>();
             services.AddTransient<TestSingleClass>();
 
-            //
 
             //自定义存储 这里xxx表示 IAopCacheProvider 的实现            
             //services.AddAopCache<xxx>();    
