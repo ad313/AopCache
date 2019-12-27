@@ -18,7 +18,7 @@ namespace AopCache
         /// <param name="services"></param>
         /// <param name="setupAction">Memory </param>
         /// <returns></returns>
-        public static IServiceProvider AddAopCacheUseDefaultMemoryProvider(this IServiceCollection services, Action<MemoryCacheOptions> setupAction = null)
+        public static void AddAopCacheUseDefaultMemoryProvider(this IServiceCollection services, Action<MemoryCacheOptions> setupAction = null)
         {
             if (setupAction == null)
             {
@@ -33,7 +33,7 @@ namespace AopCache
 
             services.ConfigureDynamicProxy();
 
-            return services.BuildAspectInjectorProvider();
+            //return services.BuildAspectInjectorProvider();
         }
 
         /// <summary>
@@ -41,13 +41,13 @@ namespace AopCache
         /// </summary>
         /// <param name="services"></param>
         /// <returns></returns>
-        public static IServiceProvider AddAopCache<T>(this IServiceCollection services) where T : class, IAopCacheProvider
+        public static void AddAopCache<T>(this IServiceCollection services) where T : class, IAopCacheProvider
         {
             services.AddSingleton<IAopCacheProvider, T>();
 
             services.ConfigureDynamicProxy();
 
-            return services.BuildAspectInjectorProvider();
+            //return services.BuildAspectInjectorProvider();
         }
     }
 }

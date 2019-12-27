@@ -5,3 +5,7 @@ bin/
 BenchmarkDotNet.Artifacts/
 *.user
 *.log
+/src/AopCache.Test/AopCache.Test.csproj
+/src/AopCache.Test/OneLock.cs
+/src/AopCache.Test/OneLockOld.cs
+/src/AopCache.Test/UnitTest1.cs

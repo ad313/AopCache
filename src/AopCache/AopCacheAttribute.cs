@@ -1,11 +1,8 @@
-﻿using AspectCore.DynamicProxy;
-using AspectCore.Injector;
+﻿using AspectCore.DependencyInjection;
+using AspectCore.DynamicProxy;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace AopCache
@@ -32,11 +29,10 @@ namespace AopCache
         public int Length { get; set; } = 0;
 
         /// <summary>
-        /// 每个方法 key中的参数
+        /// 缓存失效后调用方法时 是否使用线程锁，默认true
         /// </summary>
-        private static readonly ConcurrentDictionary<MethodInfo, List<string>> AppendKeyParamters =
-            new ConcurrentDictionary<MethodInfo, List<string>>();
-
+        public bool ThreadLock { get; set; } = true;
+        
         /// <summary>
         /// 包装 Task
         /// </summary>
@@ -47,7 +43,7 @@ namespace AopCache
         /// </summary>
         private readonly AsyncLock _lock = new AsyncLock();
 
-        [FromContainer]
+        [FromServiceContext]
         public IAopCacheProvider CacheProvider { get; set; }
 
         static AopCacheAttribute()
@@ -57,147 +53,70 @@ namespace AopCache
 
         public override async Task Invoke(AspectContext context, AspectDelegate next)
         {
-#if DEBUG
-            Console.WriteLine($"--AopCache {context.ServiceMethod.DeclaringType}.{context.ImplementationMethod.Name}");
-#endif
-
-            //key中附带的参数
-            List<string> appendKeyArray = null;
-            if (string.IsNullOrWhiteSpace(Key))
-            {
-                Key = $"{context.ServiceMethod.DeclaringType}.{context.ImplementationMethod.Name}:{context.ServiceMethod.ToString()}";
-            }
-            else
-            {
-                if (!AppendKeyParamters.TryGetValue(context.ImplementationMethod, out appendKeyArray))
-                {
-                    if (Key.IndexOf("{", StringComparison.Ordinal) > -1)
-                    {
-                        appendKeyArray = new List<string>();
-
-                        //获取key中附带的参数，格式：用 {} 包裹
-                        var matchs = Regex.Matches(Key, @"\{\w*\:?\w*\}", RegexOptions.None);
-                        foreach (Match match in matchs)
-                        {
-                            if (match.Success)
-                            {
-                                appendKeyArray.Add(match.Value.TrimStart('{').TrimEnd('}'));
-                            }
-                        }
-                    }
-
-                    AppendKeyParamters.TryAdd(context.ImplementationMethod, appendKeyArray);
-                }
-            }
-
-            var currentCacheKey = Key;
-
-            if (appendKeyArray != null && appendKeyArray.Count > 0)
-            {
-                //得到方法的参数
-                var pars = context.ProxyMethod.GetParameters();
-
-                //设置参数名和值 加入字典
-                var dicValue = new Dictionary<string, object>();
-                for (var i = 0; i < pars.Length; i++)
-                {
-                    dicValue.Add(pars[i].Name, context.Parameters[i]);
-                }
-
-                foreach (var key in appendKeyArray)
-                {
-                    //参数包含:
-                    if (key.Contains(":"))
-                    {
-                        var arr = key.Split(':');
-                        var keyFirst = arr[0];
-                        var keySecond = arr[1];
-
-                        if (!dicValue.TryGetValue(keyFirst, out object v))
-                        {
-                            throw new Exception($"--AopCache {context.ServiceMethod.DeclaringType}.{context.ImplementationMethod.Name} " +
-                                                $"不包含参数 {keyFirst}");
-                        }
-
-                        //var ob = JObject.FromObject(v);
-                        var ob = FastConvertHelper.ToDictionary(v);
-                        if (!ob.TryGetValue(keySecond, out object tokenValue))
-                        {
-                            throw new Exception($"--AopCache {context.ServiceMethod.DeclaringType}.{context.ImplementationMethod.Name} {keyFirst} " +
-                                                $"不包含参数 {keySecond}");
-                        }
-
-                        currentCacheKey = currentCacheKey.Replace("{" + key + "}", tokenValue.ToString());
-                    }
-                    else
-                    {
-                        if (!dicValue.TryGetValue(key, out object value))
-                        {
-                            throw new Exception($"--AopCache {context.ServiceMethod.DeclaringType}.{context.ImplementationMethod.Name} " +
-                                                $"不包含参数 {key}");
-                        }
-
-                        currentCacheKey = currentCacheKey.Replace("{" + key + "}", value.ToString());
-                    }
-                }
-            }
-
-#if DEBUG
-            Console.WriteLine($"--AopCache {context.ServiceMethod.DeclaringType}.{context.ImplementationMethod.Name} 键值：{currentCacheKey}");
-#endif
+            var currentCacheKey = Key.FillValue(context.GetParamsDictionary(), context.GetDefaultKey());
 
             //返回值类型
-            var returnType = context.IsAsync()
-                ? context.ServiceMethod.ReturnType.GetGenericArguments().First()
-                : context.ServiceMethod.ReturnType;
+            var returnType = context.GetReturnType();
 
             //从缓存取值
-            var cacheValue = CacheProvider.Get(currentCacheKey, returnType);
-            if (cacheValue != null)
+            var cacheValue = GetCahceValue(currentCacheKey, returnType, context);
+            if (cacheValue != null) return;
+            
+            //不加锁，直接返回
+            if (!ThreadLock)
             {
-#if DEBUG
-                Console.WriteLine($"--AopCache {context.ServiceMethod.DeclaringType}.{context.ImplementationMethod.Name} 缓存有效");
-#endif
-
-                context.ReturnValue = context.IsAsync()
-                    ? TaskResultMethod.MakeGenericMethod(returnType).Invoke(null, new object[] { cacheValue })
-                    : cacheValue;
-
+                await GetDirectValueWithSetCache(context, next, currentCacheKey, returnType);
                 return;
             }
 
             using (await _lock.LockAsync())
             {
-                cacheValue = CacheProvider.Get(currentCacheKey, returnType);
-                if (cacheValue != null)
-                {
-                    context.ReturnValue = context.IsAsync()
-                        ? TaskResultMethod.MakeGenericMethod(returnType).Invoke(null, new object[] { cacheValue })
-                        : cacheValue;
+                cacheValue = GetCahceValue(currentCacheKey, returnType, context);
+                if (cacheValue != null) return;
 
-#if DEBUG
-                    Console.WriteLine($"--AopCache {context.ServiceMethod.DeclaringType}.{context.ImplementationMethod.Name} 缓存有效，直接返回");
-#endif
-                }
-                else
-                {
-                    //执行方法
-                    await next(context);
-
-                    //获取缓存过期时间
-                    var limitTime = GetCacheNewTime(Type, Length);
-
-                    dynamic returnValue = context.IsAsync() ? await context.UnwrapAsyncReturnValue() : context.ReturnValue;
-
-                    //加入缓存
-                    CacheProvider.Set(currentCacheKey, returnValue, returnType, limitTime);
-
-#if DEBUG
-                    Console.WriteLine($"--AopCache {context.ServiceMethod.DeclaringType}.{context.ImplementationMethod.Name} " +
-                                                             $"当前无缓存，加入缓存，过期时间：{limitTime.ToString("yyyy-MM-dd HH:mm:ss:fff")}");
-#endif
-                }
+                await GetDirectValueWithSetCache(context, next, currentCacheKey, returnType);
             }
+        }
+              
+        /// <summary>
+        /// 获取缓存，并处理返回值
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="type"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        private object GetCahceValue(string key, Type type, AspectContext context)
+        {
+            //从缓存取值
+            var cacheValue = CacheProvider.Get(key, type);
+            if (cacheValue != null)
+            {
+                context.ReturnValue = context.IsAsync()
+                    ? TaskResultMethod.MakeGenericMethod(type).Invoke(null, new object[] { cacheValue })
+                    : cacheValue;
+            }
+            return cacheValue;
+        }
+
+        /// <summary>
+        /// 直接调用方法，并把结果加入缓存
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="next"></param>
+        /// <param name="key">缓存key</param>
+        /// <param name="type">缓存值类型</param>
+        /// <returns></returns>
+        public async Task GetDirectValueWithSetCache(AspectContext context, AspectDelegate next, string key, Type type)
+        {
+            //执行方法
+            await next(context);
+
+            //获取缓存过期时间
+            var limitTime = GetCacheNewTime(Type, Length);
+            var value = await context.GetReturnValue();
+
+            //加入缓存
+            CacheProvider.Set(key, value, type, limitTime);
         }
 
         /// <summary>
