@@ -10,7 +10,7 @@ namespace AopCache
     /// <summary>
     /// 注册AopCache
     /// </summary>
-    public static class AopCacheExtentions
+    public static partial class AopCacheExtentions
     {
         /// <summary>
         /// 注册 AopCache ，默认 MemoryCache

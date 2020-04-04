@@ -38,7 +38,9 @@ namespace AopCache.Web
 
             //默认内存存储
             //返回IServiceProvider，由 AspectCore接管
-            services.AddAopCacheUseDefaultMemoryProvider();
+            //services.AddAopCacheUseDefaultMemoryProvider();
+            //redis实现
+            services.AddCsRedisCache("127.0.0.1:6379,password=123456,defaultDatabase=0");
 
 
             //此方法的内部实现，这里包装一层

@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyVersion>0.1.1.0</AssemblyVersion>
-    <FileVersion>0.1.1.0</FileVersion>
-    <Version>0.3.0</Version>
+    <AssemblyVersion>0.3.2.0</AssemblyVersion>
+    <FileVersion>0.3.2.0</FileVersion>
+    <Version>0.3.2</Version>
     <Authors>ad313</Authors>
     <Description>基于 AspectCore 的简易缓存组件。通过在方法上加 [AopCache]标记实现自动缓存。可以自定义缓存key，缓存时间。默认是 MemoryCache。也可以自己实现 IAopCacheProvider 接口并注入，自定义缓存存储。</Description>
     <PackageProjectUrl>https://github.com/ad313/AopCache</PackageProjectUrl>
@@ -24,10 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspectCore.Core" Version="2.0.0" />
-    <PackageReference Include="AspectCore.Extensions.DependencyInjection" Version="2.0.0" />
-    <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="3.1.0" />
+    <PackageReference Include="AspectCore.Core" Version="2.1.0" />
+    <PackageReference Include="AspectCore.Extensions.DependencyInjection" Version="2.1.0" />
+    <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="3.1.3" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
