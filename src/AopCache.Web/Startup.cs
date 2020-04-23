@@ -39,22 +39,12 @@ namespace AopCache.Web
             //默认内存存储
             //返回IServiceProvider，由 AspectCore接管
             //services.AddAopCacheUseDefaultMemoryProvider();
-            //redis实现
-            services.AddCsRedisCache("127.0.0.1:6379,password=123456,defaultDatabase=0");
 
-
-            //此方法的内部实现，这里包装一层
-            //if (setupAction == null)
-            //{
-            //    services.AddMemoryCache();
-            //}
-            //else
-            //{
-            //    services.AddMemoryCache(setupAction);
-            //}
-            //services.AddSingleton<IAopCacheProvider, DefaultAopCacheProvider>();
-            //services.ConfigureDynamicProxy();
-            //return services.BuildAspectInjectorProvider();
+            //redis实现 
+            //Newtonsoft
+            //services.AddAopCacheUseCsRedis("192.168.0.243:16379,password=123456,defaultDatabase=3");
+            //MessagePack
+            services.AddAopCacheUseCsRedisWithMessagePack("192.168.0.243:16379,password=123456,defaultDatabase=3");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

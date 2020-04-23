@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AopCache
+﻿namespace AopCache
 {
     /// <summary>
     /// 缓存的时间类型

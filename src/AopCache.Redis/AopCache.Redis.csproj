@@ -2,8 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>0.3.2</Version>
-    <Description>基于CsRedis的实现</Description>
+    <Version>0.3.2.1</Version>
+    <Description>基于CsRedis的实现
+ services.AddAopCacheUseCsRedis("xxx");
+ 或
+  services.AddAopCacheUseCsRedisWithMessagePack("xxxx");</Description>
     <Copyright>Copyright © ad313</Copyright>
     <PackageProjectUrl>https://github.com/ad313/AopCache</PackageProjectUrl>
     <PackageTags>AopCache.Redis</PackageTags>
@@ -14,7 +17,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CSRedisCore" Version="3.5.5" />
+    <PackageReference Include="CSRedisCore" Version="3.6.2" />
+    <PackageReference Include="MessagePack" Version="2.1.115" />
   </ItemGroup>
 
   <ItemGroup>

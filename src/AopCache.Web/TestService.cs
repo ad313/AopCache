@@ -39,7 +39,12 @@ namespace AopCache.Web
             return new UserInfo()
             {
                 Id = new Random().Next(1, 100),
-                Name = Guid.NewGuid().ToString("N")
+                Name = Guid.NewGuid().ToString("N"),
+                UserInfo2 = new UserInfo2()
+                {
+                    Id = new Random().Next(1, 100),
+                    Name = Guid.NewGuid().ToString("N")
+                }
             };
         }
     }
@@ -75,5 +80,20 @@ namespace AopCache.Web
 
 
         public string Name { get; set; }
+
+        public UserInfo2 UserInfo2 { get; set; }
+    }
+
+    public class UserInfo2
+    {
+        public int Id { get; set; }
+
+
+        public string Name { get; set; }
+    }
+
+    public class Testaaa
+    {
+
     }
 }

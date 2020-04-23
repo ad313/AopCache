@@ -2,11 +2,11 @@
 
 namespace AopCache.Redis
 {
-    public class RedisCacheProvider : IAopCacheProvider
+    public class RedisCacheWithMessagePackProvider : IAopCacheProvider
     {
         public object Get(string key, Type type)
         {
-            return string.IsNullOrWhiteSpace(key) ? null : SerializerHandler.StringToObject(RedisHelper.Get(key), type);
+            return string.IsNullOrWhiteSpace(key) ? null : SerializerHandler.BytesToObject(RedisHelper.Get<byte[]>(key), type);
         }
 
         public void Remove(string key)
@@ -21,7 +21,7 @@ namespace AopCache.Redis
             {
                 return false;
             }
-            return RedisHelper.Set(key, SerializerHandler.ToString(value, type), absoluteExpiration - DateTime.Now);
+            return RedisHelper.Set(key, SerializerHandler.ToBytes(value, type), absoluteExpiration - DateTime.Now);
         }
     }
 }

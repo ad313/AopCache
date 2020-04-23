@@ -34,7 +34,19 @@ namespace AopCache.Web.Controllers
         {
             //在这里清除某个key
             //清除 GetUserInfo
-            AopCacheProvider.Remove("ccc_1000_1");
+            //AopCacheProvider.Remove("ccc_1000_1");
+
+
+            var model = new UserInfo()
+            {
+                Id = 100,
+                Name = "aa",
+                UserInfo2 = new UserInfo2()
+                {
+                    Id = 111,
+                    Name = "bb"
+                }
+            };
 
             return View();
         }

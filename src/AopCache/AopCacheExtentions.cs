@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AspectCore.Extensions.DependencyInjection;
+﻿using AspectCore.Extensions.DependencyInjection;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace AopCache
 {
@@ -21,19 +19,12 @@ namespace AopCache
         public static void AddAopCacheUseDefaultMemoryProvider(this IServiceCollection services, Action<MemoryCacheOptions> setupAction = null)
         {
             if (setupAction == null)
-            {
                 services.AddMemoryCache();
-            }
             else
-            {
                 services.AddMemoryCache(setupAction);
-            }
 
             services.AddSingleton<IAopCacheProvider, DefaultAopCacheProvider>();
-
             services.ConfigureDynamicProxy();
-
-            //return services.BuildAspectInjectorProvider();
         }
 
         /// <summary>
@@ -44,10 +35,7 @@ namespace AopCache
         public static void AddAopCache<T>(this IServiceCollection services) where T : class, IAopCacheProvider
         {
             services.AddSingleton<IAopCacheProvider, T>();
-
             services.ConfigureDynamicProxy();
-
-            //return services.BuildAspectInjectorProvider();
         }
     }
 }
