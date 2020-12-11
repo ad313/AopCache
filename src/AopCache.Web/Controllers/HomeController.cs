@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using AopCache.Abstractions;
+using AopCache.Web.Models;
+using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using AopCache.Web.Models;
 
 namespace AopCache.Web.Controllers
 {
@@ -37,17 +35,18 @@ namespace AopCache.Web.Controllers
             //AopCacheProvider.Remove("ccc_1000_1");
 
 
-            var model = new UserInfo()
-            {
-                Id = 100,
-                Name = "aa",
-                UserInfo2 = new UserInfo2()
-                {
-                    Id = 111,
-                    Name = "bb"
-                }
-            };
+            //var model = new UserInfo()
+            //{
+            //    Id = 100,
+            //    Name = "aa",
+            //    UserInfo2 = new UserInfo2()
+            //    {
+            //        Id = 111,
+            //        Name = "bb"
+            //    }
+            //};
 
+            
             return View();
         }
 
@@ -101,4 +100,5 @@ namespace AopCache.Web.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
+
 }

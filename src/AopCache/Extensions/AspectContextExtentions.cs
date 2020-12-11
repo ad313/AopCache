@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AopCache
+namespace AopCache.Extensions
 {
     public static class AspectContextExtentions
     {

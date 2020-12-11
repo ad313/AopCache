@@ -1,9 +1,10 @@
-﻿using AspectCore.Extensions.DependencyInjection;
+﻿using AopCache.Abstractions;
+using AopCache.Implements;
+using AspectCore.Extensions.DependencyInjection;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 
-namespace AopCache
+namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>
     /// 注册AopCache
@@ -23,7 +24,7 @@ namespace AopCache
             else
                 services.AddMemoryCache(setupAction);
 
-            services.AddSingleton<IAopCacheProvider, DefaultAopCacheProvider>();
+            services.AddSingleton<IAopCacheProvider, MemoryCacheProvider>();
             services.ConfigureDynamicProxy();
         }
 

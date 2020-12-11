@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace AopCache
+namespace AopCache.Common
 {
     /// <summary>
     /// 处理参数辅助类
@@ -16,6 +15,11 @@ namespace AopCache
         private static readonly ConcurrentDictionary<string, List<string>> KeyParamtersCache = new ConcurrentDictionary<string, List<string>>();
 
         /// <summary>
+        /// 参数分隔符
+        /// </summary>
+        private const char Separator = '.';
+
+        /// <summary>
         /// 格式化字符串中的占位符，用给定的参数值填充
         /// </summary>
         /// <param name="source">原始字符串</param>
@@ -26,11 +30,13 @@ namespace AopCache
         {
             if (string.IsNullOrWhiteSpace(source)) return source;
 
+            source = source.Replace(":", Separator.ToString());
+
             //key中的参数
-            var keyArray = GetKeyParamters(source, cacheKey);
+            var keys = GetKeyParamters(source, cacheKey);
 
             //处理参数 填充值
-            return FillParamValues(source, keyArray, paramDictionary, cacheKey);
+            return FillParamValues(source, keys, paramDictionary);
         }
 
         /// <summary>
@@ -63,7 +69,7 @@ namespace AopCache
             var keyArray = new List<string>();
 
             //获取key中附带的参数，格式：用 {} 包裹
-            var matchs = Regex.Matches(source, @"\{\w*\:?\w*\}", RegexOptions.None);
+            var matchs = Regex.Matches(source, @"\{\w*\" + Separator + @"?\w*\}", RegexOptions.None);
             foreach (Match match in matchs)
             {
                 if (!match.Success)
@@ -80,46 +86,34 @@ namespace AopCache
         /// 处理附加参数，给占位符填充值
         /// </summary>
         /// <param name="source">原始字符串</param>
-        /// <param name="keyArray">附加的参数名称数组</param>
+        /// <param name="keys">附加的参数名称数组</param>
         /// <param name="pars">参数字段</param>
-        /// <param name="cacheKey">参数缓存Key</param>
         /// <returns></returns>
-        private static string FillParamValues(string source, List<string> keyArray, Dictionary<string, object> pars, string cacheKey)
+        private static string FillParamValues(string source, List<string> keys, Dictionary<string, object> pars)
         {
-            if (keyArray == null || keyArray.Count <= 0) return source;
+            if (keys == null || keys.Count <= 0) return source;
 
-            foreach (var key in keyArray)
+            foreach (var key in keys)
             {
                 //参数包含:
-                if (key.Contains(":"))
+                if (key.Contains(Separator))
                 {
-                    var arr = key.Split(':');
-                    var keyFirst = arr[0];
-                    var keySecond = arr[1];
+                    var parts = key.Split(Separator);
+                    var firstKey = parts[0];
+                    var secondKey = parts[1];
 
-                    if (!pars.TryGetValue(keyFirst, out object v))
-                    {
-                        throw new Exception($"--AopCache {cacheKey} " +
-                                            $"不包含参数 {keyFirst}");
-                    }
+                    if (!pars.TryGetValue(firstKey, out object firstValue) || firstValue == null)
+                        continue;
 
-                    //var ob = JObject.FromObject(v);
-                    var ob = FastConvertHelper.ToDictionary(v);
-                    if (!ob.TryGetValue(keySecond, out object tokenValue))
-                    {
-                        throw new Exception($"--AopCache {cacheKey} " +
-                                            $"不包含参数 {keySecond}");
-                    }
+                    if (!FastConvertHelper.ToDictionary(firstValue).TryGetValue(secondKey, out object secondValue) || secondValue == null)
+                        continue;
 
-                    source = source.Replace("{" + key + "}", tokenValue.ToString());
+                    source = source.Replace("{" + key + "}", secondValue.ToString());
                 }
                 else
                 {
-                    if (!pars.TryGetValue(key, out object value))
-                    {
-                        throw new Exception($"--AopCache {cacheKey} " +
-                                             $"不包含参数 {key}");
-                    }
+                    if (!pars.TryGetValue(key, out object value) || value == null)
+                        continue;
 
                     source = source.Replace("{" + key + "}", value.ToString());
                 }

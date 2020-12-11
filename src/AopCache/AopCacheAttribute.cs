@@ -1,4 +1,7 @@
-﻿using AspectCore.DependencyInjection;
+﻿using AopCache.Abstractions;
+using AopCache.Common;
+using AopCache.Extensions;
+using AspectCore.DependencyInjection;
 using AspectCore.DynamicProxy;
 using System;
 using System.Linq;
@@ -13,6 +16,11 @@ namespace AopCache
     [AttributeUsage(AttributeTargets.Method)]
     public class AopCacheAttribute : AbstractInterceptorAttribute
     {
+        /// <summary>
+        /// 指定缓存键值分组
+        /// </summary>
+        public string Group { get; set; } = "AopCache";
+
         /// <summary>
         /// 指定缓存键值 可以附加参数 如 UserInfo_{model:Name}_{type}
         /// </summary>
@@ -59,7 +67,7 @@ namespace AopCache
             var returnType = context.GetReturnType();
 
             //从缓存取值
-            var cacheValue = GetCahceValue(currentCacheKey, returnType, context);
+            var cacheValue = await GetCahceValue(currentCacheKey, returnType, context);
             if (cacheValue != null) return;
             
             //不加锁，直接返回
@@ -71,7 +79,7 @@ namespace AopCache
 
             using (await _lock.LockAsync())
             {
-                cacheValue = GetCahceValue(currentCacheKey, returnType, context);
+                cacheValue = await GetCahceValue(currentCacheKey, returnType, context);
                 if (cacheValue != null) return;
 
                 await GetDirectValueWithSetCache(context, next, currentCacheKey, returnType);
@@ -85,10 +93,10 @@ namespace AopCache
         /// <param name="type"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        private object GetCahceValue(string key, Type type, AspectContext context)
+        private async Task<object> GetCahceValue(string key, Type type, AspectContext context)
         {
             //从缓存取值
-            var cacheValue = CacheProvider.Get(key, type);
+            var cacheValue = await CacheProvider.Get(key, type);
             if (cacheValue != null)
             {
                 context.ReturnValue = context.IsAsync()
@@ -116,7 +124,7 @@ namespace AopCache
             var value = await context.GetReturnValue();
 
             //加入缓存
-            CacheProvider.Set(key, value, type, limitTime);
+            await CacheProvider.Set(key, value, type, limitTime);
         }
 
         /// <summary>
@@ -148,5 +156,28 @@ namespace AopCache
 
             return limitTime;
         }
+    }
+
+    /// <summary>
+    /// 缓存的时间类型
+    /// </summary>
+    public enum CacheTimeType
+    {
+        /// <summary>
+        /// 天
+        /// </summary>
+        Day = 1,
+        /// <summary>
+        /// 小时
+        /// </summary>
+        Hour = 2,
+        /// <summary>
+        /// 分钟
+        /// </summary>
+        Minute = 3,
+        /// <summary>
+        /// 秒
+        /// </summary>
+        Second = 4
     }
 }

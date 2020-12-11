@@ -1,12 +1,31 @@
-﻿using System;
+﻿using AopCache.Abstractions;
+using System;
+using System.Threading.Tasks;
 
 namespace AopCache.Redis
 {
     public class RedisCacheProvider : IAopCacheProvider
     {
-        public object Get(string key, Type type)
+        private readonly ISerializerProvider _serializerProvider;
+
+        public RedisCacheProvider(ISerializerProvider serializerProvider)
         {
-            return string.IsNullOrWhiteSpace(key) ? null : SerializerHandler.StringToObject(RedisHelper.Get(key), type);
+            _serializerProvider = serializerProvider;
+        }
+
+        public async Task<object> Get(string key, Type type)
+        {
+            return string.IsNullOrWhiteSpace(key) ? null : _serializerProvider.Deserialize(await RedisHelper.GetAsync<byte[]>(key), type);
+        }
+
+        public async Task<bool> Set(string key, object value, Type type, DateTime absoluteExpiration)
+        {
+            if (string.IsNullOrWhiteSpace(key) || value == null)
+            {
+                return false;
+            }
+
+            return await RedisHelper.SetAsync(key, _serializerProvider.SerializeBytes(value, type), absoluteExpiration - DateTime.Now);
         }
 
         public void Remove(string key)
@@ -14,14 +33,6 @@ namespace AopCache.Redis
             if (string.IsNullOrWhiteSpace(key)) return;
             RedisHelper.Del(key);
         }
-
-        public bool Set(string key, object value, Type type, DateTime absoluteExpiration)
-        {
-            if (string.IsNullOrWhiteSpace(key) || value == null)
-            {
-                return false;
-            }
-            return RedisHelper.Set(key, SerializerHandler.ToString(value, type), absoluteExpiration - DateTime.Now);
-        }
     }
 }
+

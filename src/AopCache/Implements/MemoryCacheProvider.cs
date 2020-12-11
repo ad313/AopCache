@@ -1,18 +1,22 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using AopCache.Abstractions;
+using Microsoft.Extensions.Caching.Memory;
 using System;
+using System.Threading.Tasks;
 
-namespace AopCache
+namespace AopCache.Implements
 {
     /// <summary>
-    /// aop 缓存默认实现
+    /// aop 内存缓存实现
     /// </summary>
-    public class DefaultAopCacheProvider : IAopCacheProvider
+    public class MemoryCacheProvider : IAopCacheProvider
     {
         private static IMemoryCache _cache;
-        
-        public DefaultAopCacheProvider(IMemoryCache cache)
+        private readonly ISerializerProvider _serializerProvider;
+
+        public MemoryCacheProvider(IMemoryCache cache, ISerializerProvider serializerProvider)
         {
             _cache = cache;
+            _serializerProvider = serializerProvider;
         }
 
         /// <summary>
@@ -21,9 +25,9 @@ namespace AopCache
         /// <param name="key">key</param>
         /// <param name="type">数据类型</param>
         /// <returns></returns>
-        public object Get(string key,Type type)
+        public async Task<object> Get(string key, Type type)
         {
-            return string.IsNullOrWhiteSpace(key) ? null : _cache.Get(key);
+            return await Task.FromResult(string.IsNullOrWhiteSpace(key) ? null : _cache.Get(key));
         }
 
         /// <summary>
@@ -34,16 +38,16 @@ namespace AopCache
         /// <param name="type">数据类型</param>
         /// <param name="absoluteExpiration">绝对过期实现</param>
         /// <returns></returns>
-        public bool Set(string key, object value, Type type, DateTime absoluteExpiration)
+        public async Task<bool> Set(string key, object value, Type type, DateTime absoluteExpiration)
         {
             if (string.IsNullOrWhiteSpace(key) || value == null)
             {
                 return false;
             }
-            
-            _cache.Set(key, FastConvertHelper.Clone(value, type), new DateTimeOffset(absoluteExpiration));
 
-            return true;
+            _cache.Set(key, _serializerProvider.Clone(value, type), new DateTimeOffset(absoluteExpiration));
+
+            return await Task.FromResult(true);
         }
 
         /// <summary>

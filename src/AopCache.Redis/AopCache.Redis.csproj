@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <PackageReference Include="CSRedisCore" Version="3.6.2" />
-    <PackageReference Include="MessagePack" Version="2.1.115" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache", "AopCache\AopCache.csproj", "{C2F2C467-D664-4FD2-A9BA-BF44CF265D7F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache.Web", "AopCache.Web\AopCache.Web.csproj", "{A2971865-8A69-4772-9A7C-9BF6CA98CA82}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AopCache.Redis", "AopCache.Redis\AopCache.Redis.csproj", "{C0117122-46F8-4442-8D74-6482BD37B62D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache.Redis", "AopCache.Redis\AopCache.Redis.csproj", "{C0117122-46F8-4442-8D74-6482BD37B62D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache.Test", "AopCache.Test\AopCache.Test.csproj", "{8329ECB7-FCCE-4352-897B-BDA6BDCEE876}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache", "AopCache\AopCache.csproj", "{1CAD9535-9720-47AE-9CA7-084A5405270E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C2F2C467-D664-4FD2-A9BA-BF44CF265D7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C2F2C467-D664-4FD2-A9BA-BF44CF265D7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C2F2C467-D664-4FD2-A9BA-BF44CF265D7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C2F2C467-D664-4FD2-A9BA-BF44CF265D7F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A2971865-8A69-4772-9A7C-9BF6CA98CA82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A2971865-8A69-4772-9A7C-9BF6CA98CA82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2971865-8A69-4772-9A7C-9BF6CA98CA82}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -27,6 +25,14 @@ Global
 		{C0117122-46F8-4442-8D74-6482BD37B62D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0117122-46F8-4442-8D74-6482BD37B62D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0117122-46F8-4442-8D74-6482BD37B62D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8329ECB7-FCCE-4352-897B-BDA6BDCEE876}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8329ECB7-FCCE-4352-897B-BDA6BDCEE876}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8329ECB7-FCCE-4352-897B-BDA6BDCEE876}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8329ECB7-FCCE-4352-897B-BDA6BDCEE876}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CAD9535-9720-47AE-9CA7-084A5405270E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CAD9535-9720-47AE-9CA7-084A5405270E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CAD9535-9720-47AE-9CA7-084A5405270E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CAD9535-9720-47AE-9CA7-084A5405270E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

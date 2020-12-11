@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Threading.Tasks;
 
-namespace AopCache
+namespace AopCache.Abstractions
 {
     /// <summary>
     /// aop 缓存接口
@@ -13,7 +14,7 @@ namespace AopCache
         /// <param name="key">key</param>
         /// <param name="type">数据类型</param>
         /// <returns></returns>
-        object Get(string key, Type type);
+        Task<object> Get(string key, Type type);
 
         /// <summary>
         /// 设置缓存
@@ -23,7 +24,7 @@ namespace AopCache
         /// <param name="type">数据类型</param>
         /// <param name="absoluteExpiration">绝对过期实现</param>
         /// <returns></returns>
-        bool Set(string key, object value, Type type, DateTime absoluteExpiration);
+        Task<bool> Set(string key, object value, Type type, DateTime absoluteExpiration);
 
         /// <summary>
         /// 移除缓存

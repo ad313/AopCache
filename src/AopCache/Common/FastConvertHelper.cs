@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace AopCache
+namespace AopCache.Common
 {
     /// <summary>
     /// 对象转换成字典
@@ -59,19 +59,6 @@ namespace AopCache
             il.Emit(OpCodes.Ldloc_0);
             il.Emit(OpCodes.Ret);
             return (Func<object, Dictionary<string, object>>)dm.CreateDelegate(typeof(Func<object, Dictionary<string, object>>));
-        }
-
-        #endregion
-
-        #region Clone
-
-        public static object Clone(object value, Type type)
-        {
-            if (value == null) return null;
-
-            var json = Newtonsoft.Json.JsonConvert.SerializeObject(value);
-
-            return Newtonsoft.Json.JsonConvert.DeserializeObject(json, type);
         }
 
         #endregion
