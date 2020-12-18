@@ -70,7 +70,7 @@ namespace AopCache.Web.Controllers
 
             //第二次获取值
             var v1New = TestService.GetByKey();
-
+            
             var v2New = TestService.GetByKeyAndParamter(1);
 
             var v3New = await TestService.GetUserInfo(1, new Req() { Id = 1000 });
@@ -90,6 +90,10 @@ namespace AopCache.Web.Controllers
 
             sb.AppendLine($"TestSingleClass.Get（永不过期）：第一次=> {v4}");
             sb.AppendLine($"TestSingleClass.Get（永不过期）：第二次=> {v4New}");
+
+
+            var sss = TestService.SetUserInfo(1, new Req() { Id = 1000 });
+
 
             return Content(sb.ToString());
         }

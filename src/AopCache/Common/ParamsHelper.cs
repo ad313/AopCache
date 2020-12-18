@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace AopCache.Common
@@ -24,16 +26,16 @@ namespace AopCache.Common
         /// </summary>
         /// <param name="source">原始字符串</param>
         /// <param name="paramDictionary">参数数据字典</param>
-        /// <param name="cacheKey">若需要缓存字符串中的参数，传入key</param>
         /// <returns></returns>
-        public static string FillValue(this string source, Dictionary<string, object> paramDictionary, string cacheKey = null)
+        public static string FillValue(this string source, Dictionary<string, object> paramDictionary)
         {
-            if (string.IsNullOrWhiteSpace(source)) return source;
+            if (string.IsNullOrWhiteSpace(source) || paramDictionary == null || paramDictionary.Count <= 0)
+                return source;
 
             source = source.Replace(":", Separator.ToString());
 
             //key中的参数
-            var keys = GetKeyParamters(source, cacheKey);
+            var keys = GetKeyParamters(source);
 
             //处理参数 填充值
             return FillParamValues(source, keys, paramDictionary);
@@ -43,18 +45,14 @@ namespace AopCache.Common
         /// 处理附加的参数
         /// </summary>
         /// <param name="source"></param>
-        /// <param name="cacheKey"></param>
-        private static List<string> GetKeyParamters(string source, string cacheKey)
+        private static List<string> GetKeyParamters(string source)
         {
-            if (cacheKey == null)
-                return GetKeyParamters(source);
-
-            if (KeyParamtersCache.TryGetValue(cacheKey, out List<string> keyArray))
+            if (KeyParamtersCache.TryGetValue(source, out List<string> keyArray))
                 return keyArray;
 
-            keyArray = GetKeyParamters(source);
+            keyArray = GetKeyParamtersInternal(source);
 
-            KeyParamtersCache.TryAdd(cacheKey, keyArray);
+            KeyParamtersCache.TryAdd(source, keyArray);
 
             return keyArray;
         }
@@ -64,7 +62,7 @@ namespace AopCache.Common
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        private static List<string> GetKeyParamters(string source)
+        private static List<string> GetKeyParamtersInternal(string source)
         {
             var keyArray = new List<string>();
 
@@ -89,9 +87,10 @@ namespace AopCache.Common
         /// <param name="keys">附加的参数名称数组</param>
         /// <param name="pars">参数字段</param>
         /// <returns></returns>
-        private static string FillParamValues(string source, List<string> keys, Dictionary<string, object> pars)
+        public static string FillParamValues(string source, List<string> keys, Dictionary<string, object> pars)
         {
-            if (keys == null || keys.Count <= 0) return source;
+            if (keys == null || keys.Count <= 0) 
+                return source;
 
             foreach (var key in keys)
             {
@@ -105,10 +104,24 @@ namespace AopCache.Common
                     if (!pars.TryGetValue(firstKey, out object firstValue) || firstValue == null)
                         continue;
 
-                    if (!FastConvertHelper.ToDictionary(firstValue).TryGetValue(secondKey, out object secondValue) || secondValue == null)
-                        continue;
+                    var secondValue = "";
 
-                    source = source.Replace("{" + key + "}", secondValue.ToString());
+                    if (firstValue is JsonElement json)
+                    {
+                        if (!json.TryGetProperty(secondKey, out JsonElement value))
+                            continue;
+
+                        secondValue = value.ToString();
+                    }
+                    else
+                    {
+                        if (!FastConvertHelper.ToDictionary(firstValue).TryGetValue(secondKey, out object second) || second == null)
+                            continue;
+
+                        secondValue = second.ToString();
+                    }
+                    
+                    source = source.Replace("{" + key + "}", secondValue);
                 }
                 else
                 {
@@ -121,5 +134,111 @@ namespace AopCache.Common
 
             return source;
         }
+
+        /// <summary>
+        /// 处理附加参数，给占位符填充值
+        /// </summary>
+        /// <param name="source">原始字符串</param>
+        /// <param name="dicMaps">附加的参数名称数组</param>
+        /// <param name="pars">参数字段</param>
+        /// <returns></returns>
+        public static string FillParamValues(string source, Dictionary<string,string> dicMaps, Dictionary<string, object> pars)
+        {
+            if (dicMaps == null || dicMaps.Count <= 0)
+                return source;
+
+            foreach (var key in dicMaps)
+            {
+                //参数包含:
+                if (key.Value.Contains(Separator))
+                {
+                    var parts = key.Value.Split(Separator);
+                    var firstKey = parts[0];
+                    var secondKey = parts[1];
+
+                    if (!pars.TryGetValue(firstKey, out object firstValue) || firstValue == null)
+                        continue;
+
+                    var secondValue = "";
+
+                    if (firstValue is JsonElement json)
+                    {
+                        if (!json.TryGetProperty(secondKey, out JsonElement value))
+                            continue;
+
+                        secondValue = value.ToString();
+                    }
+                    else
+                    {
+                        if (!FastConvertHelper.ToDictionary(firstValue).TryGetValue(secondKey, out object second) || second == null)
+                            continue;
+
+                        secondValue = second.ToString();
+                    }
+
+                    source = source.Replace("{" + key.Key + "}", secondValue);
+                }
+                else
+                {
+                    if (!pars.TryGetValue(key.Value, out object value) || value == null)
+                        continue;
+
+                    source = source.Replace("{" + key.Key + "}", value.ToString());
+                }
+            }
+
+            return source;
+        }
+
+        ///// <summary>
+        ///// 处理附加参数，给占位符填充值
+        ///// </summary>
+        ///// <param name="source">原始字符串</param>
+        ///// <param name="keys">附加的参数名称数组</param>
+        ///// <param name="pars">参数字段</param>
+        ///// <returns></returns>
+        //public static string FillParamValues2(string source, List<string> keys, Dictionary<string, object> pars)
+        //{
+        //    if (keys == null || keys.Count <= 0)
+        //        return source;
+
+        //    foreach (var key in keys)
+        //    {
+        //        //参数包含:
+        //        if (key.Contains(Separator))
+        //        {
+        //            var parts = key.Split(Separator);
+        //            var firstKey = parts[0];
+        //            var secondKey = parts[1];
+
+        //            if (!pars.TryGetValue(firstKey, out object firstValue) || firstValue == null)
+        //                continue;
+
+        //            if (firstValue is JsonElement json)
+        //            {
+        //                if (!json.TryGetProperty(secondKey, out JsonElement value))
+        //                    continue;
+
+        //                source = source.Replace("{" + key + "}", value.ToString());
+        //            }
+        //            else
+        //            {
+        //                if (!FastConvertHelper.ToDictionary(firstValue).TryGetValue(secondKey, out object secondValue) || secondValue == null)
+        //                    continue;
+
+        //                source = source.Replace("{" + key + "}", secondValue.ToString());
+        //            }
+        //        }
+        //        else
+        //        {
+        //            if (!pars.TryGetValue(key, out object value) || value == null)
+        //                continue;
+
+        //            source = source.Replace("{" + key + "}", value.ToString());
+        //        }
+        //    }
+
+        //    return source;
+        //}
     }
 }

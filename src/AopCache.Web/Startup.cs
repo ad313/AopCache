@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using AopCache.Implements;
+using AopCache.Runtime;
 using AopCache.Web.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -44,9 +46,21 @@ namespace AopCache.Web
 
             //redis实现 
             //Newtonsoft
-            services.AddAopCacheUseCsRedis("192.168.1.110:32350,password=123456,defaultDatabase=5");
+            services.AddAopCacheUseCsRedis("192.168.1.120:30985,password=123456,defaultDatabase=5");
+            services.AddAopEventBus();
             //MessagePack
             //services.AddAopCacheUseCsRedisWithMessagePack("192.168.1.110:32350,password=123456,defaultDatabase=5");
+
+
+
+
+
+
+
+            new DependencyRegistrator(services, new TypeFinder()).RegisterServices();
+
+
+            services.AddHostedService<SubscriberWorker>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -8,15 +8,21 @@ namespace AopCache.Web
     {
         //默认时间单位是秒，长度为0，即永不过期
         [AopCache(Key = "aaa")]
+        [AopSubscriberTag(Channel = "aaa")]
         string GetByKey();
 
         //设置3秒过期 这里的“{userId}”，占位符。用参数 userId 的值去替换
         [AopCache(Key = "bbb_{userId}", Length = 3)]
+        [AopSubscriberTag(Channel = "aaa", Map = "userId={type}")]
         string GetByKeyAndParamter(int userId);
 
         //设置十分钟过期 这里的“{req:Id}”，占位符。用参数 req里面的Id 的值去替换
         [AopCache(Key = "ccc_{req:Id}_{type}", Type = CacheTimeType.Minute, Length = 10)]
+        [AopSubscriberTag(Channel = "aaa", Map = "type={type},req:Id={req:Id}")]
         Task<UserInfo> GetUserInfo(int type, Req req);
+
+        [AopPublisher(Channel = "aaa", MessageSource = MessageSource.InParams)]
+        Task<UserInfo> SetUserInfo(int type, Req req);
     }
 
     //实现接口
@@ -33,6 +39,20 @@ namespace AopCache.Web
         }
 
         public async Task<UserInfo> GetUserInfo(int type, Req req)
+        {
+            return new UserInfo()
+            {
+                Id = new Random().Next(1, 100),
+                Name = Guid.NewGuid().ToString("N"),
+                UserInfo2 = new UserInfo2()
+                {
+                    Id = new Random().Next(1, 100),
+                    Name = Guid.NewGuid().ToString("N")
+                }
+            };
+        }
+
+        public async Task<UserInfo> SetUserInfo(int type, Req req)
         {
             return new UserInfo()
             {

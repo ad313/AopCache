@@ -4,6 +4,7 @@ using AopCache.Extensions;
 using AspectCore.DependencyInjection;
 using AspectCore.DynamicProxy;
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 namespace AopCache
 {
     /// <summary>
-    /// aop 缓存
+    /// Aop 缓存
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
     public class AopCacheAttribute : AbstractInterceptorAttribute
@@ -19,7 +20,7 @@ namespace AopCache
         /// <summary>
         /// 指定缓存键值分组
         /// </summary>
-        public string Group { get; set; } = "AopCache";
+        public string Group { get; set; } = "Default";
 
         /// <summary>
         /// 指定缓存键值 可以附加参数 如 UserInfo_{model:Name}_{type}
@@ -51,6 +52,12 @@ namespace AopCache
         /// </summary>
         private readonly AsyncLock _lock = new AsyncLock();
 
+        /// <summary>
+        /// 存储 group key
+        /// </summary>
+        private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, DateTime>> GroupDictionary =
+            new ConcurrentDictionary<string, ConcurrentDictionary<string, DateTime>>();
+
         [FromServiceContext]
         public IAopCacheProvider CacheProvider { get; set; }
 
@@ -61,7 +68,9 @@ namespace AopCache
 
         public override async Task Invoke(AspectContext context, AspectDelegate next)
         {
-            var currentCacheKey = Key.FillValue(context.GetParamsDictionary(), context.GetDefaultKey());
+            var currentCacheKey = Key.FillValue(context.GetParamsDictionary());
+
+            currentCacheKey = FormatPrefix(currentCacheKey);
 
             //返回值类型
             var returnType = context.GetReturnType();
@@ -85,7 +94,12 @@ namespace AopCache
                 await GetDirectValueWithSetCache(context, next, currentCacheKey, returnType);
             }
         }
-              
+
+        public string FormatPrefix(string key)
+        {
+            return $"AopCache:{(string.IsNullOrWhiteSpace(Group) ? "Default" : Group)}:{key}";
+        }
+
         /// <summary>
         /// 获取缓存，并处理返回值
         /// </summary>

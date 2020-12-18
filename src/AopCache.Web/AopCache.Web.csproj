@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AopCache.Redis\AopCache.Redis.csproj" />
+    <ProjectReference Include="..\AopCache.Trigger\AopCache.Trigger.csproj" />
   </ItemGroup>
 
 </Project>
