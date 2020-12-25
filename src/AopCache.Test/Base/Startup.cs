@@ -29,12 +29,13 @@ namespace AopCache.Test.Base
             // в╒╡А HttpContext иообнд
             services.AddHttpContextAccessor();
 
-
-
             services.AddSingleton<ISerializerProvider, SerializerProvider>();
 
-            //services.AddAopCacheUseDefaultMemoryProvider();
-            services.AddAopCacheUseCsRedis("192.168.1.110:32350,password=123456,defaultDatabase=5");
+            services.AddAopCache(op =>
+            {
+                op.AddCacheProviderUseMemory();
+                op.AddCacheProviderUseCsRedis("192.168.1.110:32350,password=123456,defaultDatabase=5");
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -2,6 +2,7 @@ using AopCache.Abstractions;
 using AopCache.Test.Base;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 
 namespace AopCache.Test
@@ -16,38 +17,78 @@ namespace AopCache.Test
             serializerProvider = GetService<ISerializerProvider>();
         }
 
-        //[Test]
-        //public void Test1()
-        //{
-        //    var json = JsonSerializer.Serialize(new User()
-        //    {
-        //        Id = 1,
-        //        UserId = Guid.NewGuid(),
-        //        Birthday = DateTime.Now,
-        //        Money = 100m,
-        //        Name = "ad314"
-        //    });
+        [Test]
+        public void SerializerHandlerTest1()
+        {
+            var json = JsonSerializer.Serialize(new User()
+            {
+                Id = 1,
+                UserId = Guid.NewGuid(),
+                Birthday = DateTime.Now,
+                Money = 100m,
+                Name = "ad314"
+            });
 
-        //    var model = new SerializerModel()
-        //    {
-        //        Text = "ad313",
-        //        UserInfo = new User()
-        //        {
-        //            Id = 1,
-        //            UserId = Guid.NewGuid(),
-        //            Birthday = DateTime.Now,
-        //            Money = 100m,
-        //            Name = "ad314"
-        //        },
-        //        Json = JsonDocument.Parse(json).RootElement
-        //    };
+            var model = new SerializerModel()
+            {
+                Text = "ad313",
+                UserInfo = new User()
+                {
+                    Id = 1,
+                    UserId = Guid.NewGuid(),
+                    Birthday = DateTime.Now,
+                    Money = 100m,
+                    Name = "ad314"
+                },
+                //Json = JsonDocument.Parse(json).RootElement
+            };
 
-        //    var bytes = SerializerHandler.ToBytes(model, model.GetType());
-        //    Assert.IsTrue(bytes != null && bytes.Length > 0);
+            var bytes = SerializerHandler.ToBytes(model, model.GetType());
+            Assert.IsTrue(bytes != null && bytes.Length > 0);
 
-        //    var newModel = (SerializerModel)SerializerHandler.BytesToObject(bytes, model.GetType());
-        //    Assert.IsTrue(newModel?.UserInfo != null && newModel.UserInfo.Name == "ad314");
-        //}
+            var newModel = (SerializerModel)SerializerHandler.BytesToObject(bytes, model.GetType());
+            Assert.IsTrue(newModel?.UserInfo != null && newModel.UserInfo.Name == "ad314");
+        }
+
+        [Test]
+        public void SerializerHandlerTest2()
+        {
+            var model = new SerializerModel()
+            {
+                Text = "ad313",
+                UserInfo = new User()
+                {
+                    Id = 1,
+                    UserId = Guid.NewGuid(),
+                    Birthday = DateTime.Now,
+                    Money = 100m,
+                    Name = "ad314"
+                }
+            };
+
+            var list = new List<SerializerModel>();
+            list.Add(model);
+            list.Add(model);
+            list.Add(model);
+            list.Add(model);
+            list.Add(model);
+            list.Add(model);
+            list.Add(model);
+            list.Add(model);
+            list.Add(model);
+            list.Add(model);
+            list.Add(model);
+            list.Add(model);
+            list.Add(model);
+            list.Add(model);
+            list.Add(model);
+
+            var bytes = SerializerHandler.ToBytes(list, list.GetType());
+
+            var bytes2 = serializerProvider.SerializeBytes(list, list.GetType());
+
+            
+        }
 
 
         [Test]
@@ -79,7 +120,7 @@ namespace AopCache.Test
                     Money = 100m,
                     Name = "ad314"
                 },
-                Json = JsonDocument.Parse(json).RootElement
+                //Json = JsonDocument.Parse(json).RootElement
             };
 
             var bytes = serializerProvider.SerializeBytes(model);
@@ -102,7 +143,7 @@ namespace AopCache.Test
 
         public User UserInfo { get; set; }
 
-        public JsonElement Json { get; set; }
+        //public JsonElement Json { get; set; }
     }
 
     public class User

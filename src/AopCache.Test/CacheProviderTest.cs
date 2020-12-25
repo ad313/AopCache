@@ -87,7 +87,7 @@ namespace AopCache.Test
                     Money = 100m,
                     Name = "ad314"
                 },
-                Json = JsonDocument.Parse(json).RootElement
+                //Json = JsonDocument.Parse(json).RootElement
             };
 
 

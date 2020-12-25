@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache", "AopCache\AopCac
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AopCache.Trigger", "AopCache.Trigger\AopCache.Trigger.csproj", "{8C2E7650-9C6A-4185-AF9A-AC4CC92DB724}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AopCache.BenchmarkTest", "AopCache.BenchmarkTest\AopCache.BenchmarkTest.csproj", "{D8592925-85B5-4685-9CDF-DAD177EA0D36}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{8C2E7650-9C6A-4185-AF9A-AC4CC92DB724}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C2E7650-9C6A-4185-AF9A-AC4CC92DB724}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8C2E7650-9C6A-4185-AF9A-AC4CC92DB724}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8592925-85B5-4685-9CDF-DAD177EA0D36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8592925-85B5-4685-9CDF-DAD177EA0D36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8592925-85B5-4685-9CDF-DAD177EA0D36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8592925-85B5-4685-9CDF-DAD177EA0D36}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

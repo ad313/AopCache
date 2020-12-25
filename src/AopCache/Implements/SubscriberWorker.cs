@@ -14,26 +14,20 @@ namespace AopCache.Implements
         private readonly IAopEventBusProvider _eventBusProvider;
         private readonly IAopCacheProvider _cacheProvider;
 
-        //private static readonly Dictionary<string, List<MethodInfo>> _channelMethodDictionary =
-        //    new Dictionary<string, List<MethodInfo>>();
-
-
         private static readonly Dictionary<string, List<(AopCacheAttribute, AopSubscriberTagAttribute)>>
-            ChannelAttributeDictionary =
-                new Dictionary<string, List<(AopCacheAttribute, AopSubscriberTagAttribute)>>();
+            ChannelSubscribersDictionary = new Dictionary<string, List<(AopCacheAttribute, AopSubscriberTagAttribute)>>();
 
-        public SubscriberWorker(IAopEventBusProvider eventBusProvider,IAopCacheProvider cacheProvider)
+        public SubscriberWorker(IAopEventBusProvider eventBusProvider, IAopCacheProvider cacheProvider)
         {
             _eventBusProvider = eventBusProvider;
             _cacheProvider = cacheProvider;
         }
-        
+
         /// <summary>
-        /// This method is called when the <see cref="T:Microsoft.Extensions.Hosting.IHostedService" /> starts. The implementation should return a task that represents
-        /// the lifetime of the long running operation(s) being performed.
+        /// 处理订阅
         /// </summary>
-        /// <param name="stoppingToken">Triggered when <see cref="M:Microsoft.Extensions.Hosting.IHostedService.StopAsync(System.Threading.CancellationToken)" /> is called.</param>
-        /// <returns>A <see cref="T:System.Threading.Tasks.Task" /> that represents the long running operations.</returns>
+        /// <param name="stoppingToken"></param>
+        /// <returns></returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             Console.WriteLine($"{DateTime.Now} ----------------------------------------");
@@ -45,9 +39,7 @@ namespace AopCache.Implements
                 var methodList = AopSubscriberTagAttribute.MethodList.Where(d =>
                     d.GetCustomAttributes<AopSubscriberTagAttribute>().ToList().Exists(t => t.Channel == channel)).ToList();
 
-                //_channelMethodDictionary.Add(channel, methodList);
-
-                var attrs = new List<(AopCacheAttribute, AopSubscriberTagAttribute)>();
+                var subscribers = new List<(AopCacheAttribute, AopSubscriberTagAttribute)>();
 
                 foreach (var method in methodList)
                 {
@@ -59,30 +51,29 @@ namespace AopCache.Implements
 
                     var subscriberTag = method.GetCustomAttributes<AopSubscriberTagAttribute>().First(d => d.Channel == channel);
 
-                    attrs.Add((cacheAttribute, subscriberTag));
+                    subscribers.Add((cacheAttribute, subscriberTag));
                 }
 
-                ChannelAttributeDictionary.Add(channel, attrs);
+                ChannelSubscribersDictionary.Add(channel, subscribers);
 
                 Console.WriteLine($"{DateTime.Now} ----------------------------------------");
             }
 
-            foreach (var keyValuePair in ChannelAttributeDictionary)
+            //开始订阅
+            foreach (var keyValuePair in ChannelSubscribersDictionary)
             {
                 _eventBusProvider.Subscribe<Dictionary<string, object>>(keyValuePair.Key, msg =>
                 {
-                    var data = msg.Data;
-
                     foreach (var valueTuple in keyValuePair.Value)
                     {
                         var cacheAttribute = valueTuple.Item1;
                         var subscriberTag = valueTuple.Item2;
-                        
+
                         switch (subscriberTag.ActionType)
                         {
                             case ActionType.DeleteByKey:
 
-                                var key = subscriberTag.GetKey(cacheAttribute.Key, data);
+                                var key = subscriberTag.GetKey(cacheAttribute.Key, msg.Data);
                                 key = cacheAttribute.FormatPrefix(key);
                                 _cacheProvider.Remove(key);
                                 Console.WriteLine($"{DateTime.Now} Channel：{msg.Channel}：清除缓存：{key}");
@@ -95,6 +86,8 @@ namespace AopCache.Implements
                     }
                 });
             }
+
+            await Task.CompletedTask;
         }
     }
 }

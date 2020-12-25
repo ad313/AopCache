@@ -10,7 +10,7 @@ namespace AopCache.Runtime
     /// <summary>
     /// 类型查找器
     /// </summary>
-    public class TypeFinder //: ITypeFinder
+    public class TypeFinder
     {
         /// <summary>
         /// 跳过的程序集
@@ -88,41 +88,19 @@ namespace AopCache.Runtime
         {
             return !Regex.IsMatch(assembly.FullName, SkipAssemblies, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         }
-
+        
         /// <summary>
         /// 查找类型列表
         /// </summary>
-        /// <typeparam name="T">查找类型</typeparam>
-        /// <param name="assemblies">在指定的程序集列表中查找</param>
-        public List<Type> Find<T>(List<Assembly> assemblies = null)
-        {
-            return Find(typeof(T), assemblies);
-        }
-
-        /// <summary>
-        /// 查找类型列表
-        /// </summary>
-        /// <typeparam name="T">查找类型</typeparam>
         /// <param name="assemblies">在指定的程序集列表中查找</param>
         public List<Type> FindAllInterface(List<Assembly> assemblies = null)
         {
-            assemblies = assemblies ?? GetAssemblies();
+            assemblies ??= GetAssemblies();
 
             if (assemblies == null || !assemblies.Any())
                 return new List<Type>();
 
-            return assemblies.SelectMany(d => d.GetTypes().Where(d => d.IsInterface)).ToList();
-        }
-
-        /// <summary>
-        /// 查找类型列表
-        /// </summary>
-        /// <param name="findType">查找类型</param>
-        /// <param name="assemblies">在指定的程序集列表中查找</param>
-        public List<Type> Find(Type findType, List<Assembly> assemblies = null)
-        {
-            assemblies = assemblies ?? GetAssemblies();
-            return Reflection.FindTypes(findType, assemblies.ToArray());
+            return assemblies.SelectMany(d => d.GetTypes().Where(t => t.IsInterface)).ToList();
         }
     }
 }

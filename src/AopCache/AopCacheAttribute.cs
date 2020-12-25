@@ -40,7 +40,7 @@ namespace AopCache
         /// <summary>
         /// 缓存失效后调用方法时 是否使用线程锁，默认true
         /// </summary>
-        public bool ThreadLock { get; set; } = true;
+        public bool ThreadLock { get; set; } = false;
         
         /// <summary>
         /// 包装 Task

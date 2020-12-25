@@ -73,7 +73,14 @@ namespace AopCache.Web
     public class TestSingleClass
     {
         [AopCache(Key = "TestSingleClassKey")]
+        [AopSubscriberTag(Channel = "aaa2")]
         public virtual string Get()
+        {
+            return Guid.NewGuid().ToString("N");
+        }
+        
+        [AopPublisher(Channel = "aaa2")]
+        public virtual string ClearTestSingleClassCache()
         {
             return Guid.NewGuid().ToString("N");
         }

@@ -42,25 +42,23 @@ namespace AopCache.Web
 
             //默认内存存储
             //返回IServiceProvider，由 AspectCore接管
-            //services.AddAopCacheUseDefaultMemoryProvider();
+            //services.AddAopCache();
 
             //redis实现 
             //Newtonsoft
-            services.AddAopCacheUseCsRedis("192.168.1.120:30985,password=123456,defaultDatabase=5");
-            services.AddAopEventBus();
+            //services.AddAopCacheUseCsRedis("192.168.1.120:30985,password=123456,defaultDatabase=5");
+            //services.AddAopTriggerWithRedis("192.168.1.120:30985,password=123456,defaultDatabase=5");
+
+            services.AddAopCache(op =>
+            {
+                op.AddCacheProviderUseMemory();
+                //op.AddCacheProviderUseCsRedis("192.168.1.120:30985,password=123456,defaultDatabase=5");
+                //op.AddAopTriggerUseRedisEventBus("192.168.1.120:30985,password=123456,defaultDatabase=5");
+            });
+
             //MessagePack
             //services.AddAopCacheUseCsRedisWithMessagePack("192.168.1.110:32350,password=123456,defaultDatabase=5");
 
-
-
-
-
-
-
-            new DependencyRegistrator(services, new TypeFinder()).RegisterServices();
-
-
-            services.AddHostedService<SubscriberWorker>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

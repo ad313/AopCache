@@ -1,7 +1,7 @@
 ﻿using AopCache.Abstractions;
 using AopCache.Implements;
 using AopCache.Redis;
-using AspectCore.Extensions.DependencyInjection;
+using AopCache.Runtime;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -10,32 +10,33 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static partial class AopCacheExtentions
     {
+        public static void AddCacheProviderUseCsRedis(this AopCacheOption option, string connectionString)
+        {
+            InitCsRedis(connectionString);
+
+            DependencyRegistrator.ServiceCollection.AddSingleton<IAopCacheProvider, RedisCacheProvider>();
+        }
+
         /// <summary>
-        /// 注册 AopCache ，默认 自己传入实现缓存类，替换默认的MemoryCache
+        /// 注册 AopCache 缓存清理触发器
         /// </summary>
-        /// <param name="services"></param>
+        /// <param name="option"></param>
         /// <param name="connectionString"></param>
         /// <returns></returns>
-        public static void AddAopCacheUseCsRedis(this IServiceCollection services, string connectionString)
+        public static void AddAopTriggerUseRedisEventBus(this AopCacheOption option, string connectionString = null)
         {
-            var csredis = new CSRedis.CSRedisClient(connectionString);
-            RedisHelper.Initialization(csredis);
+            InitCsRedis(connectionString);
 
-            services.AddSingleton<ISerializerProvider, SerializerProvider>();
-            services.AddSingleton<IAopCacheProvider, RedisCacheProvider>();
-
-            services.ConfigureDynamicProxy();
+            //处理发布订阅
+            new DependencyRegistrator().RegisterServices();
+            DependencyRegistrator.ServiceCollection.AddSingleton<IAopEventBusProvider, RedisEventBusProvider>();
+            DependencyRegistrator.ServiceCollection.AddHostedService<SubscriberWorker>();
         }
 
-        /// <summary>
-        /// 注册 AopCache ，默认 自己传入实现缓存类，替换默认的MemoryCache
-        /// </summary>
-        /// <param name="services"></param>
-        /// <returns></returns>
-        public static void AddAopEventBus(this IServiceCollection services)
+        private static void InitCsRedis(string connectionString)
         {
-            services.AddSingleton<IAopEventBusProvider, RedisEventBusProvider>();
+            if (!string.IsNullOrWhiteSpace(connectionString))
+                RedisHelper.Initialization(new CSRedis.CSRedisClient(connectionString));
         }
-
     }
 }

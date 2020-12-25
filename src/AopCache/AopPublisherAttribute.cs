@@ -22,15 +22,25 @@ namespace AopCache
         /// <summary>
         /// 发布事件的消息来源
         /// </summary>
-        public MessageSource MessageSource { get; set; }
+        public MessageSource MessageSource { get; set; } = MessageSource.NoParams;
         
         [FromServiceContext]
         private IAopEventBusProvider EventBusProvider { get; set; }
+        
+        /// <summary>
+        /// 是否开启
+        /// </summary>
+        public static bool Enable { get; set; }
 
         public override async Task Invoke(AspectContext context, AspectDelegate next)
         {
             //执行方法
             await next(context);
+
+            if (!Enable)
+            {
+                return;
+            }
 
             if (string.IsNullOrWhiteSpace(Channel))
             {
@@ -46,6 +56,9 @@ namespace AopCache
                 case MessageSource.OutParams:
                     var result = await context.GetReturnValue();
                     message = new Dictionary<string, object>() { { "Result", result } };
+                    break;
+                case MessageSource.NoParams:
+
                     break;
                 case MessageSource.Other:
 
@@ -73,8 +86,12 @@ namespace AopCache
         /// </summary>
         OutParams = 2,
         /// <summary>
+        /// 无需参数
+        /// </summary>
+        NoParams = 3,
+        /// <summary>
         /// 其他参数、自定义参数
         /// </summary>
-        Other = 3
+        Other = 4
     }
 }

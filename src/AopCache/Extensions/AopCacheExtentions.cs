@@ -3,6 +3,7 @@ using AopCache.Implements;
 using AspectCore.Extensions.DependencyInjection;
 using Microsoft.Extensions.Caching.Memory;
 using System;
+using AopCache.Runtime;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -11,32 +12,50 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static partial class AopCacheExtentions
     {
-        /// <summary>
-        /// 注册 AopCache ，默认 MemoryCache
-        /// </summary>
-        /// <param name="services"></param>
-        /// <param name="setupAction">Memory </param>
-        /// <returns></returns>
-        public static void AddAopCacheUseDefaultMemoryProvider(this IServiceCollection services, Action<MemoryCacheOptions> setupAction = null)
+        public static IServiceCollection AddAopCache(this IServiceCollection services, Action<MemoryCacheOptions> memoryCacheOptions = null)
+        {
+            services.AddAopCacheUssMemory(memoryCacheOptions);
+            return services.AddAopCacheCore();
+        }
+
+        public static IServiceCollection AddAopCache(this IServiceCollection services, Action<AopCacheOption> option)
+        {
+            if (option == null)
+                return services.AddAopCache();
+
+            DependencyRegistrator.ServiceCollection = services;
+
+            option.Invoke(new AopCacheOption());
+
+            return services.AddAopCacheCore();
+        }
+        
+
+        public static void AddCacheProviderUseMemory(this AopCacheOption option, Action<MemoryCacheOptions> memoryCacheOptions = null)
+        {
+            DependencyRegistrator.ServiceCollection.AddAopCacheUssMemory(memoryCacheOptions);
+        }
+
+
+        private static IServiceCollection AddAopCacheUssMemory(this IServiceCollection services, Action<MemoryCacheOptions> setupAction = null)
         {
             if (setupAction == null)
                 services.AddMemoryCache();
             else
                 services.AddMemoryCache(setupAction);
 
-            services.AddSingleton<IAopCacheProvider, MemoryCacheProvider>();
-            services.ConfigureDynamicProxy();
+            return services.AddSingleton<IAopCacheProvider, MemoryCacheProvider>();
         }
 
-        /// <summary>
-        /// 注册 AopCache ，默认 自己传入实现缓存类，替换默认的MemoryCache
-        /// </summary>
-        /// <param name="services"></param>
-        /// <returns></returns>
-        public static void AddAopCache<T>(this IServiceCollection services) where T : class, IAopCacheProvider
+        private static IServiceCollection AddAopCacheCore(this IServiceCollection services)
         {
-            services.AddSingleton<IAopCacheProvider, T>();
-            services.ConfigureDynamicProxy();
+            services.AddSingleton<ISerializerProvider, SerializerProvider>();
+            return services.ConfigureDynamicProxy();
         }
+    }
+
+    public class AopCacheOption
+    {
+
     }
 }

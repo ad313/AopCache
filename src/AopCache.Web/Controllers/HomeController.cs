@@ -94,6 +94,7 @@ namespace AopCache.Web.Controllers
 
             var sss = TestService.SetUserInfo(1, new Req() { Id = 1000 });
 
+            TestSingleClass.ClearTestSingleClassCache();
 
             return Content(sb.ToString());
         }
