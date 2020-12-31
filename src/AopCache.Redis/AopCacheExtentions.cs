@@ -10,7 +10,7 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static partial class AopCacheExtentions
     {
-        public static void AddCacheProviderUseCsRedis(this AopCacheOption option, string connectionString)
+        public static void UseCsRedisCacheProvider(this AopCacheOption option, string connectionString)
         {
             InitCsRedis(connectionString);
 

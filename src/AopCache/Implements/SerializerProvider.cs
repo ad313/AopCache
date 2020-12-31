@@ -5,6 +5,9 @@ using System.Text.Json;
 
 namespace AopCache.Implements
 {
+    /// <summary>
+    /// 序列化接口
+    /// </summary>
     public class SerializerProvider : ISerializerProvider
     {
         /// <summary>

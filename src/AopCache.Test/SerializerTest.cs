@@ -134,6 +134,22 @@ namespace AopCache.Test
             Assert.IsTrue(newModel?.UserInfo != null && newModel.UserInfo.Name == "ad314");
 
         }
+
+        //[Test]
+        //public void SerializerProviderTest2()
+        //{
+        //    var user = new User2(Guid.NewGuid())
+        //    {
+        //        Birthday = DateTime.Now,
+        //        Money = 100m,
+        //        Name = "ad314"
+        //    };
+
+        //    var bytes = SerializerHandler.ToBytes(user, typeof(User2));
+
+        //    var model = (User2) SerializerHandler.BytesToObject(bytes, typeof(User2));
+
+        //}
     }
 
 
@@ -152,6 +168,31 @@ namespace AopCache.Test
 
 
         public Guid UserId { get; set; }
+
+
+        public DateTime Birthday { get; set; }
+
+
+        public decimal Money { get; set; }
+
+
+        public string Name { get; set; }
+    }
+
+    public class User2
+    {
+
+        public User2()
+        {
+
+        }
+
+        public User2(Guid id)
+        {
+            UserId = id;
+        }
+
+        public Guid UserId { get;private set; }
 
 
         public DateTime Birthday { get; set; }

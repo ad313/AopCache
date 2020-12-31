@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using AopCache.Abstractions;
 using AopCache.Implements;
 using AopCache.Runtime;
 using AopCache.Web.Controllers;
@@ -49,11 +50,12 @@ namespace AopCache.Web
             //services.AddAopCacheUseCsRedis("192.168.1.120:30985,password=123456,defaultDatabase=5");
             //services.AddAopTriggerWithRedis("192.168.1.120:30985,password=123456,defaultDatabase=5");
 
-            services.AddAopCache(op =>
+            services.AddAopCache(option =>
             {
-                op.AddCacheProviderUseMemory();
-                //op.AddCacheProviderUseCsRedis("192.168.1.120:30985,password=123456,defaultDatabase=5");
-                //op.AddAopTriggerUseRedisEventBus("192.168.1.120:30985,password=123456,defaultDatabase=5");
+                option.UseMemoryCacheProvider();
+                option.AddAopTriggerUseMemoryEventBus();
+                //option.UseCsRedisCacheProvider("192.168.1.120:30985,password=123456,defaultDatabase=5");
+                //option.AddAopTriggerUseRedisEventBus("192.168.1.120:30985,password=123456,defaultDatabase=5");
             });
 
             //MessagePack
@@ -62,7 +64,7 @@ namespace AopCache.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,IHostApplicationLifetime hostLifetime)
         {
             if (env.IsDevelopment())
             {
@@ -75,6 +77,22 @@ namespace AopCache.Web
 
             app.UseStaticFiles();
             app.UseCookiePolicy();
+
+            hostLifetime.ApplicationStarted.Register(() =>
+            {
+                var provider = app.ApplicationServices.GetService<IAopEventBusProvider>();
+
+                //provider.SubscribeFromQueue<string>("abc", func =>
+                //{
+                //    var list = func(10);
+                //    Console.WriteLine($"from queue : {list.Count}");
+                //});
+
+                provider.SubscribeFromQueue<string>("abc", 10, 1000, true, data =>
+                {
+                    Console.WriteLine($"from queue : {data.Count}");
+                });
+            });
 
             app.UseRouting();
             app.UseEndpoints(endpoints =>

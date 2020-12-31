@@ -1,4 +1,5 @@
-﻿using AopCache.Abstractions;
+﻿using System.Collections.Generic;
+using AopCache.Abstractions;
 using AopCache.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -14,14 +15,16 @@ namespace AopCache.Web.Controllers
         private TestSingleClass TestSingleClass { get; set; }
 
         private IAopCacheProvider AopCacheProvider { get; set; }
+        private IAopEventBusProvider EventBusProvider { get; }
 
-        public HomeController(ITestService testService, TestSingleClass testSingleClass, IAopCacheProvider aopCacheProvider)
+        public HomeController(ITestService testService, TestSingleClass testSingleClass, IAopCacheProvider aopCacheProvider, IAopEventBusProvider eventBusProvider)
         {
             TestService = testService;
 
             TestSingleClass = testSingleClass;
 
             AopCacheProvider = aopCacheProvider;
+            EventBusProvider = eventBusProvider;
         }
 
         /// <summary>
@@ -46,7 +49,15 @@ namespace AopCache.Web.Controllers
             //    }
             //};
 
-            
+
+
+
+            EventBusProvider.PublishToQueueAsync("abc", new List<string>() { "1", });
+            EventBusProvider.PublishToQueueAsync("abc", new List<string>() { "1", "2" });
+            EventBusProvider.PublishToQueueAsync("abc", new List<string>() { "1", "2", "3" });
+            EventBusProvider.PublishToQueueAsync("abc", new List<string>() { "1", "2", "3", "4" });
+            EventBusProvider.PublishToQueueAsync("abc", new List<string>() { "1", "2", "3", "4", "5" });
+
             return View();
         }
 

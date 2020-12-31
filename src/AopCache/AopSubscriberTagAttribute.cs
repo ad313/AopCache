@@ -29,9 +29,9 @@ namespace AopCache
 
         public static readonly Dictionary<string, Dictionary<string, string>> MapDictionary = new Dictionary<string, Dictionary<string, string>>();
 
-        public static List<string> ChannelList { get; set; }
+        public static List<string> ChannelList { get; set; } = new List<string>();
 
-        public static List<MethodInfo> MethodList { get; set; }
+        public static List<MethodInfo> MethodList { get; set; } = new List<MethodInfo>();
 
         public string GetMapDictionaryKey() => $"{Channel}_{Map}";
 

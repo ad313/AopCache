@@ -15,18 +15,31 @@ namespace AopCache.Runtime
 
         private List<Assembly> Assemblies { get; set; }
 
+        /// <summary>
+        /// ServiceCollection
+        /// </summary>
         public static IServiceCollection ServiceCollection { get;set; }
 
+        /// <summary>
+        /// 初始化
+        /// </summary>
         public DependencyRegistrator()
         {
             Assemblies = TypeFinder.GetAssemblies().ToList();
         }
 
+        /// <summary>
+        /// 设置ServiceCollection
+        /// </summary>
+        /// <param name="serviceCollection"></param>
         public void SetServiceCollection(IServiceCollection serviceCollection)
         {
             ServiceCollection = serviceCollection;
         }
 
+        /// <summary>
+        /// 注册依赖服务
+        /// </summary>
         public void RegisterServices()
         {
             RegisterTransientDependency();

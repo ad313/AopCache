@@ -31,12 +31,24 @@ namespace Microsoft.Extensions.DependencyInjection
         }
         
 
-        public static void AddCacheProviderUseMemory(this AopCacheOption option, Action<MemoryCacheOptions> memoryCacheOptions = null)
+        public static void UseMemoryCacheProvider(this AopCacheOption option, Action<MemoryCacheOptions> memoryCacheOptions = null)
         {
             DependencyRegistrator.ServiceCollection.AddAopCacheUssMemory(memoryCacheOptions);
         }
 
-
+        /// <summary>
+        /// 注册 AopCache 缓存清理触发器
+        /// </summary>
+        /// <param name="option"></param>
+        /// <returns></returns>
+        public static void AddAopTriggerUseMemoryEventBus(this AopCacheOption option)
+        {
+            //处理发布订阅
+            new DependencyRegistrator().RegisterServices();
+            DependencyRegistrator.ServiceCollection.AddSingleton<IAopEventBusProvider, MemoryEventBusProvider>();
+            DependencyRegistrator.ServiceCollection.AddHostedService<SubscriberWorker>();
+        }
+        
         private static IServiceCollection AddAopCacheUssMemory(this IServiceCollection services, Action<MemoryCacheOptions> setupAction = null)
         {
             if (setupAction == null)

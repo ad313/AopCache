@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AopCache.Abstractions
@@ -10,9 +9,58 @@ namespace AopCache.Abstractions
     /// </summary>
     public interface IAopEventBusProvider
     {
+        /// <summary>
+        /// 发布事件
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="channel"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
         Task PublishAsync<T>(string channel, AopMessageModel<T> message);
 
-        void Subscribe<T>(string channel, Action<AopMessageModel<T>> message);
+        /// <summary>
+        /// 发布事件 发布数据到队列，并发布通知
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="channel"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        Task PublishToQueueAsync<T>(string channel, List<T> data);
+
+        /// <summary>
+        /// 订阅事件
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="channel"></param>
+        /// <param name="handler"></param>
+        void Subscribe<T>(string channel, Action<AopMessageModel<T>> handler);
+
+        /// <summary>
+        /// 订阅事件
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="channel"></param>
+        /// <param name="handler"></param>
+        void Subscribe<T>(string channel, Func<AopMessageModel<T>, Task> handler);
+
+        /// <summary>
+        /// 订阅事件 队列中有新数据
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="channel"></param>
+        /// <param name="message"></param>
+        void SubscribeFromQueue<T>(string channel, Action<Func<int, List<T>>> message);
+
+        /// <summary>
+        /// 订阅事件 队列中有新数据 分批次消费
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="channel"></param>
+        /// <param name="length">每次处理条数</param>
+        /// <param name="delay">处理完一次的停顿时间 毫秒</param>
+        /// <param name="rollbackToQueueWhenException">当处理失败时是否把数据重新加入到队列</param>
+        /// <param name="message"></param>
+        void SubscribeFromQueue<T>(string channel, int length, int delay, bool rollbackToQueueWhenException, Action<List<T>> message);
     }
 
     /// <summary>

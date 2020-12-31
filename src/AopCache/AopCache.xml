@@ -39,6 +39,51 @@
             Aop EventBus
             </summary>
         </member>
+        <member name="M:AopCache.Abstractions.IAopEventBusProvider.PublishAsync``1(System.String,AopCache.Abstractions.AopMessageModel{``0})">
+            <summary>
+            发布事件
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Abstractions.IAopEventBusProvider.PublishToQueueAsync``1(System.String,System.Collections.Generic.List{``0})">
+            <summary>
+            发布事件 发布数据到队列，并发布通知
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel"></param>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Abstractions.IAopEventBusProvider.Subscribe``1(System.String,System.Action{AopCache.Abstractions.AopMessageModel{``0}})">
+            <summary>
+            订阅事件
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:AopCache.Abstractions.IAopEventBusProvider.SubscribeFromQueue``1(System.String,System.Action{System.Func{System.Int32,System.Collections.Generic.List{``0}}})">
+            <summary>
+            订阅事件 队列中有新数据
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:AopCache.Abstractions.IAopEventBusProvider.SubscribeFromQueue``1(System.String,System.Int32,System.Int32,System.Boolean,System.Action{System.Collections.Generic.List{``0}})">
+            <summary>
+            订阅事件 队列中有新数据 分批次消费
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel"></param>
+            <param name="length">每次处理条数</param>
+            <param name="delay">处理完一次的停顿时间 毫秒</param>
+            <param name="rollbackToQueueWhenException">当处理失败时是否把数据重新加入到队列</param>
+            <param name="message"></param>
+        </member>
         <member name="T:AopCache.Abstractions.AopMessageModel`1">
             <summary>
             事件消息模型
@@ -432,6 +477,75 @@
             <param name="key"></param>
             <returns></returns>
         </member>
+        <member name="T:AopCache.Implements.MemoryEventBusProvider">
+            <summary>
+            基于进程的发布订阅实现
+            </summary>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.#ctor(AopCache.Abstractions.ISerializerProvider)">
+            <summary>
+            初始化
+            </summary>
+            <param name="serializerProvider"></param>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.PublishAsync``1(System.String,AopCache.Abstractions.AopMessageModel{``0})">
+            <summary>
+            发布事件
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.PublishToQueueAsync``1(System.String,System.Collections.Generic.List{``0})">
+            <summary>
+            发布事件 发布数据到队列，并发布通知
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel"></param>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.Subscribe``1(System.String,System.Action{AopCache.Abstractions.AopMessageModel{``0}})">
+            <summary>
+            订阅事件
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.Subscribe2``1(System.String,System.Func{AopCache.Abstractions.AopMessageModel{``0},System.Threading.Tasks.Task})">
+            <summary>
+            订阅事件
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.SubscribeFromQueue``1(System.String,System.Action{System.Func{System.Int32,System.Collections.Generic.List{``0}}})">
+            <summary>
+            订阅事件 队列中有新数据
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.SubscribeFromQueue``1(System.String,System.Int32,System.Int32,System.Boolean,System.Action{System.Collections.Generic.List{``0}})">
+            <summary>
+            订阅事件 队列中有新数据 分批次消费
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel"></param>
+            <param name="length">每次处理条数</param>
+            <param name="delay">处理完一次的停顿时间 毫秒</param>
+            <param name="rollbackToQueueWhenException">当处理失败时是否把数据重新加入到队列</param>
+            <param name="message"></param>
+        </member>
+        <member name="T:AopCache.Implements.SerializerProvider">
+            <summary>
+            序列化接口
+            </summary>
+        </member>
         <member name="M:AopCache.Implements.SerializerProvider.Serialize(System.Object,System.Type)">
             <summary>
             序列化
@@ -496,6 +610,18 @@
             <param name="type"></param>
             <returns></returns>
         </member>
+        <member name="T:AopCache.Implements.SubscriberWorker">
+            <summary>
+            订阅服务
+            </summary>
+        </member>
+        <member name="M:AopCache.Implements.SubscriberWorker.#ctor(AopCache.Abstractions.IAopEventBusProvider,AopCache.Abstractions.IAopCacheProvider)">
+            <summary>
+            初始化 订阅服务
+            </summary>
+            <param name="eventBusProvider"></param>
+            <param name="cacheProvider"></param>
+        </member>
         <member name="M:AopCache.Implements.SubscriberWorker.ExecuteAsync(System.Threading.CancellationToken)">
             <summary>
             处理订阅
@@ -506,6 +632,27 @@
         <member name="T:AopCache.Runtime.DependencyRegistrator">
             <summary>
             依赖引导器
+            </summary>
+        </member>
+        <member name="P:AopCache.Runtime.DependencyRegistrator.ServiceCollection">
+            <summary>
+            ServiceCollection
+            </summary>
+        </member>
+        <member name="M:AopCache.Runtime.DependencyRegistrator.#ctor">
+            <summary>
+            初始化
+            </summary>
+        </member>
+        <member name="M:AopCache.Runtime.DependencyRegistrator.SetServiceCollection(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            设置ServiceCollection
+            </summary>
+            <param name="serviceCollection"></param>
+        </member>
+        <member name="M:AopCache.Runtime.DependencyRegistrator.RegisterServices">
+            <summary>
+            注册依赖服务
             </summary>
         </member>
         <member name="T:AopCache.Runtime.TypeFinder">
@@ -559,6 +706,13 @@
             <summary>
             注册AopCache
             </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.AopCacheExtentions.AddAopTriggerUseMemoryEventBus(Microsoft.Extensions.DependencyInjection.AopCacheOption)">
+            <summary>
+            注册 AopCache 缓存清理触发器
+            </summary>
+            <param name="option"></param>
+            <returns></returns>
         </member>
     </members>
 </doc>

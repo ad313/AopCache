@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace AopCache.Implements
 {
+    /// <summary>
+    /// 订阅服务
+    /// </summary>
     public class SubscriberWorker : BackgroundService
     {
         private readonly IAopEventBusProvider _eventBusProvider;
@@ -17,6 +20,11 @@ namespace AopCache.Implements
         private static readonly Dictionary<string, List<(AopCacheAttribute, AopSubscriberTagAttribute)>>
             ChannelSubscribersDictionary = new Dictionary<string, List<(AopCacheAttribute, AopSubscriberTagAttribute)>>();
 
+        /// <summary>
+        /// 初始化 订阅服务
+        /// </summary>
+        /// <param name="eventBusProvider"></param>
+        /// <param name="cacheProvider"></param>
         public SubscriberWorker(IAopEventBusProvider eventBusProvider, IAopCacheProvider cacheProvider)
         {
             _eventBusProvider = eventBusProvider;
