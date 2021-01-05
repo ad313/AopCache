@@ -45,7 +45,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             //处理发布订阅
             new DependencyRegistrator().RegisterServices();
-            DependencyRegistrator.ServiceCollection.AddSingleton<IAopEventBusProvider, MemoryEventBusProvider>();
+            DependencyRegistrator.ServiceCollection.AddSingleton<IEventBusProvider, MemoryEventBusProvider>();
             DependencyRegistrator.ServiceCollection.AddHostedService<SubscriberWorker>();
         }
         

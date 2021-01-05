@@ -13,7 +13,6 @@ namespace Microsoft.Extensions.DependencyInjection
         public static void UseCsRedisCacheProvider(this AopCacheOption option, string connectionString)
         {
             InitCsRedis(connectionString);
-
             DependencyRegistrator.ServiceCollection.AddSingleton<IAopCacheProvider, RedisCacheProvider>();
         }
 
@@ -29,7 +28,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             //处理发布订阅
             new DependencyRegistrator().RegisterServices();
-            DependencyRegistrator.ServiceCollection.AddSingleton<IAopEventBusProvider, RedisEventBusProvider>();
+            DependencyRegistrator.ServiceCollection.AddSingleton<IEventBusProvider, RedisEventBusProvider>();
             DependencyRegistrator.ServiceCollection.AddHostedService<SubscriberWorker>();
         }
 

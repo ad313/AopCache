@@ -14,7 +14,7 @@ namespace AopCache.Implements
     /// </summary>
     public class SubscriberWorker : BackgroundService
     {
-        private readonly IAopEventBusProvider _eventBusProvider;
+        private readonly IEventBusProvider _eventBusProvider;
         private readonly IAopCacheProvider _cacheProvider;
 
         private static readonly Dictionary<string, List<(AopCacheAttribute, AopSubscriberTagAttribute)>>
@@ -25,7 +25,7 @@ namespace AopCache.Implements
         /// </summary>
         /// <param name="eventBusProvider"></param>
         /// <param name="cacheProvider"></param>
-        public SubscriberWorker(IAopEventBusProvider eventBusProvider, IAopCacheProvider cacheProvider)
+        public SubscriberWorker(IEventBusProvider eventBusProvider, IAopCacheProvider cacheProvider)
         {
             _eventBusProvider = eventBusProvider;
             _cacheProvider = cacheProvider;

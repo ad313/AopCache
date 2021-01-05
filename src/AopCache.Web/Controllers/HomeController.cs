@@ -15,9 +15,9 @@ namespace AopCache.Web.Controllers
         private TestSingleClass TestSingleClass { get; set; }
 
         private IAopCacheProvider AopCacheProvider { get; set; }
-        private IAopEventBusProvider EventBusProvider { get; }
+        private IEventBusProvider EventBusProvider { get; }
 
-        public HomeController(ITestService testService, TestSingleClass testSingleClass, IAopCacheProvider aopCacheProvider, IAopEventBusProvider eventBusProvider)
+        public HomeController(ITestService testService, TestSingleClass testSingleClass, IAopCacheProvider aopCacheProvider, IEventBusProvider eventBusProvider)
         {
             TestService = testService;
 
@@ -50,13 +50,20 @@ namespace AopCache.Web.Controllers
             //};
 
 
+            for (int i = 0; i < 100; i++)
+            {
+                EventBusProvider.PublishQueueAsync("abc", new List<string>() { "1", });
+                EventBusProvider.PublishQueueAsync("abc", new List<string>() { "2", "3" });
+                EventBusProvider.PublishQueueAsync("abc", new List<string>() { "4", "5", "6" });
+                EventBusProvider.PublishQueueAsync("abc", new List<string>() { "7", "8", "9", "10" });
+                EventBusProvider.PublishQueueAsync("abc", new List<string>() { "11", "12", "13", "14", "15" });
+            }
 
-
-            EventBusProvider.PublishToQueueAsync("abc", new List<string>() { "1", });
-            EventBusProvider.PublishToQueueAsync("abc", new List<string>() { "1", "2" });
-            EventBusProvider.PublishToQueueAsync("abc", new List<string>() { "1", "2", "3" });
-            EventBusProvider.PublishToQueueAsync("abc", new List<string>() { "1", "2", "3", "4" });
-            EventBusProvider.PublishToQueueAsync("abc", new List<string>() { "1", "2", "3", "4", "5" });
+            //EventBusProvider.PublishQueueAsync("abc", new List<string>() { "1", });
+            //EventBusProvider.PublishQueueAsync("abc", new List<string>() { "2", "3" });
+            //EventBusProvider.PublishQueueAsync("abc", new List<string>() { "4", "5", "6" });
+            //EventBusProvider.PublishQueueAsync("abc", new List<string>() { "7", "8", "9", "10" });
+            //EventBusProvider.PublishQueueAsync("abc", new List<string>() { "11", "12", "13", "14", "15" });
 
             return View();
         }

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AopCache.Extensions
 {
+    /// <summary>
+    /// Aspect 扩展
+    /// </summary>
     public static class AspectContextExtentions
     {
         /// <summary>

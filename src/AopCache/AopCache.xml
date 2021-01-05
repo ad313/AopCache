@@ -6,7 +6,7 @@
     <members>
         <member name="T:AopCache.Abstractions.IAopCacheProvider">
             <summary>
-            aop 缓存接口
+            Aop 缓存接口
             </summary>
         </member>
         <member name="M:AopCache.Abstractions.IAopCacheProvider.Get(System.String,System.Type)">
@@ -34,84 +34,239 @@
             <param name="key"></param>
             <returns></returns>
         </member>
-        <member name="T:AopCache.Abstractions.IAopEventBusProvider">
+        <member name="T:AopCache.Abstractions.IEventBusProvider">
             <summary>
-            Aop EventBus
+            EventBus
             </summary>
         </member>
-        <member name="M:AopCache.Abstractions.IAopEventBusProvider.PublishAsync``1(System.String,AopCache.Abstractions.AopMessageModel{``0})">
+        <member name="P:AopCache.Abstractions.IEventBusProvider.ServiceProvider">
+            <summary>
+            ServiceProvider
+            </summary>
+        </member>
+        <member name="M:AopCache.Abstractions.IEventBusProvider.PublishAsync``1(System.String,AopCache.Abstractions.EventMessageModel{``0})">
             <summary>
             发布事件
             </summary>
             <typeparam name="T"></typeparam>
-            <param name="channel"></param>
-            <param name="message"></param>
+            <param name="channel">频道名称</param>
+            <param name="message">数据</param>
             <returns></returns>
         </member>
-        <member name="M:AopCache.Abstractions.IAopEventBusProvider.PublishToQueueAsync``1(System.String,System.Collections.Generic.List{``0})">
+        <member name="M:AopCache.Abstractions.IEventBusProvider.PublishQueueAsync``1(System.String,System.Collections.Generic.List{``0})">
             <summary>
-            发布事件 发布数据到队列，并发布通知
+            发布事件 数据放到队列，并发布通知到订阅者
             </summary>
             <typeparam name="T"></typeparam>
-            <param name="channel"></param>
-            <param name="data"></param>
+            <param name="channel">频道名称</param>
+            <param name="message">数据集合</param>
             <returns></returns>
         </member>
-        <member name="M:AopCache.Abstractions.IAopEventBusProvider.Subscribe``1(System.String,System.Action{AopCache.Abstractions.AopMessageModel{``0}})">
+        <member name="M:AopCache.Abstractions.IEventBusProvider.Subscribe``1(System.String,System.Action{AopCache.Abstractions.EventMessageModel{``0}})">
             <summary>
             订阅事件
             </summary>
             <typeparam name="T"></typeparam>
-            <param name="channel"></param>
-            <param name="message"></param>
+            <param name="channel">频道名称</param>
+            <param name="handler">订阅处理</param>
         </member>
-        <member name="M:AopCache.Abstractions.IAopEventBusProvider.SubscribeFromQueue``1(System.String,System.Action{System.Func{System.Int32,System.Collections.Generic.List{``0}}})">
+        <member name="M:AopCache.Abstractions.IEventBusProvider.Subscribe``1(System.String,System.Func{AopCache.Abstractions.EventMessageModel{``0},System.Threading.Tasks.Task})">
             <summary>
-            订阅事件 队列中有新数据
+            订阅事件
             </summary>
             <typeparam name="T"></typeparam>
-            <param name="channel"></param>
-            <param name="message"></param>
+            <param name="channel">频道名称</param>
+            <param name="handler">订阅处理</param>
         </member>
-        <member name="M:AopCache.Abstractions.IAopEventBusProvider.SubscribeFromQueue``1(System.String,System.Int32,System.Int32,System.Boolean,System.Action{System.Collections.Generic.List{``0}})">
+        <member name="M:AopCache.Abstractions.IEventBusProvider.SubscribeQueue``1(System.String,System.Action{System.Func{System.Int32,System.Collections.Generic.List{``0}}})">
             <summary>
-            订阅事件 队列中有新数据 分批次消费
+            订阅事件 从队列读取数据
             </summary>
             <typeparam name="T"></typeparam>
-            <param name="channel"></param>
+            <param name="channel">频道名称</param>
+            <param name="handler">订阅处理</param>
+        </member>
+        <member name="M:AopCache.Abstractions.IEventBusProvider.SubscribeQueue``1(System.String,System.Func{System.Func{System.Int32,System.Threading.Tasks.Task{System.Collections.Generic.List{``0}}},System.Threading.Tasks.Task})">
+            <summary>
+            订阅事件 从队列读取数据
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel">频道名称</param>
+            <param name="handler">订阅处理</param>
+        </member>
+        <member name="M:AopCache.Abstractions.IEventBusProvider.SubscribeQueue``1(System.String,System.Int32,System.Int32,AopCache.Abstractions.ExceptionHandlerEnum,System.Func{System.Collections.Generic.List{``0},System.Threading.Tasks.Task},System.Func{System.Collections.Generic.List{``0},System.Threading.Tasks.Task},System.Func{System.Threading.Tasks.Task})">
+            <summary>
+            订阅事件 从队列读取数据 分批次消费
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel">频道名称</param>
             <param name="length">每次处理条数</param>
-            <param name="delay">处理完一次的停顿时间 毫秒</param>
-            <param name="rollbackToQueueWhenException">当处理失败时是否把数据重新加入到队列</param>
-            <param name="message"></param>
+            <param name="delay">每次处理间隔 毫秒</param>
+            <param name="exceptionHandler">异常处理方式</param>
+            <param name="handler">订阅处理</param>
+            <param name="error">发生异常时回调</param>
+            <param name="completed">本次消费完成回调 最后执行</param>
         </member>
-        <member name="T:AopCache.Abstractions.AopMessageModel`1">
+        <member name="M:AopCache.Abstractions.IEventBusProvider.GetQueueLength(System.String)">
+            <summary>
+            获取某个频道队列数据量
+            </summary>
+            <param name="channel">频道名称</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Abstractions.IEventBusProvider.GetQueueItems``1(System.String,System.Int32)">
+            <summary>
+            获取某个频道队列数据
+            </summary>
+            <param name="channel">频道名称</param>
+            <param name="length">获取指定的数据条数</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Abstractions.IEventBusProvider.GetQueueItemsAsync``1(System.String,System.Int32)">
+            <summary>
+            获取某个频道队列数据
+            </summary>
+            <param name="channel">频道名称</param>
+            <param name="length">获取指定的数据条数</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Abstractions.IEventBusProvider.GetErrorQueueLength(System.String)">
+            <summary>
+            获取某个频道错误队列数据量
+            </summary>
+            <param name="channel">频道名称</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Abstractions.IEventBusProvider.GetErrorQueueItems``1(System.String,System.Int32)">
+            <summary>
+            获取某个频道错误队列数据
+            </summary>
+            <param name="channel">频道名称</param>
+            <param name="length">获取指定的数据条数</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Abstractions.IEventBusProvider.GetErrorQueueItemsAsync``1(System.String,System.Int32)">
+            <summary>
+            获取某个频道错误队列数据
+            </summary>
+            <param name="channel">频道名称</param>
+            <param name="length">获取指定的数据条数</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Abstractions.IEventBusProvider.UnSubscribe(System.String)">
+            <summary>
+            取消订阅
+            </summary>
+            <param name="channel"></param>
+        </member>
+        <member name="M:AopCache.Abstractions.IEventBusProvider.SubscribeTest``1(System.String,System.Action{AopCache.Abstractions.EventMessageModel{``0}})">
+            <summary>
+            订阅事件 用于单元测试
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel">频道名称</param>
+            <param name="handler">订阅处理</param>
+        </member>
+        <member name="M:AopCache.Abstractions.IEventBusProvider.SubscribeTest``1(System.String,System.Func{AopCache.Abstractions.EventMessageModel{``0},System.Threading.Tasks.Task})">
+            <summary>
+            订阅事件 用于单元测试
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel">频道名称</param>
+            <param name="handler">订阅处理</param>
+        </member>
+        <member name="M:AopCache.Abstractions.IEventBusProvider.SubscribeQueueTest``1(System.String,System.Action{System.Func{System.Int32,System.Collections.Generic.List{``0}}})">
+            <summary>
+            订阅事件 从队列读取数据 用于单元测试
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel">频道名称</param>
+            <param name="handler">订阅处理</param>
+        </member>
+        <member name="M:AopCache.Abstractions.IEventBusProvider.SubscribeQueueTest``1(System.String,System.Func{System.Func{System.Int32,System.Threading.Tasks.Task{System.Collections.Generic.List{``0}}},System.Threading.Tasks.Task})">
+            <summary>
+            订阅事件 从队列读取数据 用于单元测试
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel">频道名称</param>
+            <param name="handler">订阅处理</param>
+        </member>
+        <member name="M:AopCache.Abstractions.IEventBusProvider.SubscribeQueueTest``1(System.String,System.Int32,System.Int32,AopCache.Abstractions.ExceptionHandlerEnum,System.Func{System.Collections.Generic.List{``0},System.Threading.Tasks.Task},System.Func{System.Collections.Generic.List{``0},System.Threading.Tasks.Task},System.Func{System.Threading.Tasks.Task})">
+            <summary>
+            订阅事件 从队列读取数据 分批次消费 用于单元测试
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel">频道名称</param>
+            <param name="length">每次处理条数</param>
+            <param name="delay">每次处理间隔 毫秒</param>
+            <param name="exceptionHandler">异常处理方式</param>
+            <param name="handler">订阅处理</param>
+            <param name="error">发生异常时回调</param>
+            <param name="completed">本次消费完成回调 最后执行</param>
+        </member>
+        <member name="T:AopCache.Abstractions.EventMessageModel`1">
             <summary>
             事件消息模型
             </summary>
         </member>
-        <member name="P:AopCache.Abstractions.AopMessageModel`1.Channel">
+        <member name="P:AopCache.Abstractions.EventMessageModel`1.Channel">
             <summary>
             频道
             </summary>
         </member>
-        <member name="P:AopCache.Abstractions.AopMessageModel`1.Data">
+        <member name="P:AopCache.Abstractions.EventMessageModel`1.Data">
             <summary>
             数据
             </summary>
         </member>
-        <member name="P:AopCache.Abstractions.AopMessageModel`1.TrackId">
+        <member name="P:AopCache.Abstractions.EventMessageModel`1.TrackId">
             <summary>
             TrackId
             </summary>
         </member>
-        <member name="M:AopCache.Abstractions.AopMessageModel`1.#ctor">
+        <member name="M:AopCache.Abstractions.EventMessageModel`1.#ctor">
             <summary>
             初始化
             </summary>
         </member>
-        <member name="M:AopCache.Abstractions.AopMessageModel`1.#ctor(`0,System.Nullable{System.Guid})">
+        <member name="M:AopCache.Abstractions.EventMessageModel`1.#ctor(`0,System.String)">
             <summary>
             初始化
+            </summary>
+        </member>
+        <member name="T:AopCache.Abstractions.ExceptionHandlerEnum">
+            <summary>
+            处理错误枚举
+            </summary>
+        </member>
+        <member name="F:AopCache.Abstractions.ExceptionHandlerEnum.Continue">
+            <summary>
+            忽略错误，继续执行
+            </summary>
+        </member>
+        <member name="F:AopCache.Abstractions.ExceptionHandlerEnum.Stop">
+            <summary>
+            停止执行
+            </summary>
+        </member>
+        <member name="F:AopCache.Abstractions.ExceptionHandlerEnum.PushToSelfQueueAndStop">
+            <summary>
+            重新加入本身队列 并且停止执行
+            </summary>
+        </member>
+        <member name="F:AopCache.Abstractions.ExceptionHandlerEnum.PushToSelfQueueAndContinue">
+            <summary>
+            重新加入本身队列 并且忽略错误，继续执行
+            </summary>
+        </member>
+        <member name="F:AopCache.Abstractions.ExceptionHandlerEnum.PushToErrorQueueAndStop">
+            <summary>
+            加入错误队列 并且停止执行
+            </summary>
+        </member>
+        <member name="F:AopCache.Abstractions.ExceptionHandlerEnum.PushToErrorQueueAndContinue">
+            <summary>
+            加入错误队列 并且忽略错误，继续执行
             </summary>
         </member>
         <member name="T:AopCache.Abstractions.ISerializerProvider">
@@ -228,6 +383,26 @@
             存储 group key
             </summary>
         </member>
+        <member name="P:AopCache.AopCacheAttribute.CacheProvider">
+            <summary>
+            缓存操作类
+            </summary>
+        </member>
+        <member name="M:AopCache.AopCacheAttribute.Invoke(AspectCore.DynamicProxy.AspectContext,AspectCore.DynamicProxy.AspectDelegate)">
+            <summary>
+            处理业务逻辑
+            </summary>
+            <param name="context"></param>
+            <param name="next"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.AopCacheAttribute.FormatPrefix(System.String)">
+            <summary>
+            处理Key前缀
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
         <member name="M:AopCache.AopCacheAttribute.GetCahceValue(System.String,System.Type,AspectCore.DynamicProxy.AspectContext)">
             <summary>
             获取缓存，并处理返回值
@@ -300,6 +475,14 @@
             是否开启
             </summary>
         </member>
+        <member name="M:AopCache.AopPublisherAttribute.Invoke(AspectCore.DynamicProxy.AspectContext,AspectCore.DynamicProxy.AspectDelegate)">
+            <summary>
+            处理业务逻辑
+            </summary>
+            <param name="context"></param>
+            <param name="next"></param>
+            <returns></returns>
+        </member>
         <member name="T:AopCache.MessageSource">
             <summary>
             发布事件消息来源
@@ -327,7 +510,7 @@
         </member>
         <member name="T:AopCache.AopSubscriberTagAttribute">
             <summary>
-            aop 订阅标记
+            Aop 缓存订阅标记
             </summary>
         </member>
         <member name="P:AopCache.AopSubscriberTagAttribute.Channel">
@@ -345,6 +528,35 @@
             输入参数映射
             </summary>
         </member>
+        <member name="F:AopCache.AopSubscriberTagAttribute.MapDictionary">
+            <summary>
+            参数映射字典
+            </summary>
+        </member>
+        <member name="P:AopCache.AopSubscriberTagAttribute.ChannelList">
+            <summary>
+            订阅的频道列表
+            </summary>
+        </member>
+        <member name="P:AopCache.AopSubscriberTagAttribute.MethodList">
+            <summary>
+            订阅的方法列表
+            </summary>
+        </member>
+        <member name="M:AopCache.AopSubscriberTagAttribute.GetMapDictionaryKey">
+            <summary>
+            获取 频道-输入参数映射 Key
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.AopSubscriberTagAttribute.GetKey(System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            获取处理参数后的key
+            </summary>
+            <param name="key"></param>
+            <param name="dic"></param>
+            <returns></returns>
+        </member>
         <member name="T:AopCache.ActionType">
             <summary>
             操作类型
@@ -358,6 +570,11 @@
         <member name="F:AopCache.ActionType.DeleteByGroup">
             <summary>
             通过 group 删除缓存 group
+            </summary>
+        </member>
+        <member name="T:AopCache.Common.AsyncLock">
+            <summary>
+            异步锁
             </summary>
         </member>
         <member name="T:AopCache.Common.FastConvertHelper">
@@ -419,6 +636,11 @@
             <param name="pars">参数字段</param>
             <returns></returns>
         </member>
+        <member name="T:AopCache.Extensions.AspectContextExtentions">
+            <summary>
+            Aspect 扩展
+            </summary>
+        </member>
         <member name="M:AopCache.Extensions.AspectContextExtentions.GetParamsDictionary(AspectCore.DynamicProxy.AspectContext)">
             <summary>
             获取参数字典
@@ -449,8 +671,15 @@
         </member>
         <member name="T:AopCache.Implements.MemoryCacheProvider">
             <summary>
-            aop 内存缓存实现
+            Aop 内存缓存实现
             </summary>
+        </member>
+        <member name="M:AopCache.Implements.MemoryCacheProvider.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,AopCache.Abstractions.ISerializerProvider)">
+            <summary>
+            初始化
+            </summary>
+            <param name="cache"></param>
+            <param name="serializerProvider"></param>
         </member>
         <member name="M:AopCache.Implements.MemoryCacheProvider.Get(System.String,System.Type)">
             <summary>
@@ -479,67 +708,180 @@
         </member>
         <member name="T:AopCache.Implements.MemoryEventBusProvider">
             <summary>
-            基于进程的发布订阅实现
+            基于内存的发布订阅实现
             </summary>
         </member>
-        <member name="M:AopCache.Implements.MemoryEventBusProvider.#ctor(AopCache.Abstractions.ISerializerProvider)">
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.#ctor(AopCache.Abstractions.ISerializerProvider,System.IServiceProvider)">
             <summary>
             初始化
             </summary>
             <param name="serializerProvider"></param>
+            <param name="serviceProvider"></param>
         </member>
-        <member name="M:AopCache.Implements.MemoryEventBusProvider.PublishAsync``1(System.String,AopCache.Abstractions.AopMessageModel{``0})">
+        <member name="P:AopCache.Implements.MemoryEventBusProvider.ServiceProvider">
+            <summary>
+            ServiceProvider
+            </summary>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.PublishAsync``1(System.String,AopCache.Abstractions.EventMessageModel{``0})">
             <summary>
             发布事件
             </summary>
             <typeparam name="T"></typeparam>
-            <param name="channel"></param>
-            <param name="message"></param>
+            <param name="channel">频道名称</param>
+            <param name="message">数据</param>
             <returns></returns>
         </member>
-        <member name="M:AopCache.Implements.MemoryEventBusProvider.PublishToQueueAsync``1(System.String,System.Collections.Generic.List{``0})">
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.PublishQueueAsync``1(System.String,System.Collections.Generic.List{``0})">
             <summary>
-            发布事件 发布数据到队列，并发布通知
+            发布事件 数据放到队列，并发布通知到订阅者
             </summary>
             <typeparam name="T"></typeparam>
-            <param name="channel"></param>
-            <param name="data"></param>
+            <param name="channel">频道名称</param>
+            <param name="message">数据集合</param>
             <returns></returns>
         </member>
-        <member name="M:AopCache.Implements.MemoryEventBusProvider.Subscribe``1(System.String,System.Action{AopCache.Abstractions.AopMessageModel{``0}})">
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.Subscribe``1(System.String,System.Action{AopCache.Abstractions.EventMessageModel{``0}})">
             <summary>
             订阅事件
             </summary>
             <typeparam name="T"></typeparam>
-            <param name="channel"></param>
-            <param name="message"></param>
+            <param name="channel">频道名称</param>
+            <param name="handler">订阅处理</param>
         </member>
-        <member name="M:AopCache.Implements.MemoryEventBusProvider.Subscribe2``1(System.String,System.Func{AopCache.Abstractions.AopMessageModel{``0},System.Threading.Tasks.Task})">
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.Subscribe``1(System.String,System.Func{AopCache.Abstractions.EventMessageModel{``0},System.Threading.Tasks.Task})">
             <summary>
             订阅事件
             </summary>
             <typeparam name="T"></typeparam>
-            <param name="channel"></param>
-            <param name="message"></param>
+            <param name="channel">频道名称</param>
+            <param name="handler">订阅处理</param>
         </member>
-        <member name="M:AopCache.Implements.MemoryEventBusProvider.SubscribeFromQueue``1(System.String,System.Action{System.Func{System.Int32,System.Collections.Generic.List{``0}}})">
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.SubscribeQueue``1(System.String,System.Action{System.Func{System.Int32,System.Collections.Generic.List{``0}}})">
             <summary>
-            订阅事件 队列中有新数据
+            订阅事件 用于单元测试
             </summary>
             <typeparam name="T"></typeparam>
-            <param name="channel"></param>
-            <param name="message"></param>
+            <param name="channel">频道名称</param>
+            <param name="handler">订阅处理</param>
         </member>
-        <member name="M:AopCache.Implements.MemoryEventBusProvider.SubscribeFromQueue``1(System.String,System.Int32,System.Int32,System.Boolean,System.Action{System.Collections.Generic.List{``0}})">
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.SubscribeQueue``1(System.String,System.Func{System.Func{System.Int32,System.Threading.Tasks.Task{System.Collections.Generic.List{``0}}},System.Threading.Tasks.Task})">
             <summary>
-            订阅事件 队列中有新数据 分批次消费
+            订阅事件 从队列读取数据
             </summary>
             <typeparam name="T"></typeparam>
-            <param name="channel"></param>
+            <param name="channel">频道名称</param>
+            <param name="handler">订阅处理</param>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.SubscribeQueue``1(System.String,System.Int32,System.Int32,AopCache.Abstractions.ExceptionHandlerEnum,System.Func{System.Collections.Generic.List{``0},System.Threading.Tasks.Task},System.Func{System.Collections.Generic.List{``0},System.Threading.Tasks.Task},System.Func{System.Threading.Tasks.Task})">
+            <summary>
+            订阅事件 从队列读取数据 分批次消费
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel">频道名称</param>
             <param name="length">每次处理条数</param>
-            <param name="delay">处理完一次的停顿时间 毫秒</param>
-            <param name="rollbackToQueueWhenException">当处理失败时是否把数据重新加入到队列</param>
-            <param name="message"></param>
+            <param name="delay">每次处理间隔 毫秒</param>
+            <param name="exceptionHandler">异常处理方式</param>
+            <param name="handler">订阅处理</param>
+            <param name="error">发生异常时回调</param>
+            <param name="completed">本次消费完成回调 最后执行</param>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.GetQueueLength(System.String)">
+            <summary>
+            获取某个频道队列数据量
+            </summary>
+            <param name="channel">频道名称</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.GetQueueItems``1(System.String,System.Int32)">
+            <summary>
+            获取某个频道队列数据
+            </summary>
+            <param name="channel">频道名称</param>
+            <param name="length">获取指定的数据条数</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.GetQueueItemsAsync``1(System.String,System.Int32)">
+            <summary>
+            获取某个频道队列数据
+            </summary>
+            <param name="channel">频道名称</param>
+            <param name="length">获取指定的数据条数</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.GetErrorQueueLength(System.String)">
+            <summary>
+            获取某个频道错误队列数据量
+            </summary>
+            <param name="channel">频道名称</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.GetErrorQueueItems``1(System.String,System.Int32)">
+            <summary>
+            获取某个频道错误队列数据
+            </summary>
+            <param name="channel">频道名称</param>
+            <param name="length">获取指定的数据条数</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.GetErrorQueueItemsAsync``1(System.String,System.Int32)">
+            <summary>
+            获取某个频道错误队列数据
+            </summary>
+            <param name="channel">频道名称</param>
+            <param name="length">获取指定的数据条数</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.UnSubscribe(System.String)">
+            <summary>
+            取消订阅
+            </summary>
+            <param name="channel"></param>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.SubscribeTest``1(System.String,System.Action{AopCache.Abstractions.EventMessageModel{``0}})">
+            <summary>
+            订阅事件 用于单元测试
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel">频道名称</param>
+            <param name="handler">订阅处理</param>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.SubscribeTest``1(System.String,System.Func{AopCache.Abstractions.EventMessageModel{``0},System.Threading.Tasks.Task})">
+            <summary>
+            订阅事件 用于单元测试
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel">频道名称</param>
+            <param name="handler">订阅处理</param>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.SubscribeQueueTest``1(System.String,System.Action{System.Func{System.Int32,System.Collections.Generic.List{``0}}})">
+            <summary>
+            订阅事件 从队列读取数据 用于单元测试
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel">频道名称</param>
+            <param name="handler">订阅处理</param>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.SubscribeQueueTest``1(System.String,System.Func{System.Func{System.Int32,System.Threading.Tasks.Task{System.Collections.Generic.List{``0}}},System.Threading.Tasks.Task})">
+            <summary>
+            订阅事件 从队列读取数据 用于单元测试
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel">频道名称</param>
+            <param name="handler">订阅处理</param>
+        </member>
+        <member name="M:AopCache.Implements.MemoryEventBusProvider.SubscribeQueueTest``1(System.String,System.Int32,System.Int32,AopCache.Abstractions.ExceptionHandlerEnum,System.Func{System.Collections.Generic.List{``0},System.Threading.Tasks.Task},System.Func{System.Collections.Generic.List{``0},System.Threading.Tasks.Task},System.Func{System.Threading.Tasks.Task})">
+            <summary>
+            订阅事件 从队列读取数据 分批次消费 用于单元测试
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="channel">频道名称</param>
+            <param name="length">每次处理条数</param>
+            <param name="delay">每次处理间隔 毫秒</param>
+            <param name="exceptionHandler">异常处理方式</param>
+            <param name="handler">订阅处理</param>
+            <param name="error">发生异常时回调</param>
+            <param name="completed">本次消费完成回调 最后执行</param>
         </member>
         <member name="T:AopCache.Implements.SerializerProvider">
             <summary>
@@ -615,7 +957,7 @@
             订阅服务
             </summary>
         </member>
-        <member name="M:AopCache.Implements.SubscriberWorker.#ctor(AopCache.Abstractions.IAopEventBusProvider,AopCache.Abstractions.IAopCacheProvider)">
+        <member name="M:AopCache.Implements.SubscriberWorker.#ctor(AopCache.Abstractions.IEventBusProvider,AopCache.Abstractions.IAopCacheProvider)">
             <summary>
             初始化 订阅服务
             </summary>

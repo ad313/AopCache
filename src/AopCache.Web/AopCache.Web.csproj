@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\AopCache.Redis\AopCache.Redis.csproj" />
     <ProjectReference Include="..\AopCache.Trigger\AopCache.Trigger.csproj" />
   </ItemGroup>

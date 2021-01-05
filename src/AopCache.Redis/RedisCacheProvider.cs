@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 
 namespace AopCache.Redis
 {
+    /// <summary>
+    /// Aop CsRedis 缓存实现
+    /// </summary>
     public class RedisCacheProvider : IAopCacheProvider
     {
         private readonly ISerializerProvider _serializerProvider;

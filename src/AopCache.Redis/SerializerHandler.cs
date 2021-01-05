@@ -1,9 +1,9 @@
-﻿using MessagePack;
+﻿using System;
+using MessagePack;
 using MessagePack.Resolvers;
 using Newtonsoft.Json;
-using System;
 
-namespace AopCache
+namespace AopCache.Redis
 {
     public partial class SerializerHandler
     {

@@ -8,14 +8,24 @@ using System.Threading.Tasks;
 
 namespace AopCache.Test
 {
-    public class EventBusTest : TestBase
+    public class CsRedisEventBusTest : TestBase
     {
         private IEventBusProvider eventBusProvider { get; set; }
 
-        [SetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             eventBusProvider = GetService<IEventBusProvider>();
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            //var keys = RedisHelper.Keys("EventBusProvider*");
+            //foreach (var key in keys)
+            //{
+            //    RedisHelper.Del(key);
+            //}
         }
 
         [Test]
@@ -25,23 +35,20 @@ namespace AopCache.Test
             var trackId = Guid.NewGuid().ToString();
 
             var list1 = new List<string>() { "1", "2", "3" };
-
-            await eventBusProvider.PublishAsync(channel, new EventMessageModel<List<string>>(list1, trackId));
-
-            eventBusProvider.SubscribeTest<List<string>>(channel, data =>
+            
+            eventBusProvider.Subscribe<List<string>>(channel, data =>
             {
                 Assert.IsTrue(data != null);
                 Assert.IsTrue(data.TrackId == trackId);
                 Assert.IsTrue(data.Data.Count == list1.Count);
                 Assert.IsTrue(data.Data.All(item => list1.Contains(item)));
 
-                //using (var scope = eventBusProvider.ServiceProvider.CreateScope())
-                //{
-                //    var ser = scope.ServiceProvider.GetService<IEventBusProvider>();
-                //}
+                eventBusProvider.UnSubscribe(channel);
 
                 Console.WriteLine("ok");
             });
+
+             await eventBusProvider.PublishAsync(channel, new EventMessageModel<List<string>>(list1, trackId));
         }
 
         [Test]
@@ -51,18 +58,22 @@ namespace AopCache.Test
             var trackId = Guid.NewGuid().ToString();
 
             var list1 = new List<string>() { "1", "2", "3" };
-
-            await eventBusProvider.PublishAsync(channel, new EventMessageModel<List<string>>(list1, trackId));
-
-            await eventBusProvider.SubscribeTest<List<string>>(channel, async data =>
+            
+            eventBusProvider.Subscribe<List<string>>(channel, async data =>
             {
                 Assert.IsTrue(data != null);
                 Assert.IsTrue(data.TrackId == trackId);
                 Assert.IsTrue(data.Data.Count == list1.Count);
                 Assert.IsTrue(data.Data.All(item => list1.Contains(item)));
 
+                Console.WriteLine("ok");
+
+                eventBusProvider.UnSubscribe(channel);
+
                 await Task.CompletedTask;
             });
+
+            await eventBusProvider.PublishAsync(channel, new EventMessageModel<List<string>>(list1, trackId));
         }
 
         [Test]
@@ -93,21 +104,28 @@ namespace AopCache.Test
 
             var list1 = new List<string>() { "1", "2", "3" };
             var list2 = new List<string>() { "11", "22", "33" };
+            
+            eventBusProvider.SubscribeQueue<string>(key, func =>
+            {
+                var list = func(10);
+
+                if (list.Any())
+                {
+                    Assert.IsTrue(list.Count == list1.Count);
+                    Assert.IsTrue(list.All(item => list1.Contains(item)));
+                }
+                
+                //eventBusProvider.UnSubscribe(key);
+
+                Console.WriteLine("ok");
+            });
 
             await eventBusProvider.PublishQueueAsync(key, list1);
             await eventBusProvider.PublishQueueAsync(key, list2);
 
             list1.AddRange(list2);
 
-            eventBusProvider.SubscribeQueueTest<string>(key, func =>
-            {
-                var list = func(10);
-
-                Assert.IsTrue(list.Count == list1.Count);
-                Assert.IsTrue(list.All(item => list1.Contains(item)));
-
-                Console.WriteLine("ok");
-            });
+            await Task.Delay(10000);
         }
 
         [Test]
@@ -117,13 +135,8 @@ namespace AopCache.Test
 
             var list1 = new List<string>() { "1", "2", "3" };
             var list2 = new List<string>() { "11", "22", "33" };
-
-            await eventBusProvider.PublishQueueAsync(key, list1);
-            await eventBusProvider.PublishQueueAsync(key, list2);
-
-            list1.AddRange(list2);
-
-            await eventBusProvider.SubscribeQueueTest<string>(key, async func =>
+            
+            eventBusProvider.SubscribeQueue<string>(key, async func =>
             {
                 var list = await func(10);
 
@@ -134,6 +147,11 @@ namespace AopCache.Test
 
                 await Task.CompletedTask;
             });
+
+            await eventBusProvider.PublishQueueAsync(key, list1);
+            await eventBusProvider.PublishQueueAsync(key, list2);
+
+            list1.AddRange(list2);
         }
 
         /// <summary>
@@ -148,20 +166,28 @@ namespace AopCache.Test
             var list1 = new List<string>() { "1", "2", "3" };
             var list2 = new List<string>() { "11", "22", "33" };
 
+            eventBusProvider.SubscribeQueue<string>(key, 100, 1, ExceptionHandlerEnum.Continue, async list =>
+                {
+                    Assert.IsTrue(list.Count == list1.Count);
+                    Assert.IsTrue(list.All(item => list1.Contains(item)));
+
+                    Console.WriteLine("ok");
+
+                    await Task.CompletedTask;
+                },
+                null,
+                async () =>
+                {
+                    eventBusProvider.UnSubscribe(key);
+                    await Task.CompletedTask;
+                });
+
             await eventBusProvider.PublishQueueAsync(key, list1);
             await eventBusProvider.PublishQueueAsync(key, list2);
 
             list1.AddRange(list2);
 
-            await eventBusProvider.SubscribeQueueTest<string>(key, 100, 1, ExceptionHandlerEnum.Continue, async list =>
-            {
-                Assert.IsTrue(list.Count == list1.Count);
-                Assert.IsTrue(list.All(item => list1.Contains(item)));
-
-                Console.WriteLine("ok");
-
-                await Task.CompletedTask;
-            });
+            await Task.Delay(10000);
         }
 
         /// <summary>
@@ -175,14 +201,9 @@ namespace AopCache.Test
 
             var list1 = new List<string>() { "1", "2", "3" };
             var list2 = new List<string>() { "11", "22", "33" };
-
-            await eventBusProvider.PublishQueueAsync(key, list1);
-            await eventBusProvider.PublishQueueAsync(key, list2);
-
-            list1.AddRange(list2);
-
+            
             var index = 0;
-            await eventBusProvider.SubscribeQueueTest<string>(key, 1, 1, ExceptionHandlerEnum.Continue, async list =>
+            eventBusProvider.SubscribeQueue<string>(key, 1, 1, ExceptionHandlerEnum.Continue, async list =>
             {
                 Assert.IsTrue(list.Count == 1);
 
@@ -196,9 +217,20 @@ namespace AopCache.Test
                 index++;
 
                 await Task.CompletedTask;
-            });
+            },null, async () =>
+            {
+                Assert.IsTrue(index == 6);
 
-            Assert.IsTrue(index == 6);
+                //eventBusProvider.UnSubscribe(key);
+                await Task.CompletedTask;
+            });
+            
+            await eventBusProvider.PublishQueueAsync(key, list1);
+            await eventBusProvider.PublishQueueAsync(key, list2);
+
+            list1.AddRange(list2);
+
+            await Task.Delay(10000);
         }
 
         /// <summary>
@@ -212,13 +244,8 @@ namespace AopCache.Test
 
             var list1 = new List<string>() { "1", "2", "3" };
             var list2 = new List<string>() { "11", "22", "33" };
-
-            await eventBusProvider.PublishQueueAsync(key, list1);
-            await eventBusProvider.PublishQueueAsync(key, list2);
-
-            list1.AddRange(list2);
-
-            await eventBusProvider.SubscribeQueueTest<string>(key, 100, 1, ExceptionHandlerEnum.Continue, async list =>
+            
+            eventBusProvider.SubscribeQueue<string>(key, 100, 1, ExceptionHandlerEnum.Continue, async list =>
             {
                 Assert.IsTrue(list.Count == list1.Count);
                 Assert.IsTrue(list.All(item => list1.Contains(item)));
@@ -230,7 +257,18 @@ namespace AopCache.Test
                 Assert.IsTrue(list.All(item => list1.Contains(item)));
 
                 await Task.CompletedTask;
+            }, async () =>
+            {
+                //eventBusProvider.UnSubscribe(key);
+                await Task.CompletedTask;
             });
+
+            await eventBusProvider.PublishQueueAsync(key, list1);
+            await eventBusProvider.PublishQueueAsync(key, list2);
+
+            list1.AddRange(list2);
+
+            await Task.Delay(10000);
         }
 
         /// <summary>
@@ -245,12 +283,7 @@ namespace AopCache.Test
             var list1 = new List<string>() { "1", "2", "3" };
             var list2 = new List<string>() { "11", "22", "33" };
 
-            await eventBusProvider.PublishQueueAsync(key, list1);
-            await eventBusProvider.PublishQueueAsync(key, list2);
-
-            list1.AddRange(list2);
-
-            await eventBusProvider.SubscribeQueueTest<string>(key, 100, 1, ExceptionHandlerEnum.PushToSelfQueueAndContinue, async list =>
+            eventBusProvider.SubscribeQueue<string>(key, 100, 1, ExceptionHandlerEnum.PushToSelfQueueAndContinue, async list =>
             {
                 Assert.IsTrue(list.Count == list1.Count);
                 Assert.IsTrue(list.All(item => list1.Contains(item)));
@@ -267,9 +300,18 @@ namespace AopCache.Test
                 Assert.IsTrue(queueList.All(item => list1.Contains(item)));
 
                 await Task.CompletedTask;
+            }, async () =>
+            {
+                //eventBusProvider.UnSubscribe(key);
+                await Task.CompletedTask;
             });
 
-            Assert.Pass();
+            await eventBusProvider.PublishQueueAsync(key, list1);
+            await eventBusProvider.PublishQueueAsync(key, list2);
+
+            list1.AddRange(list2);
+
+            await Task.Delay(10000);
         }
 
         /// <summary>
@@ -283,13 +325,8 @@ namespace AopCache.Test
 
             var list1 = new List<string>() { "1", "2", "3" };
             var list2 = new List<string>() { "11", "22", "33" };
-
-            await eventBusProvider.PublishQueueAsync(key, list1);
-            await eventBusProvider.PublishQueueAsync(key, list2);
-
-            list1.AddRange(list2);
-
-            await eventBusProvider.SubscribeQueueTest<string>(key, 100, 1, ExceptionHandlerEnum.PushToErrorQueueAndContinue, async list =>
+            
+            eventBusProvider.SubscribeQueue<string>(key, 100, 1, ExceptionHandlerEnum.PushToErrorQueueAndContinue, async list =>
             {
                 Assert.IsTrue(list.Count == list1.Count);
                 Assert.IsTrue(list.All(item => list1.Contains(item)));
@@ -311,7 +348,18 @@ namespace AopCache.Test
                 Assert.IsTrue(errorQueueList.All(item => list1.Contains(item)));
 
                 await Task.CompletedTask;
+            }, async () =>
+            {
+                //eventBusProvider.UnSubscribe(key);
+                await Task.CompletedTask;
             });
+
+            await eventBusProvider.PublishQueueAsync(key, list1);
+            await eventBusProvider.PublishQueueAsync(key, list2);
+
+            list1.AddRange(list2);
+
+            await Task.Delay(10000);
         }
 
 
@@ -331,14 +379,9 @@ namespace AopCache.Test
 
             var list1 = new List<string>() { "1", "2", "3" };
             var list2 = new List<string>() { "11", "22", "33" };
-
-            await eventBusProvider.PublishQueueAsync(key, list1);
-            await eventBusProvider.PublishQueueAsync(key, list2);
-
-            list1.AddRange(list2);
-
+            
             var index = 0;
-            await eventBusProvider.SubscribeQueueTest<string>(key, 1, 1, ExceptionHandlerEnum.Continue, async list =>
+            eventBusProvider.SubscribeQueue<string>(key, 1, 1, ExceptionHandlerEnum.Continue, async list =>
             {
                 Assert.IsTrue(list.Count == 1);
 
@@ -357,9 +400,19 @@ namespace AopCache.Test
                 Assert.IsTrue(list1[index - 1] == list.First());
 
                 await Task.CompletedTask;
+            }, async () =>
+            {
+                Assert.IsTrue(index == list1.Count);
+                //eventBusProvider.UnSubscribe(key);
+                await Task.CompletedTask;
             });
+            
+            await eventBusProvider.PublishQueueAsync(key, list1);
+            await eventBusProvider.PublishQueueAsync(key, list2);
 
-            Assert.IsTrue(index == list1.Count);
+            list1.AddRange(list2);
+
+            await Task.Delay(10000);
         }
 
         /// <summary>
@@ -374,13 +427,8 @@ namespace AopCache.Test
             var list1 = new List<string>() { "1", "2", "3" };
             var list2 = new List<string>() { "11", "22", "33" };
 
-            await eventBusProvider.PublishQueueAsync(key, list1);
-            await eventBusProvider.PublishQueueAsync(key, list2);
-
-            list1.AddRange(list2);
-
             var index = 0;
-            await eventBusProvider.SubscribeQueueTest<string>(key, 1, 1, ExceptionHandlerEnum.PushToSelfQueueAndContinue, async list =>
+            eventBusProvider.SubscribeQueue<string>(key, 1, 1, ExceptionHandlerEnum.PushToSelfQueueAndContinue, async list =>
             {
                 Assert.IsTrue(list.Count == 1);
 
@@ -405,9 +453,19 @@ namespace AopCache.Test
                 Assert.IsTrue(eventBusProvider.GetErrorQueueLength(key) == 0);
 
                 await Task.CompletedTask;
+            }, async () =>
+            {
+                Assert.IsTrue(index == list1.Count);
+                //eventBusProvider.UnSubscribe(key);
+                await Task.CompletedTask;
             });
+            
+            await eventBusProvider.PublishQueueAsync(key, list1);
+            await eventBusProvider.PublishQueueAsync(key, list2);
 
-            Assert.IsTrue(index == list1.Count);
+            list1.AddRange(list2);
+
+            await Task.Delay(100000);
         }
 
         /// <summary>
@@ -421,14 +479,9 @@ namespace AopCache.Test
 
             var list1 = new List<string>() { "1", "2", "3" };
             var list2 = new List<string>() { "11", "22", "33" };
-
-            await eventBusProvider.PublishQueueAsync(key, list1);
-            await eventBusProvider.PublishQueueAsync(key, list2);
-
-            list1.AddRange(list2);
-
+            
             var index = 0;
-            await eventBusProvider.SubscribeQueueTest<string>(key, 1, 1, ExceptionHandlerEnum.PushToErrorQueueAndContinue, async list =>
+            eventBusProvider.SubscribeQueue<string>(key, 1, 1, ExceptionHandlerEnum.PushToErrorQueueAndContinue, async list =>
             {
                 Assert.IsTrue(list.Count == 1);
 
@@ -451,13 +504,21 @@ namespace AopCache.Test
 
                 //验证错误队列数据
                 Assert.IsTrue(eventBusProvider.GetErrorQueueLength(key) == index);
-                //var errorQueueList = eventBusProvider.GetErrorQueueItems<string>(key, 100);
-                //Assert.IsTrue(errorQueueList.All(item => list1.Contains(item)));
+
+                await Task.CompletedTask;
+            }, async () =>
+            {
+                Assert.IsTrue(index == list1.Count);
 
                 await Task.CompletedTask;
             });
+            
+            await eventBusProvider.PublishQueueAsync(key, list1);
+            await eventBusProvider.PublishQueueAsync(key, list2);
 
-            Assert.IsTrue(index == list1.Count);
+            list1.AddRange(list2);
+
+            await Task.Delay(10000);
         }
 
 
@@ -474,14 +535,9 @@ namespace AopCache.Test
 
             var list1 = new List<string>() { "1", "2", "3" };
             var list2 = new List<string>() { "11", "22", "33" };
-
-            await eventBusProvider.PublishQueueAsync(key, list1);
-            await eventBusProvider.PublishQueueAsync(key, list2);
-
-            list1.AddRange(list2);
-
+            
             var index = 0;
-            await eventBusProvider.SubscribeQueueTest<string>(key, 1, 1, ExceptionHandlerEnum.Stop, async list =>
+            eventBusProvider.SubscribeQueue<string>(key, 1, 1, ExceptionHandlerEnum.Stop, async list =>
             {
                 Assert.IsTrue(list.Count == 1);
 
@@ -500,9 +556,19 @@ namespace AopCache.Test
                 Assert.IsTrue(list1[index - 1] == list.First());
 
                 await Task.CompletedTask;
+            }, async () =>
+            {
+                Assert.IsTrue(index == 1);
+                //eventBusProvider.UnSubscribe(key);
+                await Task.CompletedTask;
             });
+            
+            await eventBusProvider.PublishQueueAsync(key, list1);
+            await eventBusProvider.PublishQueueAsync(key, list2);
 
-            Assert.IsTrue(index == 1);
+            list1.AddRange(list2);
+
+            await Task.Delay(10000);
         }
 
         /// <summary>
@@ -516,14 +582,9 @@ namespace AopCache.Test
 
             var list1 = new List<string>() { "1", "2", "3" };
             var list2 = new List<string>() { "11", "22", "33" };
-
-            await eventBusProvider.PublishQueueAsync(key, list1);
-            await eventBusProvider.PublishQueueAsync(key, list2);
-
-            list1.AddRange(list2);
-
+            
             var index = 0;
-            await eventBusProvider.SubscribeQueueTest<string>(key, 1, 1, ExceptionHandlerEnum.PushToSelfQueueAndStop, async list =>
+            eventBusProvider.SubscribeQueue<string>(key, 1, 1, ExceptionHandlerEnum.PushToSelfQueueAndStop, async list =>
             {
                 Assert.IsTrue(list.Count == 1);
 
@@ -548,9 +609,19 @@ namespace AopCache.Test
                 Assert.IsTrue(eventBusProvider.GetErrorQueueLength(key) == 0);
 
                 await Task.CompletedTask;
+            }, async () =>
+            {
+                Assert.IsTrue(index == 1);
+                //eventBusProvider.UnSubscribe(key);
+                await Task.CompletedTask;
             });
+            
+            await eventBusProvider.PublishQueueAsync(key, list1);
+            await eventBusProvider.PublishQueueAsync(key, list2);
 
-            Assert.IsTrue(index == 1);
+            list1.AddRange(list2);
+
+            await Task.Delay(10000);
         }
 
         /// <summary>
@@ -564,14 +635,9 @@ namespace AopCache.Test
 
             var list1 = new List<string>() { "1", "2", "3" };
             var list2 = new List<string>() { "11", "22", "33" };
-
-            await eventBusProvider.PublishQueueAsync(key, list1);
-            await eventBusProvider.PublishQueueAsync(key, list2);
-
-            list1.AddRange(list2);
-
+            
             var index = 0;
-            await eventBusProvider.SubscribeQueueTest<string>(key, 1, 1, ExceptionHandlerEnum.PushToErrorQueueAndStop, async list =>
+            eventBusProvider.SubscribeQueue<string>(key, 1, 1, ExceptionHandlerEnum.PushToErrorQueueAndStop, async list =>
             {
                 Assert.IsTrue(list.Count == 1);
 
@@ -596,9 +662,19 @@ namespace AopCache.Test
                 Assert.IsTrue(eventBusProvider.GetErrorQueueLength(key) == index);
 
                 await Task.CompletedTask;
+            }, async () =>
+            {
+                Assert.IsTrue(index == 1);
+                //eventBusProvider.UnSubscribe(key);
+                await Task.CompletedTask;
             });
+            
+            await eventBusProvider.PublishQueueAsync(key, list1);
+            await eventBusProvider.PublishQueueAsync(key, list2);
 
-            Assert.IsTrue(index == 1);
+            list1.AddRange(list2);
+
+            await Task.Delay(10000);
         }
 
 

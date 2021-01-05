@@ -7,7 +7,7 @@ using AopCache.Common;
 namespace AopCache
 {
     /// <summary>
-    /// aop 订阅标记
+    /// Aop 缓存订阅标记
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class AopSubscriberTagAttribute : Attribute
@@ -27,14 +27,33 @@ namespace AopCache
         /// </summary>
         public string Map { get; set; }
 
+        /// <summary>
+        /// 参数映射字典
+        /// </summary>
         public static readonly Dictionary<string, Dictionary<string, string>> MapDictionary = new Dictionary<string, Dictionary<string, string>>();
 
+        /// <summary>
+        /// 订阅的频道列表
+        /// </summary>
         public static List<string> ChannelList { get; set; } = new List<string>();
 
+        /// <summary>
+        /// 订阅的方法列表
+        /// </summary>
         public static List<MethodInfo> MethodList { get; set; } = new List<MethodInfo>();
 
+        /// <summary>
+        /// 获取 频道-输入参数映射 Key
+        /// </summary>
+        /// <returns></returns>
         public string GetMapDictionaryKey() => $"{Channel}_{Map}";
 
+        /// <summary>
+        /// 获取处理参数后的key
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="dic"></param>
+        /// <returns></returns>
         public string GetKey(string key, Dictionary<string, object> dic)
         {
             if (dic == null || !dic.Any())

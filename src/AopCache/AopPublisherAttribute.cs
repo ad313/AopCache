@@ -25,13 +25,19 @@ namespace AopCache
         public MessageSource MessageSource { get; set; } = MessageSource.NoParams;
         
         [FromServiceContext]
-        private IAopEventBusProvider EventBusProvider { get; set; }
+        private IEventBusProvider EventBusProvider { get; set; }
         
         /// <summary>
         /// 是否开启
         /// </summary>
         public static bool Enable { get; set; }
 
+        /// <summary>
+        /// 处理业务逻辑
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="next"></param>
+        /// <returns></returns>
         public override async Task Invoke(AspectContext context, AspectDelegate next)
         {
             //执行方法
@@ -67,7 +73,7 @@ namespace AopCache
                     throw new ArgumentOutOfRangeException();
             }
 
-            await EventBusProvider.PublishAsync(Channel, new AopMessageModel<Dictionary<string, object>>(message));
+            await EventBusProvider.PublishAsync(Channel, new EventMessageModel<Dictionary<string, object>>(message));
         }
     }
 

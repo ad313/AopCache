@@ -52,10 +52,11 @@ namespace AopCache.Web
 
             services.AddAopCache(option =>
             {
-                option.UseMemoryCacheProvider();
-                option.AddAopTriggerUseMemoryEventBus();
-                //option.UseCsRedisCacheProvider("192.168.1.120:30985,password=123456,defaultDatabase=5");
-                //option.AddAopTriggerUseRedisEventBus("192.168.1.120:30985,password=123456,defaultDatabase=5");
+                //option.UseMemoryCacheProvider();
+                //option.AddAopTriggerUseMemoryEventBus();
+
+                option.UseCsRedisCacheProvider("192.168.1.120:30985,password=123456,defaultDatabase=5");
+                option.AddAopTriggerUseRedisEventBus("192.168.1.120:30985,password=123456,defaultDatabase=5");
             });
 
             //MessagePack
@@ -80,18 +81,37 @@ namespace AopCache.Web
 
             hostLifetime.ApplicationStarted.Register(() =>
             {
-                var provider = app.ApplicationServices.GetService<IAopEventBusProvider>();
+                var provider = app.ApplicationServices.GetService<IEventBusProvider>();
 
-                //provider.SubscribeFromQueue<string>("abc", func =>
+                //provider.SubscribeQueue<string>("abc", func =>
                 //{
                 //    var list = func(10);
                 //    Console.WriteLine($"from queue : {list.Count}");
                 //});
 
-                provider.SubscribeFromQueue<string>("abc", 10, 1000, true, data =>
-                {
-                    Console.WriteLine($"from queue : {data.Count}");
-                });
+                provider.SubscribeQueue<string>("abc", 10, 0, ExceptionHandlerEnum.PushToErrorQueueAndContinue,
+                    async data =>
+                    {
+                        Console.WriteLine($"{DateTime.Now} from queue : {data.Count}");
+
+                        //foreach (var s in data)
+                        //{
+                        //    Console.WriteLine($"{s}");
+                        //}
+
+                        //await Task.Delay(500);
+
+                        //throw new Exception("hahhah");
+
+
+                    }, 
+                    async data =>
+                    {
+                        Console.WriteLine($"报错了------- : {data.Count}");
+                        await Task.CompletedTask;
+
+                        //throw new Exception("error error");
+                    });
             });
 
             app.UseRouting();

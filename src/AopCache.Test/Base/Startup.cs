@@ -34,8 +34,10 @@ namespace AopCache.Test.Base
             services.AddAopCache(op =>
             {
                 op.UseMemoryCacheProvider();
-                op.AddAopTriggerUseMemoryEventBus();
+                //op.AddAopTriggerUseMemoryEventBus();
+
                 //op.UseCsRedisCacheProvider("192.168.1.110:32350,password=123456,defaultDatabase=5");
+                op.AddAopTriggerUseRedisEventBus("192.168.1.110:32350,password=123456,defaultDatabase=5");
             });
         }
 

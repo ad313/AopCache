@@ -6,13 +6,18 @@ using System.Threading.Tasks;
 namespace AopCache.Implements
 {
     /// <summary>
-    /// aop 内存缓存实现
+    /// Aop 内存缓存实现
     /// </summary>
     public class MemoryCacheProvider : IAopCacheProvider
     {
         private static IMemoryCache _cache;
         private readonly ISerializerProvider _serializerProvider;
 
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <param name="serializerProvider"></param>
         public MemoryCacheProvider(IMemoryCache cache, ISerializerProvider serializerProvider)
         {
             _cache = cache;

@@ -58,6 +58,9 @@ namespace AopCache
         private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, DateTime>> GroupDictionary =
             new ConcurrentDictionary<string, ConcurrentDictionary<string, DateTime>>();
 
+        /// <summary>
+        /// 缓存操作类
+        /// </summary>
         [FromServiceContext]
         public IAopCacheProvider CacheProvider { get; set; }
 
@@ -66,6 +69,12 @@ namespace AopCache
             TaskResultMethod = typeof(Task).GetMethods().FirstOrDefault(p => p.Name == "FromResult" && p.ContainsGenericParameters);
         }
 
+        /// <summary>
+        /// 处理业务逻辑
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="next"></param>
+        /// <returns></returns>
         public override async Task Invoke(AspectContext context, AspectDelegate next)
         {
             var currentCacheKey = Key.FillValue(context.GetParamsDictionary());
@@ -95,6 +104,11 @@ namespace AopCache
             }
         }
 
+        /// <summary>
+        /// 处理Key前缀
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public string FormatPrefix(string key)
         {
             return $"AopCache:{(string.IsNullOrWhiteSpace(Group) ? "Default" : Group)}:{key}";

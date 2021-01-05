@@ -4,7 +4,10 @@ using System.Threading.Tasks;
 
 namespace AopCache.Common
 {
-    internal class AsyncLock
+    /// <summary>
+    /// 异步锁
+    /// </summary>
+    public class AsyncLock
     {
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
         private readonly Releaser _releaser;

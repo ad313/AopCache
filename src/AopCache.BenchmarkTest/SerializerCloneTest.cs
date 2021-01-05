@@ -4,6 +4,7 @@ using AopCache.Implements;
 using BenchmarkDotNet.Attributes;
 using Newtonsoft.Json;
 using System;
+using AopCache.Redis;
 
 namespace AopCache.BenchmarkTest
 {

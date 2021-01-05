@@ -11,9 +11,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache.Test", "AopCache.T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache", "AopCache\AopCache.csproj", "{1CAD9535-9720-47AE-9CA7-084A5405270E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AopCache.Trigger", "AopCache.Trigger\AopCache.Trigger.csproj", "{8C2E7650-9C6A-4185-AF9A-AC4CC92DB724}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache.BenchmarkTest", "AopCache.BenchmarkTest\AopCache.BenchmarkTest.csproj", "{D8592925-85B5-4685-9CDF-DAD177EA0D36}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AopCache.BenchmarkTest", "AopCache.BenchmarkTest\AopCache.BenchmarkTest.csproj", "{D8592925-85B5-4685-9CDF-DAD177EA0D36}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DC4CB5EB-C2D5-4598-9030-36A9B4E3CEE4}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,10 +40,6 @@ Global
 		{1CAD9535-9720-47AE-9CA7-084A5405270E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CAD9535-9720-47AE-9CA7-084A5405270E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CAD9535-9720-47AE-9CA7-084A5405270E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8C2E7650-9C6A-4185-AF9A-AC4CC92DB724}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8C2E7650-9C6A-4185-AF9A-AC4CC92DB724}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8C2E7650-9C6A-4185-AF9A-AC4CC92DB724}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8C2E7650-9C6A-4185-AF9A-AC4CC92DB724}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D8592925-85B5-4685-9CDF-DAD177EA0D36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D8592925-85B5-4685-9CDF-DAD177EA0D36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8592925-85B5-4685-9CDF-DAD177EA0D36}.Release|Any CPU.ActiveCfg = Release|Any CPU
