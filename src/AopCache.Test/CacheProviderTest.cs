@@ -1,9 +1,9 @@
-﻿using AopCache.Abstractions;
-using AopCache.Test.Base;
+﻿using AopCache.Test.Base;
 using NUnit.Framework;
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
+using AopCache.Core.Abstractions;
 
 namespace AopCache.Test
 {

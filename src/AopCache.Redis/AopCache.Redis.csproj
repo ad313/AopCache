@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AopCache.EventBus.CSRedis\AopCache.EventBus.CSRedis.csproj" />
     <ProjectReference Include="..\AopCache\AopCache.csproj" />
   </ItemGroup>
 

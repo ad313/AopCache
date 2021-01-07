@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AopCache.Abstractions
+namespace AopCache.Core.Abstractions
 {
     /// <summary>
     /// EventBus

@@ -18,6 +18,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AopCache.Core", "AopCache.Core\AopCache.Core.csproj", "{FDFC8CB5-A8A5-4FF5-8B2D-E666BE463CBD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AopCache.EventBus.CSRedis", "AopCache.EventBus.CSRedis\AopCache.EventBus.CSRedis.csproj", "{99BEB92A-950E-43B0-84B2-B04755E09447}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +48,14 @@ Global
 		{D8592925-85B5-4685-9CDF-DAD177EA0D36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8592925-85B5-4685-9CDF-DAD177EA0D36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8592925-85B5-4685-9CDF-DAD177EA0D36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDFC8CB5-A8A5-4FF5-8B2D-E666BE463CBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDFC8CB5-A8A5-4FF5-8B2D-E666BE463CBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDFC8CB5-A8A5-4FF5-8B2D-E666BE463CBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDFC8CB5-A8A5-4FF5-8B2D-E666BE463CBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99BEB92A-950E-43B0-84B2-B04755E09447}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99BEB92A-950E-43B0-84B2-B04755E09447}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99BEB92A-950E-43B0-84B2-B04755E09447}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99BEB92A-950E-43B0-84B2-B04755E09447}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

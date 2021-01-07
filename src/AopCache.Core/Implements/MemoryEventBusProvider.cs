@@ -1,12 +1,13 @@
-﻿using AopCache.Abstractions;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using AopCache.Core.Abstractions;
+using AopCache.Core.Common;
 
-namespace AopCache.Implements
+namespace AopCache.Core.Implements
 {
     /// <summary>
     /// 基于内存的发布订阅实现
@@ -128,6 +129,8 @@ namespace AopCache.Implements
                         var data = _serializerProvider.Deserialize<EventMessageModel<T>>(msg);
                         await handler.Invoke(data);
                     }
+
+                    await Task.Delay(1);
                 }
             });
         }
@@ -179,13 +182,12 @@ namespace AopCache.Implements
         {
             if (length <= 0)
                 throw new Exception("length must be greater than zero");
-
-            //if (delay <= 0)
-            //    throw new Exception("delay must be greater than zero");
-
+            
             Subscribe<T>(channel, async msg =>
             {
                 var pages = GetTotalPagesFromQueue(channel, length);
+
+                var needGc = pages * length > 1000;
 
                 while (pages > 0)
                 {
@@ -219,6 +221,12 @@ namespace AopCache.Implements
                     }
 
                     pages--;
+
+                    if (pages == 0 && needGc)
+                    {
+                        GC.Collect();
+                        Console.WriteLine("---------------gc-----------------");
+                    }
 
                     if (delay > 0)
                         await Task.Delay(delay);
@@ -444,16 +452,33 @@ namespace AopCache.Implements
             return total <= 0 ? 0 : (total / length + (total % length > 0 ? 1 : 0));
         }
 
-        private async Task PushToQueueAsync<T>(string channel, List<T> data)
+        private async Task PushToQueueAsync<T>(string channel, List<T> data, int length = 10000)
         {
             if (data == null || !data.Any())
                 return;
 
             var queue = GetQueue(channel);
 
-            foreach (var item in data)
+            var type = typeof(T);
+
+            if (data.Count > length)
             {
-                await queue.Writer.WriteAsync(_serializerProvider.SerializeBytes(item));
+                foreach (var list in Helpers.SplitList(data, length))
+                {
+                    foreach (var item in list)
+                    {
+                        await queue.Writer.WriteAsync(_serializerProvider.SerializeBytes(item, type));
+                    }
+
+                    await Task.Delay(10);
+                }
+            }
+            else
+            {
+                foreach (var item in data)
+                {
+                    await queue.Writer.WriteAsync(_serializerProvider.SerializeBytes(item, type));
+                }
             }
         }
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace AopCache.Abstractions
+namespace AopCache.Core.Abstractions
 {
     /// <summary>
     /// Aop 缓存接口

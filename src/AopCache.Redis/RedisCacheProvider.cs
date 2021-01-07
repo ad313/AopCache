@@ -1,6 +1,6 @@
-﻿using AopCache.Abstractions;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using AopCache.Core.Abstractions;
 
 namespace AopCache.Redis
 {

@@ -1,10 +1,10 @@
-﻿using AopCache.Abstractions;
-using AopCache.Test.Base;
+﻿using AopCache.Test.Base;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AopCache.Core.Abstractions;
 
 namespace AopCache.Test
 {

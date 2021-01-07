@@ -1,4 +1,4 @@
-﻿using AopCache.Abstractions;
+﻿using AopCache.Core.Abstractions;
 using AopCache.Implements;
 using AopCache.Redis;
 using AopCache.Runtime;
@@ -28,7 +28,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             //处理发布订阅
             new DependencyRegistrator().RegisterServices();
-            DependencyRegistrator.ServiceCollection.AddSingleton<IEventBusProvider, RedisEventBusProvider>();
+            DependencyRegistrator.ServiceCollection.AddEventBusUseCsRedis(connectionString);
             DependencyRegistrator.ServiceCollection.AddHostedService<SubscriberWorker>();
         }
 

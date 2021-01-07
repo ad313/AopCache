@@ -17,24 +17,18 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>D:\github\AopCache\src\AopCache\AopCache.xml</DocumentationFile>
+    <DocumentationFile>AopCache.xml</DocumentationFile>
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="AopCacheAttribute2.cs" />
-    <Compile Remove="AopCacheAttribute3.cs" />
-    <Compile Remove="AopCacheAttribute4.cs" />
-    <Compile Remove="AopCacheAttribute5.cs" />
-    <Compile Remove="AopCacheAttribute6.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AspectCore.Core" Version="2.1.0" />
     <PackageReference Include="AspectCore.Extensions.DependencyInjection" Version="2.1.0" />
     <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="5.0.0" />
-    <PackageReference Include="System.Threading.Channels" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AopCache.Core\AopCache.Core.csproj" />
   </ItemGroup>
 
 </Project>

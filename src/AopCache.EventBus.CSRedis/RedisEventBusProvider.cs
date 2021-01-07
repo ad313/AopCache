@@ -1,13 +1,13 @@
-﻿using AopCache.Abstractions;
-using AopCache.Common;
-using CSRedis;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AopCache.Core.Abstractions;
+using AopCache.Core.Common;
+using CSRedis;
 
-namespace AopCache.Redis
+namespace AopCache.EventBus.CSRedis
 {
     /// <summary>
     /// 基于CsRedis的发布订阅实现
@@ -28,7 +28,10 @@ namespace AopCache.Redis
         /// </summary>
         private readonly ConcurrentDictionary<string, AsyncLock> _lockObjectDictionary = new ConcurrentDictionary<string, AsyncLock>();
         
-        private static readonly string PerfixKey = "EventBusProvider:";
+        /// <summary>
+        /// 队列key前缀
+        /// </summary>
+        private static readonly string PrefixKey = "EventBusProvider:";
 
         public RedisEventBusProvider(ISerializerProvider serializerProvider, IServiceProvider serviceProvider)
         {
@@ -141,10 +144,7 @@ namespace AopCache.Redis
         {
             if (length <= 0)
                 throw new Exception("length must be greater than zero");
-
-            //if (delay <= 0)
-            //    throw new Exception("delay must be greater than zero");
-
+            
             SubscribeInternel<T>(channel, async msg =>
             {
                 var pages = GetTotalPagesFromQueue(channel, length);
@@ -455,18 +455,30 @@ namespace AopCache.Redis
             return total <= 0 ? 0 : (total / length + (total % length > 0 ? 1 : 0));
         }
 
-        private async Task PushToQueueAsync<T>(string channel, List<T> data)
+        private async Task PushToQueueAsync<T>(string channel, List<T> data, int length = 500)
         {
             if (data == null || !data.Any())
                 return;
 
             var key = GetChannelQueueKey(channel);
-            await RedisHelper.LPushAsync(key, data.ToArray());
+
+            if (data.Count > length)
+            {
+                foreach (var list in Helpers.SplitList(data, length))
+                {
+                    await RedisHelper.LPushAsync(key, list.ToArray());
+                    await Task.Delay(10);
+                }
+            }
+            else
+            {
+                await RedisHelper.LPushAsync(key, data.ToArray());
+            }
         }
 
         private string GetChannelQueueKey(string channel)
         {
-            return PerfixKey + channel;
+            return PrefixKey + channel;
         }
 
         private async Task PushToErrorQueueAsync<T>(string channel, List<T> data)
@@ -480,7 +492,7 @@ namespace AopCache.Redis
 
         private string GetChannelErrorQueueKey(string channel)
         {
-            return PerfixKey + "Error:" + channel;
+            return PrefixKey + "Error:" + channel;
         }
 
         private AsyncLock GetLockObject(string channel)

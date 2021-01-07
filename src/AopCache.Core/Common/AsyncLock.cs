@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AopCache.Common
+namespace AopCache.Core.Common
 {
     /// <summary>
     /// 异步锁

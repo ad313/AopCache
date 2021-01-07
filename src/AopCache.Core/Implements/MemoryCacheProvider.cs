@@ -1,9 +1,9 @@
-﻿using AopCache.Abstractions;
-using Microsoft.Extensions.Caching.Memory;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using AopCache.Core.Abstractions;
+using Microsoft.Extensions.Caching.Memory;
 
-namespace AopCache.Implements
+namespace AopCache.Core.Implements
 {
     /// <summary>
     /// Aop 内存缓存实现

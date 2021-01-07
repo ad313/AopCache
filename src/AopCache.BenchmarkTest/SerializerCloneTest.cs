@@ -1,9 +1,10 @@
-﻿using AopCache.Abstractions;
-using AopCache.BenchmarkTest.Models;
+﻿using AopCache.BenchmarkTest.Models;
 using AopCache.Implements;
 using BenchmarkDotNet.Attributes;
 using Newtonsoft.Json;
 using System;
+using AopCache.Core.Abstractions;
+using AopCache.Core.Implements;
 using AopCache.Redis;
 
 namespace AopCache.BenchmarkTest

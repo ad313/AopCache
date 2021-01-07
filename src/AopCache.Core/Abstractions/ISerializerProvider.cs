@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AopCache.Abstractions
+namespace AopCache.Core.Abstractions
 {
     /// <summary>
     /// 序列化接口

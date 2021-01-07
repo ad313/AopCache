@@ -1,9 +1,9 @@
-using AopCache.Abstractions;
 using AopCache.Test.Base;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using AopCache.Core.Abstractions;
 using AopCache.Redis;
 
 namespace AopCache.Test

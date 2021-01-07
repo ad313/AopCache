@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using AopCache.Core.Common;
 
 namespace AopCache.Common
 {
@@ -115,7 +116,7 @@ namespace AopCache.Common
                     }
                     else
                     {
-                        if (!FastConvertHelper.ToDictionary(firstValue).TryGetValue(secondKey, out object second) || second == null)
+                        if (!Helpers.ToDictionary(firstValue).TryGetValue(secondKey, out object second) || second == null)
                             continue;
 
                         secondValue = second.ToString();
@@ -170,7 +171,7 @@ namespace AopCache.Common
                     }
                     else
                     {
-                        if (!FastConvertHelper.ToDictionary(firstValue).TryGetValue(secondKey, out object second) || second == null)
+                        if (!Helpers.ToDictionary(firstValue).TryGetValue(secondKey, out object second) || second == null)
                             continue;
 
                         secondValue = second.ToString();

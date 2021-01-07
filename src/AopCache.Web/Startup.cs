@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using AopCache.Abstractions;
+using AopCache.Core.Abstractions;
 using AopCache.Implements;
 using AopCache.Runtime;
 using AopCache.Web.Controllers;
@@ -89,7 +89,7 @@ namespace AopCache.Web
                 //    Console.WriteLine($"from queue : {list.Count}");
                 //});
 
-                provider.SubscribeQueue<string>("abc", 10, 0, ExceptionHandlerEnum.PushToErrorQueueAndContinue,
+                provider.SubscribeQueue<UserInfo>("abc", 200, 1, ExceptionHandlerEnum.PushToErrorQueueAndContinue,
                     async data =>
                     {
                         Console.WriteLine($"{DateTime.Now} from queue : {data.Count}");
@@ -103,7 +103,7 @@ namespace AopCache.Web
 
                         //throw new Exception("hahhah");
 
-
+                        await Task.CompletedTask;
                     }, 
                     async data =>
                     {
@@ -111,6 +111,10 @@ namespace AopCache.Web
                         await Task.CompletedTask;
 
                         //throw new Exception("error error");
+                    }, async () =>
+                    {
+                        Console.WriteLine($"over");
+                        await Task.CompletedTask;
                     });
             });
 

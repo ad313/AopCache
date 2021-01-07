@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
-using AopCache.Abstractions;
+﻿using System;
+using System.Collections.Generic;
 using AopCache.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
+using AopCache.Core.Abstractions;
 
 namespace AopCache.Web.Controllers
 {
@@ -49,15 +50,46 @@ namespace AopCache.Web.Controllers
             //    }
             //};
 
-
-            for (int i = 0; i < 100; i++)
+            var list = new List<UserInfo>();
+            for (int i = 0; i < 10000; i++)
             {
-                EventBusProvider.PublishQueueAsync("abc", new List<string>() { "1", });
-                EventBusProvider.PublishQueueAsync("abc", new List<string>() { "2", "3" });
-                EventBusProvider.PublishQueueAsync("abc", new List<string>() { "4", "5", "6" });
-                EventBusProvider.PublishQueueAsync("abc", new List<string>() { "7", "8", "9", "10" });
-                EventBusProvider.PublishQueueAsync("abc", new List<string>() { "11", "12", "13", "14", "15" });
+                list.Add(new UserInfo()
+                {
+                    Id = 1,
+                    Name = "hahhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+                    UserInfo2 = new UserInfo2()
+                    {
+                        Id = 2,
+                        Name = "沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发"
+                    }
+                });
             }
+
+            //var list = new List<string>();
+            //for (int i = 0; i < 10000; i++)
+            //{
+            //    list.Add("hahhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
+            //}
+
+            Task.Run(async () =>
+            {
+                var watch = Stopwatch.StartNew();
+
+                await EventBusProvider.PublishQueueAsync("abc", list);
+
+                Console.WriteLine($"---{watch.ElapsedMilliseconds}");
+            });
+
+            //EventBusProvider.PublishQueueAsync("abc", new List<string>() { "1", });
+
+            //for (int i = 0; i < 100; i++)
+            //{
+            //    EventBusProvider.PublishQueueAsync("abc", new List<string>() { "1", });
+            //    EventBusProvider.PublishQueueAsync("abc", new List<string>() { "2", "3" });
+            //    EventBusProvider.PublishQueueAsync("abc", new List<string>() { "4", "5", "6" });
+            //    EventBusProvider.PublishQueueAsync("abc", new List<string>() { "7", "8", "9", "10" });
+            //    EventBusProvider.PublishQueueAsync("abc", new List<string>() { "11", "12", "13", "14", "15" });
+            //}
 
             //EventBusProvider.PublishQueueAsync("abc", new List<string>() { "1", });
             //EventBusProvider.PublishQueueAsync("abc", new List<string>() { "2", "3" });

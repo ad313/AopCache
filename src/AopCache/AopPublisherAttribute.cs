@@ -1,10 +1,10 @@
-﻿using AopCache.Abstractions;
-using AopCache.Extensions;
+﻿using AopCache.Extensions;
 using AspectCore.DependencyInjection;
 using AspectCore.DynamicProxy;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AopCache.Core.Abstractions;
 
 namespace AopCache
 {
