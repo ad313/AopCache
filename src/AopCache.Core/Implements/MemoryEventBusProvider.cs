@@ -20,6 +20,16 @@ namespace AopCache.Core.Implements
         private static readonly ConcurrentDictionary<string, Channel<byte[]>> ErrorQueueDictionary = new ConcurrentDictionary<string, Channel<byte[]>>();
 
         /// <summary>
+        /// 总开关默认开启
+        /// </summary>
+        public bool Enable { get; private set; } = true;
+
+        /// <summary>
+        /// 频道开关
+        /// </summary>
+        private readonly ConcurrentDictionary<string, bool> _channelEnableDictionary = new ConcurrentDictionary<string, bool>();
+
+        /// <summary>
         /// 初始化
         /// </summary>
         /// <param name="serializerProvider"></param>
@@ -85,7 +95,7 @@ namespace AopCache.Core.Implements
             if (handler == null)
                 throw new ArgumentNullException(nameof(handler));
 
-            Task.Run(async () =>
+            Task.Factory.StartNew(async () =>
             {
                 var channelProvider = GetChannel(channel);
 
@@ -93,13 +103,13 @@ namespace AopCache.Core.Implements
                 {
                     if (channelProvider.Reader.TryRead(out var msg))
                     {
-                        Console.WriteLine($"{DateTime.Now} {channel} 收到数据：{msg}");
+                        //Console.WriteLine($"{DateTime.Now} {channel} 收到数据：{msg}");
 
                         var data = _serializerProvider.Deserialize<EventMessageModel<T>>(msg);
                         handler.Invoke(data);
                     }
                 }
-            });
+            }, TaskCreationOptions.LongRunning);
         }
 
         /// <summary>
@@ -116,7 +126,7 @@ namespace AopCache.Core.Implements
             if (handler == null)
                 throw new ArgumentNullException(nameof(handler));
 
-            Task.Run(async () =>
+            Task.Factory.StartNew(async () =>
             {
                 var channelProvider = GetChannel(channel);
 
@@ -124,7 +134,7 @@ namespace AopCache.Core.Implements
                 {
                     if (channelProvider.Reader.TryRead(out var msg))
                     {
-                        Console.WriteLine($"{DateTime.Now} {channel} 收到数据：{msg}");
+                        //Console.WriteLine($"{DateTime.Now} {channel} 收到数据：{msg}");
 
                         var data = _serializerProvider.Deserialize<EventMessageModel<T>>(msg);
                         await handler.Invoke(data);
@@ -132,11 +142,11 @@ namespace AopCache.Core.Implements
 
                     await Task.Delay(1);
                 }
-            });
+            }, TaskCreationOptions.LongRunning);
         }
 
         /// <summary>
-        /// 订阅事件 用于单元测试
+        /// 订阅事件 从队列读取数据
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="channel">频道名称</param>
@@ -145,6 +155,12 @@ namespace AopCache.Core.Implements
         {
             Subscribe<T>(channel, msg =>
             {
+                if (!IsEnable(channel))
+                {
+                    Console.WriteLine($"{DateTime.Now} 频道【{channel}】 已关闭消费");
+                    return;
+                }
+
                 List<T> GetListFunc(int length) => GetQueueItems<T>(channel, length);
 
                 handler.Invoke(GetListFunc);
@@ -161,6 +177,12 @@ namespace AopCache.Core.Implements
         {
             Subscribe<T>(channel, async msg =>
             {
+                if (!IsEnable(channel))
+                {
+                    Console.WriteLine($"{DateTime.Now} 频道【{channel}】 已关闭消费");
+                    return;
+                }
+
                 Task<List<T>> GetListFunc(int length) => GetQueueItemsAsync<T>(channel, length);
 
                 await handler.Invoke(GetListFunc);
@@ -185,6 +207,12 @@ namespace AopCache.Core.Implements
             
             Subscribe<T>(channel, async msg =>
             {
+                if (!IsEnable(channel))
+                {
+                    Console.WriteLine($"{DateTime.Now} 频道【{channel}】 已关闭消费");
+                    return;
+                }
+
                 var pages = GetTotalPagesFromQueue(channel, length);
 
                 var needGc = pages * length > 1000;
@@ -348,7 +376,23 @@ namespace AopCache.Core.Implements
         {
             throw new NotImplementedException();
         }
-        
+
+        /// <summary>
+        /// 设置订阅是否消费
+        /// </summary>
+        /// <param name="enable">true 开启开关，false 关闭开关</param>
+        /// <param name="channel">为空时表示总开关</param>
+        public void SetEnable(bool enable, string channel = null)
+        {
+            if (string.IsNullOrWhiteSpace(channel))
+            {
+                Enable = enable;
+                return;
+            }
+
+            _channelEnableDictionary.AddOrUpdate(channel, d => enable, (key, value) => enable);
+        }
+
         #region private
 
         private async Task<bool> HandleException<T>(string channel, ExceptionHandlerEnum exceptionHandler, List<T> data, Exception e)
@@ -493,6 +537,11 @@ namespace AopCache.Core.Implements
             {
                 await queue.Writer.WriteAsync(_serializerProvider.SerializeBytes(item));
             }
+        }
+
+        private bool IsEnable(string channel)
+        {
+            return Enable && (!_channelEnableDictionary.TryGetValue(channel, out bool enable) || enable);
         }
 
         #endregion

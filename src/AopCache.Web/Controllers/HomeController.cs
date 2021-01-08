@@ -51,7 +51,7 @@ namespace AopCache.Web.Controllers
             //};
 
             var list = new List<UserInfo>();
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 list.Add(new UserInfo()
                 {
@@ -75,6 +75,8 @@ namespace AopCache.Web.Controllers
             {
                 var watch = Stopwatch.StartNew();
 
+                await EventBusProvider.PublishQueueAsync("abc", list);
+                await EventBusProvider.PublishQueueAsync("abc", list);
                 await EventBusProvider.PublishQueueAsync("abc", list);
 
                 Console.WriteLine($"---{watch.ElapsedMilliseconds}");

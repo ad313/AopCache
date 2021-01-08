@@ -159,6 +159,13 @@
             </summary>
             <param name="channel"></param>
         </member>
+        <member name="M:AopCache.Core.Abstractions.IEventBusProvider.SetEnable(System.Boolean,System.String)">
+            <summary>
+            设置发布订阅是否开启
+            </summary>
+            <param name="enable">true 开启开关，false 关闭开关</param>
+            <param name="channel">为空时表示总开关</param>
+        </member>
         <member name="M:AopCache.Core.Abstractions.IEventBusProvider.SubscribeTest``1(System.String,System.Action{AopCache.Core.Abstractions.EventMessageModel{``0}})">
             <summary>
             订阅事件 用于单元测试
@@ -399,6 +406,16 @@
             基于内存的发布订阅实现
             </summary>
         </member>
+        <member name="P:AopCache.Core.Implements.MemoryEventBusProvider.Enable">
+            <summary>
+            总开关默认开启
+            </summary>
+        </member>
+        <member name="F:AopCache.Core.Implements.MemoryEventBusProvider._channelEnableDictionary">
+            <summary>
+            频道开关
+            </summary>
+        </member>
         <member name="M:AopCache.Core.Implements.MemoryEventBusProvider.#ctor(AopCache.Core.Abstractions.ISerializerProvider,System.IServiceProvider)">
             <summary>
             初始化
@@ -447,7 +464,7 @@
         </member>
         <member name="M:AopCache.Core.Implements.MemoryEventBusProvider.SubscribeQueue``1(System.String,System.Action{System.Func{System.Int32,System.Collections.Generic.List{``0}}})">
             <summary>
-            订阅事件 用于单元测试
+            订阅事件 从队列读取数据
             </summary>
             <typeparam name="T"></typeparam>
             <param name="channel">频道名称</param>
@@ -525,6 +542,13 @@
             取消订阅
             </summary>
             <param name="channel"></param>
+        </member>
+        <member name="M:AopCache.Core.Implements.MemoryEventBusProvider.SetEnable(System.Boolean,System.String)">
+            <summary>
+            设置订阅是否消费
+            </summary>
+            <param name="enable">true 开启开关，false 关闭开关</param>
+            <param name="channel">为空时表示总开关</param>
         </member>
         <member name="M:AopCache.Core.Implements.MemoryEventBusProvider.SubscribeTest``1(System.String,System.Action{AopCache.Core.Abstractions.EventMessageModel{``0}})">
             <summary>

@@ -37,6 +37,16 @@
             队列key前缀
             </summary>
         </member>
+        <member name="P:AopCache.EventBus.CSRedis.RedisEventBusProvider.Enable">
+            <summary>
+            总开关默认开启
+            </summary>
+        </member>
+        <member name="F:AopCache.EventBus.CSRedis.RedisEventBusProvider._channelEnableDictionary">
+            <summary>
+            频道开关
+            </summary>
+        </member>
         <member name="M:AopCache.EventBus.CSRedis.RedisEventBusProvider.PublishAsync``1(System.String,AopCache.Core.Abstractions.EventMessageModel{``0})">
             <summary>
             发布事件
@@ -151,6 +161,13 @@
             取消订阅
             </summary>
             <param name="channel"></param>
+        </member>
+        <member name="M:AopCache.EventBus.CSRedis.RedisEventBusProvider.SetEnable(System.Boolean,System.String)">
+            <summary>
+            设置订阅是否消费
+            </summary>
+            <param name="enable">true 开启开关，false 关闭开关</param>
+            <param name="channel">为空时表示总开关</param>
         </member>
         <member name="M:AopCache.EventBus.CSRedis.RedisEventBusProvider.SubscribeTest``1(System.String,System.Action{AopCache.Core.Abstractions.EventMessageModel{``0}})">
             <summary>

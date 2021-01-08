@@ -1,4 +1,5 @@
 ﻿using AopCache.Core.Abstractions;
+using AopCache.Core.Implements;
 using AopCache.EventBus.CSRedis;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -18,6 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             InitCsRedis(connectionString);
 
+            service.AddSingleton<ISerializerProvider, SerializerProvider>();
             service.AddSingleton<IEventBusProvider, RedisEventBusProvider>();
         }
 

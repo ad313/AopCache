@@ -129,8 +129,15 @@ namespace AopCache.Core.Abstractions
         /// <param name="channel"></param>
         void UnSubscribe(string channel);
 
+        /// <summary>
+        /// 设置发布订阅是否开启
+        /// </summary>
+        /// <param name="enable">true 开启开关，false 关闭开关</param>
+        /// <param name="channel">为空时表示总开关</param>
+        void SetEnable(bool enable, string channel = null);
+
         #region Test
-        
+
         /// <summary>
         /// 订阅事件 用于单元测试
         /// </summary>

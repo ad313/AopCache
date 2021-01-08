@@ -79,7 +79,7 @@ namespace AopCache.Web
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
-            hostLifetime.ApplicationStarted.Register(() =>
+            hostLifetime.ApplicationStarted.Register(async () =>
             {
                 var provider = app.ApplicationServices.GetService<IEventBusProvider>();
 
@@ -88,6 +88,8 @@ namespace AopCache.Web
                 //    var list = func(10);
                 //    Console.WriteLine($"from queue : {list.Count}");
                 //});
+
+                provider.SetEnable(false, "abc");
 
                 provider.SubscribeQueue<UserInfo>("abc", 200, 1, ExceptionHandlerEnum.PushToErrorQueueAndContinue,
                     async data =>
@@ -116,6 +118,12 @@ namespace AopCache.Web
                         Console.WriteLine($"over");
                         await Task.CompletedTask;
                     });
+
+                await Task.Delay(5000);
+                provider.SetEnable(true, "abc");
+
+                await provider.PublishQueueAsync("abc", new List<UserInfo>() { new UserInfo() });
+
             });
 
             app.UseRouting();

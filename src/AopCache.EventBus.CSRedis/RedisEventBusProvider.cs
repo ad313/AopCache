@@ -1,11 +1,11 @@
-﻿using System;
+﻿using AopCache.Core.Abstractions;
+using AopCache.Core.Common;
+using CSRedis;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AopCache.Core.Abstractions;
-using AopCache.Core.Common;
-using CSRedis;
 
 namespace AopCache.EventBus.CSRedis
 {
@@ -32,6 +32,16 @@ namespace AopCache.EventBus.CSRedis
         /// 队列key前缀
         /// </summary>
         private static readonly string PrefixKey = "EventBusProvider:";
+
+        /// <summary>
+        /// 总开关默认开启
+        /// </summary>
+        public bool Enable { get; private set; } = true;
+
+        /// <summary>
+        /// 频道开关
+        /// </summary>
+        private readonly ConcurrentDictionary<string, bool> _channelEnableDictionary = new ConcurrentDictionary<string, bool>();
 
         public RedisEventBusProvider(ISerializerProvider serializerProvider, IServiceProvider serviceProvider)
         {
@@ -67,7 +77,7 @@ namespace AopCache.EventBus.CSRedis
         /// <returns></returns>
         public async Task PublishQueueAsync<T>(string channel, List<T> message)
         {
-            if (message == null || !message.Any())
+            if (message == null)
                 return;
 
             await PushToQueueAsync(channel, message);
@@ -82,7 +92,7 @@ namespace AopCache.EventBus.CSRedis
         /// <param name="handler">订阅处理</param>
         public void Subscribe<T>(string channel, Action<EventMessageModel<T>> handler)
         {
-            SubscribeInternel(channel, handler);
+            SubscribeInternal(channel, handler, false, false);
         }
         
         /// <summary>
@@ -93,7 +103,7 @@ namespace AopCache.EventBus.CSRedis
         /// <param name="handler">订阅处理</param>
         public void Subscribe<T>(string channel, Func<EventMessageModel<T>, Task> handler)
         {
-            SubscribeInternel(channel, handler);
+            SubscribeInternal(channel, handler, false, false);
         }
         
         /// <summary>
@@ -104,7 +114,7 @@ namespace AopCache.EventBus.CSRedis
         /// <param name="handler">订阅处理</param>
         public void SubscribeQueue<T>(string channel, Action<Func<int, List<T>>> handler)
         {
-            SubscribeInternel<T>(channel, msg =>
+            SubscribeInternal<T>(channel, msg =>
             {
                 List<T> GetListFunc(int length) => GetQueueItems<T>(channel, length);
 
@@ -120,7 +130,7 @@ namespace AopCache.EventBus.CSRedis
         /// <param name="handler">订阅处理</param>
         public void SubscribeQueue<T>(string channel, Func<Func<int, Task<List<T>>>, Task> handler)
         {
-            SubscribeInternel<T>(channel, async msg =>
+            SubscribeInternal<T>(channel, async msg =>
             {
                 Task<List<T>> GetListFunc(int length) => GetQueueItemsAsync<T>(channel, length);
 
@@ -145,7 +155,7 @@ namespace AopCache.EventBus.CSRedis
             if (length <= 0)
                 throw new Exception("length must be greater than zero");
             
-            SubscribeInternel<T>(channel, async msg =>
+            SubscribeInternal<T>(channel, async msg =>
             {
                 var pages = GetTotalPagesFromQueue(channel, length);
 
@@ -321,9 +331,25 @@ namespace AopCache.EventBus.CSRedis
             }
         }
 
+        /// <summary>
+        /// 设置订阅是否消费
+        /// </summary>
+        /// <param name="enable">true 开启开关，false 关闭开关</param>
+        /// <param name="channel">为空时表示总开关</param>
+        public void SetEnable(bool enable, string channel = null)
+        {
+            if (string.IsNullOrWhiteSpace(channel))
+            {
+                Enable = enable;
+                return;
+            }
+
+            _channelEnableDictionary.AddOrUpdate(channel, d => enable, (key, value) => enable);
+        }
+
         #region private
 
-        private void SubscribeInternel<T>(string channel, Action<EventMessageModel<T>> handler, bool useLock = false)
+        private void SubscribeInternal<T>(string channel, Action<EventMessageModel<T>> handler, bool useLock = false, bool checkEnable = true)
         {
             if (string.IsNullOrWhiteSpace(channel))
                 throw new ArgumentNullException(nameof(channel));
@@ -333,18 +359,24 @@ namespace AopCache.EventBus.CSRedis
 
             var sub = RedisHelper.Subscribe((channel, msg =>
             {
+                if (checkEnable && !IsEnable(channel))
+                {
+                    Console.WriteLine($"{DateTime.Now} 频道【{channel}】 已关闭消费");
+                    return;
+                }
+
                 if (useLock)
                 {
                     lock (GetLockObject(channel))
                     {
-                        Console.WriteLine($"{DateTime.Now} 收到数据：{msg.Body}");
+                        //Console.WriteLine($"{DateTime.Now} 收到数据：{msg.Body}");
                         var data = _serializerProvider.Deserialize<EventMessageModel<T>>(msg.Body);
                         handler.Invoke(data);
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"{DateTime.Now} 收到数据：{msg.Body}");
+                    //Console.WriteLine($"{DateTime.Now} 收到数据：{msg.Body}");
                     var data = _serializerProvider.Deserialize<EventMessageModel<T>>(msg.Body);
                     handler.Invoke(data);
                 }
@@ -355,7 +387,7 @@ namespace AopCache.EventBus.CSRedis
             _lockObjectDictionary.TryAdd(channel, new AsyncLock());
         }
 
-        private void SubscribeInternel<T>(string channel, Func<EventMessageModel<T>, Task> handler, bool useLock = false)
+        private void SubscribeInternal<T>(string channel, Func<EventMessageModel<T>, Task> handler, bool useLock = false, bool checkEnable = true)
         {
             if (string.IsNullOrWhiteSpace(channel))
                 throw new ArgumentNullException(nameof(channel));
@@ -365,18 +397,24 @@ namespace AopCache.EventBus.CSRedis
 
             var sub = RedisHelper.Subscribe((channel, async msg =>
             {
+                if (checkEnable && !IsEnable(channel))
+                {
+                    Console.WriteLine($"{DateTime.Now} 频道【{channel}】 已关闭消费");
+                    return;
+                }
+
                 if (useLock)
                 {
                     using (await GetLockObject(channel).LockAsync())
                     {
-                        Console.WriteLine($"{DateTime.Now} 收到数据：{msg.Body}");
+                        //Console.WriteLine($"{DateTime.Now} 收到数据：{msg.Body}");
                         var data = _serializerProvider.Deserialize<EventMessageModel<T>>(msg.Body);
                         await handler.Invoke(data);
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"{DateTime.Now} 收到数据：{msg.Body}");
+                    //Console.WriteLine($"{DateTime.Now} 收到数据：{msg.Body}");
                     var data = _serializerProvider.Deserialize<EventMessageModel<T>>(msg.Body);
                     await handler.Invoke(data);
                 }
@@ -501,7 +539,12 @@ namespace AopCache.EventBus.CSRedis
                 return obj;
 
             return new AsyncLock();
-        } 
+        }
+
+        private bool IsEnable(string channel)
+        {
+            return Enable && (!_channelEnableDictionary.TryGetValue(channel, out bool enable) || enable);
+        }
 
         #endregion
 
@@ -515,7 +558,7 @@ namespace AopCache.EventBus.CSRedis
         /// <param name="handler">订阅处理</param>
         public void SubscribeTest<T>(string channel, Action<EventMessageModel<T>> handler)
         {
-            SubscribeInternel(channel, handler);
+            SubscribeInternal(channel, handler);
         }
 
         /// <summary>
@@ -526,7 +569,7 @@ namespace AopCache.EventBus.CSRedis
         /// <param name="handler">订阅处理</param>
         public async Task SubscribeTest<T>(string channel, Func<EventMessageModel<T>, Task> handler)
         {
-            SubscribeInternel(channel, handler);
+            SubscribeInternal(channel, handler);
             await Task.CompletedTask;
         }
 
