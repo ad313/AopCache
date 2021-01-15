@@ -30,7 +30,7 @@ namespace AopCache.Core.Abstractions
         /// <param name="channel">频道名称</param>
         /// <param name="message">数据集合</param>
         /// <returns></returns>
-        Task PublishQueueAsync<T>(string channel, List<T> message);
+        Task PublishQueueAsync<T>(string channel, params T[] message);
 
         /// <summary>
         /// 订阅事件

@@ -16,6 +16,11 @@
     <Company>ad313</Company>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>bin\Debug\netstandard2.1\</OutputPath>
+    <DocumentationFile>bin\Debug\netstandard2.1\AopCache.Redis.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="CSRedisCore" Version="3.6.2" />
     <PackageReference Include="MessagePack" Version="2.2.85" />

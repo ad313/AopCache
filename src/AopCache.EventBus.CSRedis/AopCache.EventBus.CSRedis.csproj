@@ -15,7 +15,8 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>AopCache.EventBus.CSRedis.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netstandard2.1\AopCache.EventBus.CSRedis.xml</DocumentationFile>
+    <OutputPath>bin\Debug\netstandard2.1\</OutputPath>
   </PropertyGroup>
 
 	<ItemGroup>

@@ -15,7 +15,8 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>AopCache.Core.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netstandard2.1\AopCache.Core.xml</DocumentationFile>
+    <OutputPath>bin\Debug\netstandard2.1\</OutputPath>
   </PropertyGroup>
 
 	<ItemGroup>

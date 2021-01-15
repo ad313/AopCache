@@ -75,12 +75,12 @@ namespace AopCache.EventBus.CSRedis
         /// <param name="channel">频道名称</param>
         /// <param name="message">数据集合</param>
         /// <returns></returns>
-        public async Task PublishQueueAsync<T>(string channel, List<T> message)
+        public async Task PublishQueueAsync<T>(string channel, params T[] message)
         {
             if (message == null)
                 return;
 
-            await PushToQueueAsync(channel, message);
+            await PushToQueueAsync(channel, message.ToList());
             await PublishAsync(channel, new EventMessageModel<T>());
         }
 
