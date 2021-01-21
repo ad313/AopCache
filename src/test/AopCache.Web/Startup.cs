@@ -83,48 +83,76 @@ namespace AopCache.Web
             {
                 var provider = app.ApplicationServices.GetService<IEventBusProvider>();
 
-                //provider.SubscribeQueue<string>("abc", func =>
-                //{
-                //    var list = func(10);
-                //    Console.WriteLine($"from queue : {list.Count}");
-                //});
+                provider.Subscribe<int>("aqwe", data =>
+                {
+                    Console.WriteLine($"{data.Data}--------------------------------1");
+                });
 
-                provider.SetEnable(false, "abc");
+                provider.Subscribe<int>("aqwe", data =>
+                {
+                    Console.WriteLine($"{data.Data}--------------------------------2");
+                });
 
-                provider.SubscribeQueue<UserInfo>("abc", 200, 1, ExceptionHandlerEnum.PushToErrorQueueAndContinue,
-                    async data =>
-                    {
-                        Console.WriteLine($"{DateTime.Now} from queue : {data.Count}");
+                provider.Subscribe<int>("aqwe", data =>
+                {
+                    Console.WriteLine($"{data.Data}--------------------------------3");
+                });
 
-                        //foreach (var s in data)
-                        //{
-                        //    Console.WriteLine($"{s}");
-                        //}
 
-                        //await Task.Delay(500);
-
-                        //throw new Exception("hahhah");
-
-                        await Task.CompletedTask;
-                    }, 
-                    async data =>
-                    {
-                        Console.WriteLine($"报错了------- : {data.Count}");
-                        await Task.CompletedTask;
-
-                        //throw new Exception("error error");
-                    }, async () =>
-                    {
-                        Console.WriteLine($"over");
-                        await Task.CompletedTask;
-                    });
-
-                await Task.Delay(5000);
-                provider.SetEnable(true, "abc");
-
-                await provider.PublishQueueAsync("abc", new List<UserInfo>() { new UserInfo() });
+                await Task.Delay(3000);
+                for (int i = 0; i < 100; i++)
+                {
+                    await provider.PublishAsync("aqwe", new EventMessageModel<int>(i));
+                }
 
             });
+
+            //hostLifetime.ApplicationStarted.Register(async () =>
+            //{
+            //    var provider = app.ApplicationServices.GetService<IEventBusProvider>();
+
+            //    //provider.SubscribeQueue<string>("abc", func =>
+            //    //{
+            //    //    var list = func(10);
+            //    //    Console.WriteLine($"from queue : {list.Count}");
+            //    //});
+
+            //    provider.SetEnable(false, "abc");
+
+            //    provider.SubscribeQueue<UserInfo>("abc", 200, 1, ExceptionHandlerEnum.PushToErrorQueueAndContinue,
+            //        async data =>
+            //        {
+            //            Console.WriteLine($"{DateTime.Now} from queue : {data.Count}");
+
+            //            //foreach (var s in data)
+            //            //{
+            //            //    Console.WriteLine($"{s}");
+            //            //}
+
+            //            //await Task.Delay(500);
+
+            //            //throw new Exception("hahhah");
+
+            //            await Task.CompletedTask;
+            //        }, 
+            //        async (ex, data) =>
+            //        {
+            //            Console.WriteLine($"报错了------- : {data.Count}");
+            //            await Task.CompletedTask;
+
+            //            //throw new Exception("error error");
+            //        }, async () =>
+            //        {
+            //            Console.WriteLine($"over");
+            //            await Task.CompletedTask;
+            //        });
+
+            //    await Task.Delay(5000);
+            //    provider.SetEnable(true, "abc");
+
+            //    await provider.PublishQueueAsync("abc", new List<UserInfo>() { new UserInfo() });
+
+            //});
 
             app.UseRouting();
             app.UseEndpoints(endpoints =>

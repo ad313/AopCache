@@ -1,5 +1,6 @@
 using AopCache.Core.Abstractions;
 using AopCache.Core.Implements;
+using AopCache.EventBus.RabbitMQ;
 using AopCache.Implements;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -32,13 +33,27 @@ namespace AopCache.Test.Base
 
             services.AddSingleton<ISerializerProvider, SerializerProvider>();
 
-            services.AddAopCache(op =>
-            {
-                op.UseMemoryCacheProvider();
-                //op.AddAopTriggerUseMemoryEventBus();
+            //services.AddAopCache(op =>
+            //{
+            //    op.UseMemoryCacheProvider();
+            //    //op.AddAopTriggerUseMemoryEventBus();
 
-                //op.UseCsRedisCacheProvider("192.168.1.110:32350,password=123456,defaultDatabase=5");
-                op.AddAopTriggerUseRedisEventBus("192.168.1.110:32350,password=123456,defaultDatabase=5");
+            //    //op.UseCsRedisCacheProvider("192.168.1.110:32350,password=123456,defaultDatabase=5");
+            //    op.AddAopTriggerUseRedisEventBus("192.168.1.110:32350,password=123456,defaultDatabase=5");
+            //});
+
+
+
+            services.AddEventBusUseRabbitMq(option =>
+            {
+                option.ExchangeName = Configuration.GetValue<string>("RabbitMQ:ExchangeName");
+                option.HostName = Configuration.GetValue<string>("RabbitMQ:HostName");
+                option.UserName = Configuration.GetValue<string>("RabbitMQ:UserName");
+                option.Password = Configuration.GetValue<string>("RabbitMQ:Password");
+                option.Port = Configuration.GetValue<int>("RabbitMQ:Port");
+                option.VirtualHost = Configuration.GetValue<string>("RabbitMQ:VirtualHost");
+                option.PrefetchSize = Configuration.GetValue<uint>("RabbitMQ:PrefetchSize");
+                option.PrefetchCount = Configuration.GetValue<ushort>("RabbitMQ:PrefetchCount");
             });
         }
 

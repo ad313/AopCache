@@ -84,7 +84,7 @@ namespace AopCache.Implements
                                 var key = subscriberTag.GetKey(cacheAttribute.Key, msg.Data);
                                 key = cacheAttribute.FormatPrefix(key);
                                 _cacheProvider.Remove(key);
-                                Console.WriteLine($"{DateTime.Now} Channel：{msg.Channel}：清除缓存：{key}");
+                                Console.WriteLine($"{DateTime.Now} Key：{msg.Key}：清除缓存：{key}");
                                 break;
                             case ActionType.DeleteByGroup:
                                 break;

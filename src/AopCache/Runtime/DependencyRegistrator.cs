@@ -60,7 +60,7 @@ namespace AopCache.Runtime
             var check = publishers.Select(d => d.Channel).GroupBy(d => d).ToDictionary(d => d.Key, d => d.Count()).Where(d => d.Value > 1).ToList();
             if (check.Any())
             {
-                throw new Exception($"[AopCache AopPublisherAttribute] [Channel 重复：{string.Join("、", check.Select(d => d.Key))}]");
+                throw new Exception($"[AopCache AopPublisherAttribute] [Key 重复：{string.Join("、", check.Select(d => d.Key))}]");
             }
 
             //开启发布

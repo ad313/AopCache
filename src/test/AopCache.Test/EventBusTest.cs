@@ -31,7 +31,7 @@ namespace AopCache.Test
             eventBusProvider.SubscribeTest<List<string>>(channel, data =>
             {
                 Assert.IsTrue(data != null);
-                Assert.IsTrue(data.TrackId == trackId);
+                Assert.IsTrue(data.TraceId == trackId);
                 Assert.IsTrue(data.Data.Count == list1.Count);
                 Assert.IsTrue(data.Data.All(item => list1.Contains(item)));
 
@@ -57,7 +57,7 @@ namespace AopCache.Test
             await eventBusProvider.SubscribeTest<List<string>>(channel, async data =>
             {
                 Assert.IsTrue(data != null);
-                Assert.IsTrue(data.TrackId == trackId);
+                Assert.IsTrue(data.TraceId == trackId);
                 Assert.IsTrue(data.Data.Count == list1.Count);
                 Assert.IsTrue(data.Data.All(item => list1.Contains(item)));
 
@@ -224,7 +224,7 @@ namespace AopCache.Test
                 Assert.IsTrue(list.All(item => list1.Contains(item)));
 
                 throw new Exception("error");
-            }, async list =>
+            }, async (ex, list) =>
             {
                 Assert.IsTrue(list.Count == list1.Count);
                 Assert.IsTrue(list.All(item => list1.Contains(item)));
@@ -256,7 +256,7 @@ namespace AopCache.Test
                 Assert.IsTrue(list.All(item => list1.Contains(item)));
 
                 throw new Exception("error");
-            }, async list =>
+            }, async (ex, list) =>
             {
                 Assert.IsTrue(list.Count == list1.Count);
                 Assert.IsTrue(list.All(item => list1.Contains(item)));
@@ -295,7 +295,7 @@ namespace AopCache.Test
                 Assert.IsTrue(list.All(item => list1.Contains(item)));
 
                 throw new Exception("error");
-            }, async list =>
+            }, async (ex, list) =>
             {
                 Assert.IsTrue(list.Count == list1.Count);
                 Assert.IsTrue(list.All(item => list1.Contains(item)));
@@ -351,7 +351,7 @@ namespace AopCache.Test
                 await Task.CompletedTask;
 
                 throw new Exception("error");
-            }, async list =>
+            }, async (ex, list) =>
             {
                 Assert.IsTrue(list.Count == 1);
                 Assert.IsTrue(list1[index - 1] == list.First());
@@ -393,7 +393,7 @@ namespace AopCache.Test
                 await Task.CompletedTask;
 
                 throw new Exception("error");
-            }, async list =>
+            }, async (ex, list) =>
             {
                 Assert.IsTrue(list.Count == 1);
                 Assert.IsTrue(list1[index - 1] == list.First());
@@ -441,7 +441,7 @@ namespace AopCache.Test
                 await Task.CompletedTask;
 
                 throw new Exception("error");
-            }, async list =>
+            }, async (ex, list) =>
             {
                 Assert.IsTrue(list.Count == 1);
                 Assert.IsTrue(list1[index - 1] == list.First());
@@ -494,7 +494,7 @@ namespace AopCache.Test
                 await Task.CompletedTask;
 
                 throw new Exception("error");
-            }, async list =>
+            }, async (ex, list) =>
             {
                 Assert.IsTrue(list.Count == 1);
                 Assert.IsTrue(list1[index - 1] == list.First());
@@ -536,7 +536,7 @@ namespace AopCache.Test
                 await Task.CompletedTask;
 
                 throw new Exception("error");
-            }, async list =>
+            }, async (ex, list) =>
             {
                 Assert.IsTrue(list.Count == 1);
                 Assert.IsTrue(list1[index - 1] == list.First());
@@ -584,7 +584,7 @@ namespace AopCache.Test
                 await Task.CompletedTask;
 
                 throw new Exception("error");
-            }, async list =>
+            }, async (ex, list) =>
             {
                 Assert.IsTrue(list.Count == 1);
                 Assert.IsTrue(list1[index - 1] == list.First());

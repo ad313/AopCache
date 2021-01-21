@@ -5,13 +5,10 @@
     <UserSecretsId>60d6bc8a-b91d-4aa1-bc41-f45bad0b575c</UserSecretsId>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\.editorconfig" Link=".editorconfig" />
-  </ItemGroup>
+
 
   <ItemGroup>
-    <ProjectReference Include="..\AopCache.Redis\AopCache.Redis.csproj" />
-    <ProjectReference Include="..\AopCache.Trigger\AopCache.Trigger.csproj" />
+    <ProjectReference Include="..\..\AopCache.Redis\AopCache.Redis.csproj" />
   </ItemGroup>
 
 </Project>

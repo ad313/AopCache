@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AopCache.Redis\AopCache.Redis.csproj" />
+    <ProjectReference Include="..\..\AopCache.Redis\AopCache.Redis.csproj" />
   </ItemGroup>
 
 </Project>

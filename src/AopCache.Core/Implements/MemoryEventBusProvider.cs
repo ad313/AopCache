@@ -49,19 +49,20 @@ namespace AopCache.Core.Implements
         /// 发布事件
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <param name="message">数据</param>
+        /// <param name="broadcast">是否广播模式（注：对内存队列和redis无效）</param>
         /// <returns></returns>
-        public async Task PublishAsync<T>(string channel, EventMessageModel<T> message)
+        public async Task PublishAsync<T>(string key, EventMessageModel<T> message, bool broadcast = false)
         {
-            if (string.IsNullOrWhiteSpace(channel))
-                throw new ArgumentNullException(nameof(channel));
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException(nameof(key));
 
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            message.Channel = channel;
-            var channelProvider = GetChannel(channel);
+            message.Key = key;
+            var channelProvider = GetChannel(key);
             await channelProvider.Writer.WriteAsync(_serializerProvider.Serialize(message));
         }
 
@@ -69,41 +70,42 @@ namespace AopCache.Core.Implements
         /// 发布事件 数据放到队列，并发布通知到订阅者
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <param name="message">数据集合</param>
         /// <returns></returns>
-        public async Task PublishQueueAsync<T>(string channel, params T[] message)
+        public async Task PublishQueueAsync<T>(string key, List<T> message)
         {
             if (message == null || !message.Any())
                 return;
 
-            await PushToQueueAsync(channel, message.ToList());
-            await PublishAsync(channel, new EventMessageModel<T>());
+            await PushToQueueAsync(key, message);
+            await PublishAsync(key, new EventMessageModel<T>());
         }
 
         /// <summary>
         /// 订阅事件
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <param name="handler">订阅处理</param>
-        public void Subscribe<T>(string channel, Action<EventMessageModel<T>> handler)
+        /// <param name="broadcast">是否广播模式（注：对内存队列和redis无效）</param>
+        public void Subscribe<T>(string key, Action<EventMessageModel<T>> handler, bool broadcast = false)
         {
-            if (string.IsNullOrWhiteSpace(channel))
-                throw new ArgumentNullException(nameof(channel));
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException(nameof(key));
 
             if (handler == null)
                 throw new ArgumentNullException(nameof(handler));
 
             Task.Factory.StartNew(async () =>
             {
-                var channelProvider = GetChannel(channel);
+                var channelProvider = GetChannel(key);
 
                 while (await channelProvider.Reader.WaitToReadAsync())
                 {
                     if (channelProvider.Reader.TryRead(out var msg))
                     {
-                        //Console.WriteLine($"{DateTime.Now} {channel} 收到数据：{msg}");
+                        //Console.WriteLine($"{DateTime.Now} {key} 收到数据：{msg}");
 
                         var data = _serializerProvider.Deserialize<EventMessageModel<T>>(msg);
                         handler.Invoke(data);
@@ -116,25 +118,26 @@ namespace AopCache.Core.Implements
         /// 订阅事件
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <param name="handler">订阅处理</param>
-        public void Subscribe<T>(string channel, Func<EventMessageModel<T>, Task> handler)
+        /// <param name="broadcast">是否广播模式（注：对内存队列和redis无效）</param>
+        public void Subscribe<T>(string key, Func<EventMessageModel<T>, Task> handler, bool broadcast = false)
         {
-            if (string.IsNullOrWhiteSpace(channel))
-                throw new ArgumentNullException(nameof(channel));
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException(nameof(key));
 
             if (handler == null)
                 throw new ArgumentNullException(nameof(handler));
 
             Task.Factory.StartNew(async () =>
             {
-                var channelProvider = GetChannel(channel);
+                var channelProvider = GetChannel(key);
 
                 while (await channelProvider.Reader.WaitToReadAsync())
                 {
                     if (channelProvider.Reader.TryRead(out var msg))
                     {
-                        //Console.WriteLine($"{DateTime.Now} {channel} 收到数据：{msg}");
+                        //Console.WriteLine($"{DateTime.Now} {key} 收到数据：{msg}");
 
                         var data = _serializerProvider.Deserialize<EventMessageModel<T>>(msg);
                         await handler.Invoke(data);
@@ -149,19 +152,19 @@ namespace AopCache.Core.Implements
         /// 订阅事件 从队列读取数据
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <param name="handler">订阅处理</param>
-        public void SubscribeQueue<T>(string channel, Action<Func<int, List<T>>> handler)
+        public void SubscribeQueue<T>(string key, Action<Func<int, List<T>>> handler)
         {
-            Subscribe<T>(channel, msg =>
+            Subscribe<T>(key, msg =>
             {
-                if (!IsEnable(channel))
+                if (!IsEnable(key))
                 {
-                    Console.WriteLine($"{DateTime.Now} 频道【{channel}】 已关闭消费");
+                    Console.WriteLine($"{DateTime.Now} 频道【{key}】 已关闭消费");
                     return;
                 }
 
-                List<T> GetListFunc(int length) => GetQueueItems<T>(channel, length);
+                List<T> GetListFunc(int length) => GetQueueItems<T>(key, length);
 
                 handler.Invoke(GetListFunc);
             });
@@ -171,19 +174,19 @@ namespace AopCache.Core.Implements
         /// 订阅事件 从队列读取数据
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <param name="handler">订阅处理</param>
-        public void SubscribeQueue<T>(string channel, Func<Func<int, Task<List<T>>>, Task> handler)
+        public void SubscribeQueue<T>(string key, Func<Func<int, Task<List<T>>>, Task> handler)
         {
-            Subscribe<T>(channel, async msg =>
+            Subscribe<T>(key, async msg =>
             {
-                if (!IsEnable(channel))
+                if (!IsEnable(key))
                 {
-                    Console.WriteLine($"{DateTime.Now} 频道【{channel}】 已关闭消费");
+                    Console.WriteLine($"{DateTime.Now} 频道【{key}】 已关闭消费");
                     return;
                 }
 
-                Task<List<T>> GetListFunc(int length) => GetQueueItemsAsync<T>(channel, length);
+                Task<List<T>> GetListFunc(int length) => GetQueueItemsAsync<T>(key, length);
 
                 await handler.Invoke(GetListFunc);
             });
@@ -193,37 +196,37 @@ namespace AopCache.Core.Implements
         /// 订阅事件 从队列读取数据 分批次消费
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <param name="length">每次处理条数</param>
         /// <param name="delay">每次处理间隔 毫秒</param>
         /// <param name="exceptionHandler">异常处理方式</param>
         /// <param name="handler">订阅处理</param>
         /// <param name="error">发生异常时回调</param>
         /// <param name="completed">本次消费完成回调 最后执行</param>
-        public void SubscribeQueue<T>(string channel, int length, int delay, ExceptionHandlerEnum exceptionHandler, Func<List<T>, Task> handler, Func<List<T>, Task> error = null, Func<Task> completed = null)
+        public void SubscribeQueue<T>(string key, int length, int delay, ExceptionHandlerEnum exceptionHandler, Func<List<T>, Task> handler, Func<Exception, List<T>, Task> error = null, Func<Task> completed = null)
         {
             if (length <= 0)
                 throw new Exception("length must be greater than zero");
-            
-            Subscribe<T>(channel, async msg =>
+
+            Subscribe<T>(key, async msg =>
             {
-                if (!IsEnable(channel))
+                if (!IsEnable(key))
                 {
-                    Console.WriteLine($"{DateTime.Now} 频道【{channel}】 已关闭消费");
+                    Console.WriteLine($"{DateTime.Now} 频道【{key}】 已关闭消费");
                     return;
                 }
 
-                var pages = GetTotalPagesFromQueue(channel, length);
+                var pages = GetTotalPagesFromQueue(key, length);
 
                 var needGc = pages * length > 1000;
 
                 while (pages > 0)
                 {
-                    var data = await GetQueueItemsAsync<T>(channel, length);
+                    var data = await GetQueueItemsAsync<T>(key, length);
                     if (!data.Any())
                         break;
 
-                    var hasError = false;
+                    Exception ex = null;
 
                     try
                     {
@@ -231,9 +234,9 @@ namespace AopCache.Core.Implements
                     }
                     catch (Exception e)
                     {
-                        hasError = true;
+                        ex = e;
 
-                        if (await HandleException(channel, exceptionHandler, data, e))
+                        if (await HandleException(key, exceptionHandler, data, e))
                         {
                             pages = 1;
                             return;
@@ -241,11 +244,11 @@ namespace AopCache.Core.Implements
                     }
                     finally
                     {
-                        if (hasError && error != null)
-                            await HandleError(channel, data, error);
+                        if (ex != null && error != null)
+                            await HandleError(key, data, error, ex);
 
                         if (completed != null && pages == 1)
-                            await HandleCompleted(channel, completed);
+                            await HandleCompleted(key, completed);
                     }
 
                     pages--;
@@ -265,26 +268,26 @@ namespace AopCache.Core.Implements
         /// <summary>
         /// 获取某个频道队列数据量
         /// </summary>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <returns></returns>
-        public int GetQueueLength(string channel)
+        public int GetQueueLength(string key)
         {
-            if (string.IsNullOrWhiteSpace(channel))
-                throw new ArgumentNullException(nameof(channel));
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException(nameof(key));
 
-            var queue = GetQueue(channel);
+            var queue = GetQueue(key);
             return queue.Reader.Count;
         }
 
         /// <summary>
         /// 获取某个频道队列数据
         /// </summary>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <param name="length">获取指定的数据条数</param>
         /// <returns></returns>
-        public List<T> GetQueueItems<T>(string channel, int length)
+        public List<T> GetQueueItems<T>(string key, int length)
         {
-            var queue = GetQueue(channel);
+            var queue = GetQueue(key);
             var list = new List<T>();
 
             while (list.Count < length)
@@ -301,37 +304,37 @@ namespace AopCache.Core.Implements
         /// <summary>
         /// 获取某个频道队列数据
         /// </summary>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <param name="length">获取指定的数据条数</param>
         /// <returns></returns>
-        public async Task<List<T>> GetQueueItemsAsync<T>(string channel, int length)
+        public async Task<List<T>> GetQueueItemsAsync<T>(string key, int length)
         {
-            return await Task.FromResult(GetQueueItems<T>(channel, length));
+            return await Task.FromResult(GetQueueItems<T>(key, length));
         }
 
         /// <summary>
         /// 获取某个频道错误队列数据量
         /// </summary>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <returns></returns>
-        public int GetErrorQueueLength(string channel)
+        public int GetErrorQueueLength(string key)
         {
-            if (string.IsNullOrWhiteSpace(channel))
-                throw new ArgumentNullException(nameof(channel));
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException(nameof(key));
 
-            var queue = GetErrorQueue(channel);
+            var queue = GetErrorQueue(key);
             return queue.Reader.Count;
         }
 
         /// <summary>
         /// 获取某个频道错误队列数据
         /// </summary>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <param name="length">获取指定的数据条数</param>
         /// <returns></returns>
-        public List<T> GetErrorQueueItems<T>(string channel, int length)
+        public List<T> GetErrorQueueItems<T>(string key, int length)
         {
-            var queue = GetErrorQueue(channel);
+            var queue = GetErrorQueue(key);
             var list = new List<T>();
 
             while (list.Count < length)
@@ -348,12 +351,12 @@ namespace AopCache.Core.Implements
         /// <summary>
         /// 获取某个频道错误队列数据
         /// </summary>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <param name="length">获取指定的数据条数</param>
         /// <returns></returns>
-        public async Task<List<T>> GetErrorQueueItemsAsync<T>(string channel, int length)
+        public async Task<List<T>> GetErrorQueueItemsAsync<T>(string key, int length)
         {
-            var queue = GetErrorQueue(channel);
+            var queue = GetErrorQueue(key);
             var list = new List<T>();
 
             while (list.Count < length)
@@ -371,8 +374,8 @@ namespace AopCache.Core.Implements
         /// <summary>
         /// 取消订阅
         /// </summary>
-        /// <param name="channel"></param>
-        public void UnSubscribe(string channel)
+        /// <param name="key"></param>
+        public void UnSubscribe(string key)
         {
             throw new NotImplementedException();
         }
@@ -381,16 +384,16 @@ namespace AopCache.Core.Implements
         /// 设置订阅是否消费
         /// </summary>
         /// <param name="enable">true 开启开关，false 关闭开关</param>
-        /// <param name="channel">为空时表示总开关</param>
-        public void SetEnable(bool enable, string channel = null)
+        /// <param name="key">为空时表示总开关</param>
+        public void SetEnable(bool enable, string key = null)
         {
-            if (string.IsNullOrWhiteSpace(channel))
+            if (string.IsNullOrWhiteSpace(key))
             {
                 Enable = enable;
                 return;
             }
 
-            _channelEnableDictionary.AddOrUpdate(channel, d => enable, (key, value) => enable);
+            _channelEnableDictionary.AddOrUpdate(key, d => enable, (k, value) => enable);
         }
 
         #region private
@@ -432,11 +435,11 @@ namespace AopCache.Core.Implements
             }
         }
 
-        private async Task HandleError<T>(string channel, List<T> data, Func<List<T>, Task> error)
+        private async Task HandleError<T>(string channel, List<T> data, Func<Exception, List<T>, Task> error, Exception e)
         {
             try
             {
-                await error.Invoke(data);
+                await error.Invoke(e, data);
             }
             catch (Exception ex)
             {
@@ -552,21 +555,21 @@ namespace AopCache.Core.Implements
         /// 订阅事件 用于单元测试
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <param name="handler">订阅处理</param>
-        public void SubscribeTest<T>(string channel, Action<EventMessageModel<T>> handler)
+        public void SubscribeTest<T>(string key, Action<EventMessageModel<T>> handler)
         {
-            if (string.IsNullOrWhiteSpace(channel))
-                throw new ArgumentNullException(nameof(channel));
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException(nameof(key));
 
             if (handler == null)
                 throw new ArgumentNullException(nameof(handler));
 
-            var channelProvider = GetChannel(channel);
+            var channelProvider = GetChannel(key);
 
             if (channelProvider.Reader.TryRead(out var msg))
             {
-                Console.WriteLine($"{DateTime.Now} {channel} 收到数据：{msg}");
+                Console.WriteLine($"{DateTime.Now} {key} 收到数据：{msg}");
 
                 var data = _serializerProvider.Deserialize<EventMessageModel<T>>(msg);
                 handler.Invoke(data);
@@ -577,21 +580,21 @@ namespace AopCache.Core.Implements
         /// 订阅事件 用于单元测试
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <param name="handler">订阅处理</param>
-        public async Task SubscribeTest<T>(string channel, Func<EventMessageModel<T>, Task> handler)
+        public async Task SubscribeTest<T>(string key, Func<EventMessageModel<T>, Task> handler)
         {
-            if (string.IsNullOrWhiteSpace(channel))
-                throw new ArgumentNullException(nameof(channel));
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException(nameof(key));
 
             if (handler == null)
                 throw new ArgumentNullException(nameof(handler));
 
-            var channelProvider = GetChannel(channel);
+            var channelProvider = GetChannel(key);
 
             if (channelProvider.Reader.TryRead(out var msg))
             {
-                Console.WriteLine($"{DateTime.Now} {channel} 收到数据：{msg}");
+                Console.WriteLine($"{DateTime.Now} {key} 收到数据：{msg}");
 
                 var data = _serializerProvider.Deserialize<EventMessageModel<T>>(msg);
                 await handler.Invoke(data);
@@ -602,13 +605,13 @@ namespace AopCache.Core.Implements
         /// 订阅事件 从队列读取数据 用于单元测试
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <param name="handler">订阅处理</param>
-        public void SubscribeQueueTest<T>(string channel, Action<Func<int, List<T>>> handler)
+        public void SubscribeQueueTest<T>(string key, Action<Func<int, List<T>>> handler)
         {
-            SubscribeTest<T>(channel, msg =>
+            SubscribeTest<T>(key, msg =>
             {
-                List<T> GetListFunc(int length) => GetQueueItems<T>(channel, length);
+                List<T> GetListFunc(int length) => GetQueueItems<T>(key, length);
 
                 handler.Invoke(GetListFunc);
             });
@@ -618,13 +621,13 @@ namespace AopCache.Core.Implements
         /// 订阅事件 从队列读取数据 用于单元测试
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <param name="handler">订阅处理</param>
-        public async Task SubscribeQueueTest<T>(string channel, Func<Func<int, Task<List<T>>>, Task> handler)
+        public async Task SubscribeQueueTest<T>(string key, Func<Func<int, Task<List<T>>>, Task> handler)
         {
-            await SubscribeTest<T>(channel, async msg =>
+            await SubscribeTest<T>(key, async msg =>
             {
-                Task<List<T>> GetListFunc(int length) => GetQueueItemsAsync<T>(channel, length);
+                Task<List<T>> GetListFunc(int length) => GetQueueItemsAsync<T>(key, length);
 
                 await handler.Invoke(GetListFunc);
             });
@@ -634,15 +637,15 @@ namespace AopCache.Core.Implements
         /// 订阅事件 从队列读取数据 分批次消费 用于单元测试
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="channel">频道名称</param>
+        /// <param name="key">Key</param>
         /// <param name="length">每次处理条数</param>
         /// <param name="delay">每次处理间隔 毫秒</param>
         /// <param name="exceptionHandler">异常处理方式</param>
         /// <param name="handler">订阅处理</param>
         /// <param name="error">发生异常时回调</param>
         /// <param name="completed">本次消费完成回调 最后执行</param>
-        public async Task SubscribeQueueTest<T>(string channel, int length, int delay, ExceptionHandlerEnum exceptionHandler, Func<List<T>, Task> handler,
-            Func<List<T>, Task> error = null, Func<Task> completed = null)
+        public async Task SubscribeQueueTest<T>(string key, int length, int delay, ExceptionHandlerEnum exceptionHandler, Func<List<T>, Task> handler,
+            Func<Exception, List<T>, Task> error = null, Func<Task> completed = null)
         {
             if (length <= 0)
                 throw new Exception("length must be greater than zero");
@@ -650,17 +653,17 @@ namespace AopCache.Core.Implements
             if (delay <= 0)
                 throw new Exception("delay must be greater than zero");
 
-            await SubscribeTest<T>(channel, async msg =>
+            await SubscribeTest<T>(key, async msg =>
             {
-                var pages = GetTotalPagesFromQueue(channel, length);
+                var pages = GetTotalPagesFromQueue(key, length);
 
                 while (pages > 0)
                 {
-                    var data = await GetQueueItemsAsync<T>(channel, length);
+                    var data = await GetQueueItemsAsync<T>(key, length);
                     if (!data.Any())
                         break;
 
-                    var hasError = false;
+                    Exception ex = null;
 
                     try
                     {
@@ -668,9 +671,9 @@ namespace AopCache.Core.Implements
                     }
                     catch (Exception e)
                     {
-                        hasError = true;
+                        ex = e;
 
-                        if (await HandleException(channel, exceptionHandler, data, e))
+                        if (await HandleException(key, exceptionHandler, data, e))
                         {
                             pages = 1;
                             return;
@@ -678,11 +681,11 @@ namespace AopCache.Core.Implements
                     }
                     finally
                     {
-                        if (hasError && error != null)
-                            await HandleError(channel, data, error);
+                        if (ex != null && error != null)
+                            await HandleError(key, data, error, ex);
 
                         if (completed != null && pages == 1)
-                            await HandleCompleted(channel, completed);
+                            await HandleCompleted(key, completed);
                     }
 
                     pages--;
@@ -690,6 +693,13 @@ namespace AopCache.Core.Implements
                     await Task.Delay(delay);
                 }
             });
+        }
+
+        public void Dispose()
+        {
+            ChannelProviderDictionary.Clear();
+            ErrorQueueDictionary.Clear();
+            QueueDictionary.Clear();
         }
 
         #endregion

@@ -5,9 +5,9 @@ using AopCache.EventBus.CSRedis;
 namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>
-    /// 注册AopCache
+    /// 注册 CSRedis EventBus
     /// </summary>
-    public static partial class AopCacheExtentions
+    public static partial class EventExtensions
     {
         /// <summary>
         /// 注册 AopCache 缓存清理触发器
