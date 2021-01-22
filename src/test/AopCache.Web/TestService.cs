@@ -6,19 +6,23 @@ namespace AopCache.Web
     //接口
     public interface ITestService
     {
+        [AopCache]
+        [AopSubscriber(Channel = "aaa")]
+        string Get();
+
         //默认时间单位是秒，长度为0，即永不过期
         [AopCache(Key = "aaa")]
-        [AopSubscriberTag(Channel = "aaa")]
+        [AopSubscriber(Channel = "aaa")]
         string GetByKey();
 
         //设置3秒过期 这里的“{userId}”，占位符。用参数 userId 的值去替换
         [AopCache(Key = "bbb_{userId}", Length = 3)]
-        [AopSubscriberTag(Channel = "aaa", Map = "userId={type}")]
+        [AopSubscriber(Channel = "aaa", Map = "userId={type}")]
         string GetByKeyAndParamter(int userId);
 
         //设置十分钟过期 这里的“{req:Id}”，占位符。用参数 req里面的Id 的值去替换
         [AopCache(Key = "ccc_{req:Id}_{type}", Type = CacheTimeType.Minute, Length = 10)]
-        [AopSubscriberTag(Channel = "aaa", Map = "type={type},req:Id={req:Id}")]
+        [AopSubscriber(Channel = "aaa", Map = "type={type},req:Id={req:Id}")]
         Task<UserInfo> GetUserInfo(int type, Req req);
 
         [AopPublisher(Channel = "aaa", MessageSource = MessageSource.InParams)]
@@ -28,6 +32,11 @@ namespace AopCache.Web
     //实现接口
     public class TestService : ITestService
     {
+        public string Get()
+        {
+            return Guid.NewGuid().ToString("N");
+        }
+
         public string GetByKey()
         {
             return Guid.NewGuid().ToString("N");
@@ -73,7 +82,7 @@ namespace AopCache.Web
     public class TestSingleClass
     {
         [AopCache(Key = "TestSingleClassKey")]
-        [AopSubscriberTag(Channel = "aaa2")]
+        [AopSubscriber(Channel = "aaa2")]
         public virtual string Get()
         {
             return Guid.NewGuid().ToString("N");

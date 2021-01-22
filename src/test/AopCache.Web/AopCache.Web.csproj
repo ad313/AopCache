@@ -8,6 +8,7 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\..\AopCache.RabbitMQ\AopCache.RabbitMQ.csproj" />
     <ProjectReference Include="..\..\AopCache.Redis\AopCache.Redis.csproj" />
   </ItemGroup>
 

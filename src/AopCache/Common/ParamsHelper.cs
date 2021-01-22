@@ -1,9 +1,8 @@
-﻿using System.Collections.Concurrent;
+﻿using AopCache.Core.Common;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using AopCache.Core.Common;
 
 namespace AopCache.Common
 {
@@ -190,56 +189,5 @@ namespace AopCache.Common
 
             return source;
         }
-
-        ///// <summary>
-        ///// 处理附加参数，给占位符填充值
-        ///// </summary>
-        ///// <param name="source">原始字符串</param>
-        ///// <param name="keys">附加的参数名称数组</param>
-        ///// <param name="pars">参数字段</param>
-        ///// <returns></returns>
-        //public static string FillParamValues2(string source, List<string> keys, Dictionary<string, object> pars)
-        //{
-        //    if (keys == null || keys.Count <= 0)
-        //        return source;
-
-        //    foreach (var key in keys)
-        //    {
-        //        //参数包含:
-        //        if (key.Contains(Separator))
-        //        {
-        //            var parts = key.Split(Separator);
-        //            var firstKey = parts[0];
-        //            var secondKey = parts[1];
-
-        //            if (!pars.TryGetValue(firstKey, out object firstValue) || firstValue == null)
-        //                continue;
-
-        //            if (firstValue is JsonElement json)
-        //            {
-        //                if (!json.TryGetProperty(secondKey, out JsonElement value))
-        //                    continue;
-
-        //                source = source.Replace("{" + key + "}", value.ToString());
-        //            }
-        //            else
-        //            {
-        //                if (!FastConvertHelper.ToDictionary(firstValue).TryGetValue(secondKey, out object secondValue) || secondValue == null)
-        //                    continue;
-
-        //                source = source.Replace("{" + key + "}", secondValue.ToString());
-        //            }
-        //        }
-        //        else
-        //        {
-        //            if (!pars.TryGetValue(key, out object value) || value == null)
-        //                continue;
-
-        //            source = source.Replace("{" + key + "}", value.ToString());
-        //        }
-        //    }
-
-        //    return source;
-        //}
     }
 }

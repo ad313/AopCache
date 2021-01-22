@@ -56,7 +56,21 @@ namespace AopCache.Web
                 //option.AddAopTriggerUseMemoryEventBus();
 
                 option.UseCsRedisCacheProvider("192.168.1.120:30985,password=123456,defaultDatabase=5");
-                option.AddAopTriggerUseRedisEventBus("192.168.1.120:30985,password=123456,defaultDatabase=5");
+
+
+                //option.AddAopTriggerUseRedisEventBus("192.168.1.120:30985,password=123456,defaultDatabase=5");
+
+                option.AddAopTriggerUseRabbitMqEventBus(config =>
+                {
+                    config.ExchangeName = Configuration.GetValue<string>("RabbitMQ:ExchangeName");
+                    config.HostName = Configuration.GetValue<string>("RabbitMQ:HostName");
+                    config.UserName = Configuration.GetValue<string>("RabbitMQ:UserName");
+                    config.Password = Configuration.GetValue<string>("RabbitMQ:Password");
+                    config.Port = Configuration.GetValue<int>("RabbitMQ:Port");
+                    config.VirtualHost = Configuration.GetValue<string>("RabbitMQ:VirtualHost");
+                    config.PrefetchSize = Configuration.GetValue<uint>("RabbitMQ:PrefetchSize");
+                    config.PrefetchCount = Configuration.GetValue<ushort>("RabbitMQ:PrefetchCount");
+                });
             });
 
             //MessagePack
@@ -99,11 +113,40 @@ namespace AopCache.Web
                 });
 
 
-                await Task.Delay(3000);
-                for (int i = 0; i < 100; i++)
-                {
-                    await provider.PublishAsync("aqwe", new EventMessageModel<int>(i));
-                }
+                provider.SubscribeQueue<UserInfo>("abc", 200, 1, ExceptionHandlerEnum.PushToErrorQueueAndContinue,
+                    async data =>
+                    {
+                        Console.WriteLine($"{DateTime.Now} from queue : {data.Count}");
+
+                            //foreach (var s in data)
+                            //{
+                            //    Console.WriteLine($"{s}");
+                            //}
+
+                            //await Task.Delay(500);
+
+                            //throw new Exception("hahhah");
+
+                            await Task.CompletedTask;
+                    },
+                    async (ex, data) =>
+                    {
+                        Console.WriteLine($"报错了------- : {data.Count}");
+                        await Task.CompletedTask;
+
+                            //throw new Exception("error error");
+                        }, async () =>
+                        {
+                            Console.WriteLine($"over");
+                            await Task.CompletedTask;
+                        });
+
+
+                //await Task.Delay(3000);
+                //for (int i = 0; i < 100; i++)
+                //{
+                //    await provider.PublishAsync("aqwe", new EventMessageModel<int>(i));
+                //}
 
             });
 

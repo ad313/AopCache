@@ -51,7 +51,7 @@ namespace AopCache.Runtime
             var virtualClass = Assemblies.SelectMany(d => d.GetTypes().Where(t => t.IsClass && t.GetInterfaces().Length == 0)).ToList();
             var virtualMethods = virtualClass.SelectMany(d => d.GetMethods()).Where(d =>
                 d.CustomAttributes.Any(t => t.AttributeType.Name == nameof(AopPublisherAttribute)) ||
-                d.CustomAttributes.Any(t => t.AttributeType.Name == nameof(AopSubscriberTagAttribute))).ToList();
+                d.CustomAttributes.Any(t => t.AttributeType.Name == nameof(AopSubscriberAttribute))).ToList();
 
             var methods = TypeFinder.FindAllInterface(Assemblies).SelectMany(d => d.GetMethods()).ToList();
             methods.AddRange(virtualMethods);
@@ -78,14 +78,14 @@ namespace AopCache.Runtime
                 throw new Exception($"[AopCache AopPublisherAttribute] [不能与 AopCacheAttribute 一起使用 ：{string.Join("、", existsList.Select(d => $"{d.DeclaringType?.FullName}.{d.Name}"))}]");
             }
             
-            var subscribers = methods.SelectMany(d => d.GetCustomAttributes<AopSubscriberTagAttribute>()).ToList();
+            var subscribers = methods.SelectMany(d => d.GetCustomAttributes<AopSubscriberAttribute>()).ToList();
             if (subscribers.Any())
             {
-                AopSubscriberTagAttribute.ChannelList = subscribers.Select(d => d.Channel).Distinct().ToList();
+                AopSubscriberAttribute.ChannelList = subscribers.Select(d => d.Channel).Distinct().ToList();
                 
-                AopSubscriberTagAttribute.MethodList = methods.Where(d =>
+                AopSubscriberAttribute.MethodList = methods.Where(d =>
                     d.CustomAttributes != null &&
-                    d.CustomAttributes.Any(c => c.AttributeType.Name == nameof(AopSubscriberTagAttribute))).ToList();
+                    d.CustomAttributes.Any(c => c.AttributeType.Name == nameof(AopSubscriberAttribute))).ToList();
 
                 foreach (var subscriber in subscribers)
                 {
@@ -97,7 +97,7 @@ namespace AopCache.Runtime
 
                     var key = subscriber.GetMapDictionaryKey();
 
-                    if (AopSubscriberTagAttribute.MapDictionary.ContainsKey(key))
+                    if (AopSubscriberAttribute.MapDictionary.ContainsKey(key))
                         continue;
 
                     var mapDic = subscriber.Map.Split(',')
@@ -105,7 +105,7 @@ namespace AopCache.Runtime
                                     && !string.IsNullOrWhiteSpace(d.Split('=')[0])
                                     && !string.IsNullOrWhiteSpace(d.Split('=')[1]))
                         .ToDictionary(d => d.Split('=')[0].Trim(), d => d.Split('=')[1].Trim().TrimStart('{').TrimEnd('}'));
-                    AopSubscriberTagAttribute.MapDictionary.TryAdd(key, mapDic);
+                    AopSubscriberAttribute.MapDictionary.TryAdd(key, mapDic);
                 }
             }
         }

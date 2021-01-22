@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache.BenchmarkTest", "t
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EventBus", "EventBus", "{0D8D20C4-3974-40AA-BAFD-61306146D9B4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AopCache.RabbitMQ", "AopCache.RabbitMQ\AopCache.RabbitMQ.csproj", "{C744A97A-F7A3-4966-959F-C540B614F110}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,6 +74,10 @@ Global
 		{1C022C3C-0A92-4AFA-B08E-C2DA65F2C19B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C022C3C-0A92-4AFA-B08E-C2DA65F2C19B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C022C3C-0A92-4AFA-B08E-C2DA65F2C19B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C744A97A-F7A3-4966-959F-C540B614F110}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C744A97A-F7A3-4966-959F-C540B614F110}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C744A97A-F7A3-4966-959F-C540B614F110}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C744A97A-F7A3-4966-959F-C540B614F110}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

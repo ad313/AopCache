@@ -1,4 +1,6 @@
 ﻿using AopCache.Common;
+using AopCache.Core.Abstractions;
+using AopCache.Core.Common;
 using AopCache.Extensions;
 using AspectCore.DependencyInjection;
 using AspectCore.DynamicProxy;
@@ -7,8 +9,6 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using AopCache.Core.Abstractions;
-using AopCache.Core.Common;
 
 namespace AopCache
 {
@@ -24,7 +24,7 @@ namespace AopCache
         public string Group { get; set; } = "Default";
 
         /// <summary>
-        /// 指定缓存键值 可以附加参数 如 UserInfo_{model:Name}_{type}
+        /// 指定缓存键值 可以附加参数 如 UserInfo_{model.Name}_{type}
         /// </summary>
         public string Key { get; set; }
 
@@ -78,6 +78,9 @@ namespace AopCache
         /// <returns></returns>
         public override async Task Invoke(AspectContext context, AspectDelegate next)
         {
+            //if (string.IsNullOrWhiteSpace(Key))
+            //    Key = context.GetDefaultKey();
+
             var currentCacheKey = Key.FillValue(context.GetParamsDictionary());
 
             currentCacheKey = FormatPrefix(currentCacheKey);

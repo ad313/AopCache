@@ -1,8 +1,8 @@
-﻿using System;
+﻿using AopCache.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using AopCache.Common;
 
 namespace AopCache
 {
@@ -10,7 +10,7 @@ namespace AopCache
     /// Aop 缓存订阅标记
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class AopSubscriberTagAttribute : Attribute
+    public class AopSubscriberAttribute : Attribute
     {
         /// <summary>
         /// 订阅的频道值
@@ -76,9 +76,9 @@ namespace AopCache
         /// </summary>
         DeleteByKey = 1,
 
-        /// <summary>
-        /// 通过 group 删除缓存 group
-        /// </summary>
-        DeleteByGroup = 2
+        ///// <summary>
+        ///// 通过 group 删除缓存 group [暂未支持]
+        ///// </summary>
+        //DeleteByGroup = 2
     }
 }

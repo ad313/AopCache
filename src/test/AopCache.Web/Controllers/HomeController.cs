@@ -50,20 +50,20 @@ namespace AopCache.Web.Controllers
             //    }
             //};
 
-            var list = new List<UserInfo>();
-            for (int i = 0; i < 100; i++)
-            {
-                list.Add(new UserInfo()
-                {
-                    Id = 1,
-                    Name = "hahhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
-                    UserInfo2 = new UserInfo2()
-                    {
-                        Id = 2,
-                        Name = "沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发"
-                    }
-                });
-            }
+            //var list = new List<UserInfo>();
+            //for (int i = 0; i < 100; i++)
+            //{
+            //    list.Add(new UserInfo()
+            //    {
+            //        Id = 1,
+            //        Name = "hahhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+            //        UserInfo2 = new UserInfo2()
+            //        {
+            //            Id = 2,
+            //            Name = "沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发沙发"
+            //        }
+            //    });
+            //}
 
             //var list = new List<string>();
             //for (int i = 0; i < 10000; i++)
@@ -71,16 +71,16 @@ namespace AopCache.Web.Controllers
             //    list.Add("hahhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
             //}
 
-            Task.Run(async () =>
-            {
-                var watch = Stopwatch.StartNew();
+            //Task.Run(async () =>
+            //{
+            //    var watch = Stopwatch.StartNew();
 
-                await EventBusProvider.PublishQueueAsync("abc", list);
-                await EventBusProvider.PublishQueueAsync("abc", list);
-                await EventBusProvider.PublishQueueAsync("abc", list);
+            //    await EventBusProvider.PublishQueueAsync("abc", list);
+            //    await EventBusProvider.PublishQueueAsync("abc", list);
+            //    await EventBusProvider.PublishQueueAsync("abc", list);
 
-                Console.WriteLine($"---{watch.ElapsedMilliseconds}");
-            });
+            //    Console.WriteLine($"---{watch.ElapsedMilliseconds}");
+            //});
 
             //EventBusProvider.PublishQueueAsync("abc", new List<string>() { "1", });
 
@@ -131,6 +131,7 @@ namespace AopCache.Web.Controllers
 
 
             var sb = new StringBuilder();
+            sb.AppendLine($"Get（永不过期）：=> {TestService.Get()}");
             sb.AppendLine($"GetByKey（永不过期）：第一次=> {v1}");
             sb.AppendLine($"GetByKey（永不过期）：第二次=> {v1New}");
 

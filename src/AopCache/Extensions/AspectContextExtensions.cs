@@ -9,7 +9,7 @@ namespace AopCache.Extensions
     /// <summary>
     /// Aspect 扩展
     /// </summary>
-    public static class AspectContextExtentions
+    public static class AspectContextExtensions
     {
         /// <summary>
         /// 获取参数字典

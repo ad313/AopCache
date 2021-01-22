@@ -1,10 +1,10 @@
-﻿using AopCache.Extensions;
+﻿using AopCache.Core.Abstractions;
+using AopCache.Extensions;
 using AspectCore.DependencyInjection;
 using AspectCore.DynamicProxy;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AopCache.Core.Abstractions;
 
 namespace AopCache
 {
@@ -43,15 +43,9 @@ namespace AopCache
             //执行方法
             await next(context);
 
-            if (!Enable)
-            {
-                return;
-            }
+            if (!Enable) return;
 
-            if (string.IsNullOrWhiteSpace(Channel))
-            {
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(Channel)) return;
 
             var message = new Dictionary<string, object>();
             switch (MessageSource)
@@ -61,7 +55,7 @@ namespace AopCache
                     break;
                 case MessageSource.OutParams:
                     var result = await context.GetReturnValue();
-                    message = new Dictionary<string, object>() { { "Result", result } };
+                    message = new Dictionary<string, object>() { { "ReturnResult", result } };
                     break;
                 case MessageSource.NoParams:
 
@@ -73,7 +67,7 @@ namespace AopCache
                     throw new ArgumentOutOfRangeException();
             }
 
-            await EventBusProvider.PublishAsync(Channel, new EventMessageModel<Dictionary<string, object>>(message));
+            await EventBusProvider.PublishAsync(Channel, new EventMessageModel<Dictionary<string, object>>(message), true);
         }
     }
 
@@ -88,7 +82,7 @@ namespace AopCache
         /// </summary>
         InParams = 1,
         /// <summary>
-        /// 输出参数
+        /// 输出参数(参数名 ReturnResult)
         /// </summary>
         OutParams = 2,
         /// <summary>

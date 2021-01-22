@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using AopCache.Core.Abstractions;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using AopCache.Core.Abstractions;
 
 namespace AopCache.Implements
 {
@@ -17,8 +17,8 @@ namespace AopCache.Implements
         private readonly IEventBusProvider _eventBusProvider;
         private readonly IAopCacheProvider _cacheProvider;
 
-        private static readonly Dictionary<string, List<(AopCacheAttribute, AopSubscriberTagAttribute)>>
-            ChannelSubscribersDictionary = new Dictionary<string, List<(AopCacheAttribute, AopSubscriberTagAttribute)>>();
+        private static readonly Dictionary<string, List<(AopCacheAttribute, AopSubscriberAttribute)>>
+            ChannelSubscribersDictionary = new Dictionary<string, List<(AopCacheAttribute, AopSubscriberAttribute)>>();
 
         /// <summary>
         /// 初始化 订阅服务
@@ -40,14 +40,14 @@ namespace AopCache.Implements
         {
             Console.WriteLine($"{DateTime.Now} ----------------------------------------");
 
-            foreach (var channel in AopSubscriberTagAttribute.ChannelList)
+            foreach (var channel in AopSubscriberAttribute.ChannelList)
             {
                 Console.WriteLine($"{DateTime.Now} AopCache：生产者频道：{channel}");
 
-                var methodList = AopSubscriberTagAttribute.MethodList.Where(d =>
-                    d.GetCustomAttributes<AopSubscriberTagAttribute>().ToList().Exists(t => t.Channel == channel)).ToList();
+                var methodList = AopSubscriberAttribute.MethodList.Where(d =>
+                    d.GetCustomAttributes<AopSubscriberAttribute>().ToList().Exists(t => t.Channel == channel)).ToList();
 
-                var subscribers = new List<(AopCacheAttribute, AopSubscriberTagAttribute)>();
+                var subscribers = new List<(AopCacheAttribute, AopSubscriberAttribute)>();
 
                 foreach (var method in methodList)
                 {
@@ -57,7 +57,7 @@ namespace AopCache.Implements
 
                     Console.WriteLine($"{DateTime.Now} AopCache：消费者订阅方法：{method.DeclaringType?.FullName}.{method.Name}");
 
-                    var subscriberTag = method.GetCustomAttributes<AopSubscriberTagAttribute>().First(d => d.Channel == channel);
+                    var subscriberTag = method.GetCustomAttributes<AopSubscriberAttribute>().First(d => d.Channel == channel);
 
                     subscribers.Add((cacheAttribute, subscriberTag));
                 }
@@ -72,10 +72,10 @@ namespace AopCache.Implements
             {
                 _eventBusProvider.Subscribe<Dictionary<string, object>>(keyValuePair.Key, msg =>
                 {
-                    foreach (var valueTuple in keyValuePair.Value)
+                    foreach ((AopCacheAttribute cache, AopSubscriberAttribute sub) item in keyValuePair.Value)
                     {
-                        var cacheAttribute = valueTuple.Item1;
-                        var subscriberTag = valueTuple.Item2;
+                        var cacheAttribute = item.cache;
+                        var subscriberTag = item.sub;
 
                         switch (subscriberTag.ActionType)
                         {
@@ -86,13 +86,13 @@ namespace AopCache.Implements
                                 _cacheProvider.Remove(key);
                                 Console.WriteLine($"{DateTime.Now} Key：{msg.Key}：清除缓存：{key}");
                                 break;
-                            case ActionType.DeleteByGroup:
-                                break;
+                            //case ActionType.DeleteByGroup:
+                            //    break;
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
                     }
-                });
+                }, true);
             }
 
             await Task.CompletedTask;

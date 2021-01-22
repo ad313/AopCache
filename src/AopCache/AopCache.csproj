@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyVersion>0.3.2.0</AssemblyVersion>
-    <FileVersion>0.3.2.0</FileVersion>
-    <Version>0.3.2</Version>
+    <AssemblyVersion>0.4.0.0</AssemblyVersion>
+    <FileVersion>0.4.0.0</FileVersion>
+    <Version>0.4.0.0</Version>
     <Authors>ad313</Authors>
     <Description>基于 AspectCore 的简易缓存组件。通过在方法上加 [AopCache]标记实现自动缓存。可以自定义缓存key，缓存时间。默认是 MemoryCache。也可以自己实现 IAopCacheProvider 接口并注入，自定义缓存存储。</Description>
     <PackageProjectUrl>https://github.com/ad313/AopCache</PackageProjectUrl>
