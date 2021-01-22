@@ -71,7 +71,7 @@ public interface ITestService
     public interface ITestService
     {
         //此方法执行成功后，会自动发一个事件，key为 "aaa"，数据可以选择入参或者出参
-        //一个方法只能由一个 AopPublisher
+        //一个方法只能有一个 AopPublisher
         [AopPublisher(Channel = "aaa", MessageSource = MessageSource.InParams)]
         Task<UserInfo> SetUserInfo(int type, string id);
 
