@@ -38,6 +38,8 @@ namespace AopCache.EventTestWeb
             });
 
             services.AddHostedService<EventHost>();
+            //services.AddHostedService<EventHost2>();
+            //services.AddHostedService<EventHost3>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

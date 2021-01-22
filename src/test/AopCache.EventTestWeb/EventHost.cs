@@ -314,52 +314,55 @@ namespace AopCache.EventTestWeb
                     await Task.CompletedTask;
                 });
 
-            _eventBusProvider.SubscribeQueue<TestClassModel>(key, 10, 1, ExceptionHandlerEnum.PushToSelfQueueAndContinue,
-                async data =>
-                {
-                    foreach (var v in data)
-                    {
-                        queue.Enqueue(v.Index);
-                        Console.WriteLine($"--------------------------------------{v.Index}-----------------12");
-                    }
+            //_eventBusProvider.SubscribeQueue<TestClassModel>(key, 10, 1, ExceptionHandlerEnum.PushToSelfQueueAndContinue,
+            //    async data =>
+            //    {
+            //        foreach (var v in data)
+            //        {
+            //            queue.Enqueue(v.Index);
+            //            Console.WriteLine($"--------------------------------------{v.Index}-----------------12");
+            //        }
 
-                    await Task.CompletedTask;
-                }, completed: async () =>
-                {
-                    Console.WriteLine($"{queue.Count} {queue.ToArray().GroupBy(d => d).ToDictionary(d => d.Key, d => d.Count()).OrderByDescending(d => d.Value).FirstOrDefault().Value.ToString()}  12");
-                    //index1 = 0;
-                    await Task.CompletedTask;
-                });
+            //        await Task.CompletedTask;
+            //    }, completed: async () =>
+            //    {
+            //        Console.WriteLine($"{queue.Count} {queue.ToArray().GroupBy(d => d).ToDictionary(d => d.Key, d => d.Count()).OrderByDescending(d => d.Value).FirstOrDefault().Value.ToString()}  12");
+            //        //index1 = 0;
+            //        await Task.CompletedTask;
+            //    });
 
-            _eventBusProvider.SubscribeQueue<TestClassModel>(key, 10, 1, ExceptionHandlerEnum.PushToSelfQueueAndContinue,
-                async data =>
-                {
-                    foreach (var v in data)
-                    {
-                        queue.Enqueue(v.Index);
-                        Console.WriteLine($"--------------------------------------{v.Index}-----------------13");
-                    }
+            //_eventBusProvider.SubscribeQueue<TestClassModel>(key, 10, 1, ExceptionHandlerEnum.PushToSelfQueueAndContinue,
+            //    async data =>
+            //    {
+            //        foreach (var v in data)
+            //        {
+            //            queue.Enqueue(v.Index);
+            //            Console.WriteLine($"--------------------------------------{v.Index}-----------------13");
+            //        }
 
-                    await Task.CompletedTask;
-                }, completed: async () =>
-                {
-                    Console.WriteLine($"{queue.Count} {queue.ToArray().GroupBy(d => d).ToDictionary(d => d.Key, d => d.Count()).OrderByDescending(d => d.Value).FirstOrDefault().Value.ToString()}  13");
-                    //index1 = 0;
-                    await Task.CompletedTask;
-                });
+            //        await Task.CompletedTask;
+            //    }, completed: async () =>
+            //    {
+            //        Console.WriteLine($"{queue.Count} {queue.ToArray().GroupBy(d => d).ToDictionary(d => d.Key, d => d.Count()).OrderByDescending(d => d.Value).FirstOrDefault().Value.ToString()}  13");
+            //        //index1 = 0;
+            //        await Task.CompletedTask;
+            //    });
 
 
             //await Task.Delay(2000);
 
-            await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1000, 100).Select(d => new TestClassModel() { Index = d }).ToList());
-            await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1100, 100).Select(d => new TestClassModel() { Index = d }).ToList());
-            await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1200, 100).Select(d => new TestClassModel() { Index = d }).ToList());
-            await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1300, 100).Select(d => new TestClassModel() { Index = d }).ToList());
+            await _eventBusProvider.PublishQueueAsync(key, new List<TestClassModel>());
+            //await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1000, 1).Select(d => new TestClassModel() { Index = d }).ToList());
 
-            await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1400, 100).Select(d => new TestClassModel() { Index = d }).ToList());
-            await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1500, 100).Select(d => new TestClassModel() { Index = d }).ToList());
-            await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1600, 100).Select(d => new TestClassModel() { Index = d }).ToList());
-            await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1700, 100).Select(d => new TestClassModel() { Index = d }).ToList());
+            //await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1000, 100).Select(d => new TestClassModel() { Index = d }).ToList());
+            //await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1100, 100).Select(d => new TestClassModel() { Index = d }).ToList());
+            //await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1200, 100).Select(d => new TestClassModel() { Index = d }).ToList());
+            //await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1300, 100).Select(d => new TestClassModel() { Index = d }).ToList());
+
+            //await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1400, 100).Select(d => new TestClassModel() { Index = d }).ToList());
+            //await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1500, 100).Select(d => new TestClassModel() { Index = d }).ToList());
+            //await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1600, 100).Select(d => new TestClassModel() { Index = d }).ToList());
+            //await _eventBusProvider.PublishQueueAsync(key, Enumerable.Range(1700, 100).Select(d => new TestClassModel() { Index = d }).ToList());
 
         }
 
@@ -530,7 +533,7 @@ namespace AopCache.EventTestWeb
             //Cus2(connection, channel);
 
             //广播
-            await BroadcastTest();
+            //await BroadcastTest();
 
             //普通 多消费者
             //await sample_multi_cus_test();
@@ -541,7 +544,7 @@ namespace AopCache.EventTestWeb
             //普通 队列订阅 消费完
             //await sample_publish_queue_all();
             //await sample_publish_queue_all2();
-            //await sample_publish_queue_all3();
+            await sample_publish_queue_all3();
 
             //Task.WaitAll(sample_publish_queue_all2(), sample_publish_queue_all3());
 

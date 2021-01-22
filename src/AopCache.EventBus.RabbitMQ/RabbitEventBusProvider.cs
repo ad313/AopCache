@@ -3,6 +3,7 @@ using AopCache.Core.Common;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -333,7 +334,15 @@ namespace AopCache.EventBus.RabbitMQ
                     if (result.MessageCount <= 0)
                         break;
                 }
-                catch
+                catch (OperationInterruptedException ex)
+                {
+                    //队列不存在
+                    if(ex.ShutdownReason?.ReplyCode == 404)
+                    {
+                        break;
+                    }
+                }
+                catch(Exception ex)
                 {
                     channel = _rabbitMqClientProviderRead.GetChannel();
                     continue;
@@ -718,52 +727,55 @@ namespace AopCache.EventBus.RabbitMQ
 
         private void SubscribeBroadcastInternal<T>(string key, Func<EventMessageModel<T>, Task> handler, bool checkEnable = true)
         {
-            if (string.IsNullOrWhiteSpace(key))
-                throw new ArgumentNullException(nameof(key));
-
-            if (handler == null)
-                throw new ArgumentNullException(nameof(handler));
-
-            _logger.LogWarning($"{DateTime.Now} RabbitMQ 广播模式 开始订阅 " +
-                               $"[{key}] " +
-                               $"......");
-
-            var channel = _rabbitMqClientProvider.Channel;
-            channel.ExchangeDeclare(key, "fanout");
-
-            //队列
-            var queueName = channel.QueueDeclare().QueueName;
-            channel.QueueBind(queueName, key, "");
-
-            //限流
-            channel.BasicQos(_config.PrefetchSize, _config.PrefetchCount, false);
-
-            var consumer = new EventingBasicConsumer(channel);
-            consumer.Received += async (ch, ea) =>
+            Task.Factory.StartNew(() =>
             {
-                try
+                if (string.IsNullOrWhiteSpace(key))
+                    throw new ArgumentNullException(nameof(key));
+
+                if (handler == null)
+                    throw new ArgumentNullException(nameof(handler));
+
+                _logger.LogWarning($"{DateTime.Now} RabbitMQ 广播模式 开始订阅 " +
+                                   $"[{key}] " +
+                                   $"......");
+
+                var channel = _rabbitMqClientProvider.Channel;
+                channel.ExchangeDeclare(key, "fanout");
+
+                //队列
+                var queueName = channel.QueueDeclare().QueueName;
+                channel.QueueBind(queueName, key, "");
+
+                //限流
+                channel.BasicQos(_config.PrefetchSize, _config.PrefetchCount, false);
+
+                var consumer = new EventingBasicConsumer(channel);
+                consumer.Received += async (ch, ea) =>
                 {
-                    if (checkEnable && !IsEnable(key))
+                    try
                     {
-                        _logger.LogWarning($"{DateTime.Now} 频道【{key}】 已关闭消费");
-                        return;
+                        if (checkEnable && !IsEnable(key))
+                        {
+                            _logger.LogWarning($"{DateTime.Now} 频道【{key}】 已关闭消费");
+                            return;
+                        }
+
+                        _logger.LogDebug($"{DateTime.Now}：频道【{key}】 收到消息： {Encoding.Default.GetString(ea.Body.ToArray())}");
+
+                        await handler.Invoke(_serializerProvider.Deserialize<EventMessageModel<T>>(ea.Body.ToArray()));
                     }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e, $"{DateTime.Now} RabbitMQ [{key}] 消费异常 {e.Message} ");
+                    }
+                    finally
+                    {
+                        channel.BasicAck(ea.DeliveryTag, false);
+                    }
+                };
 
-                    _logger.LogDebug($"{DateTime.Now}：频道【{key}】 收到消息： {Encoding.Default.GetString(ea.Body.ToArray())}");
-
-                    await handler.Invoke(_serializerProvider.Deserialize<EventMessageModel<T>>(ea.Body.ToArray()));
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, $"{DateTime.Now} RabbitMQ [{key}] 消费异常 {e.Message} ");
-                }
-                finally
-                {
-                    channel.BasicAck(ea.DeliveryTag, false);
-                }
-            };
-
-            channel.BasicConsume(queueName, false, consumer);
+                channel.BasicConsume(queueName, false, consumer);
+            }, TaskCreationOptions.LongRunning);
         }
 
         private async Task PushToQueueAsync<T>(string key, List<T> data, int length = 1000)
