@@ -1,7 +1,94 @@
 # AopCache
 AopCache based on AspectCore
 
-## 一、单独使用 EventBus
+## 一、使用 AopCache
+### 1、引用包
+    //最小化使用 使用 MemoryCache
+    <PackageReference Include="AopCache" Version="0.4.0" />
+    
+    //使用 redis
+    <PackageReference Include="AopCache.Redis" Version="0.4.0" />
+
+### 2、注入
+```
+    //AopCache
+    services.AddAopCache(option =>
+    {
+        //1、使用内存缓存
+        option.UseMemoryCacheProvider();
+   
+        //2、使用redis
+        option.UseCsRedisCacheProvider(Configuration.GetValue<string>("RedisConnectionString"));   
+    });
+```
+
+### 3、接口定义
+
+```
+public interface ITestService
+    {
+        //默认时间单位是秒，长度为0，即永不过期
+        [AopCache(Key = "aaa")]
+        string GetByKey();
+
+        //设置3秒过期 这里的“{userId}”，占位符。用参数 userId 的值去替换
+        [AopCache(Key = "bbb_{userId}", Length = 3)]
+        string GetByKeyAndParamter(int userId);
+
+        //设置十分钟过期 这里的“{req.Id}”，占位符。用参数 req里面的Id 的值去替换
+        [AopCache(Key = "ccc_{req.Id}_{type}", Type = CacheTimeType.Minute, Length = 10)]
+        Task<UserInfo> GetUserInfo(int type, Req req);
+    }
+
+```
+### 4、使用缓存清理触发器
+```
+    //AopCache
+    services.AddAopCache(option =>
+    {
+        //1、使用内存缓存
+        option.UseMemoryCacheProvider();
+   
+        //2、使用redis
+        option.UseCsRedisCacheProvider(Configuration.GetValue<string>("RedisConnectionString"));
+   
+        //3、指定触发器，可以选择 redis 或 Rabbitmq
+        option.AddAopTriggerUseRabbitMqEventBus(config =>
+        {
+            config.ExchangeName = "xxx";
+            config.HostName = "xxx";
+            config.UserName = "xxx";
+            config.Password = "xxx";
+            config.Port = 5672;
+            config.VirtualHost = "/";;
+            config.PrefetchSize = 0;
+            config.PrefetchCount = 1;
+        });
+    });
+
+
+    public interface ITestService
+    {
+        //此方法执行成功后，会自动发一个事件，key为 "aaa"，数据可以选择入参或者出参
+        //一个方法只能由一个 AopPublisher
+        [AopPublisher(Channel = "aaa", MessageSource = MessageSource.InParams)]
+        Task<UserInfo> SetUserInfo(int type, string id);
+
+
+        //订阅“aaa”，收到消息后，可定义map，转换需要的数据。替换参数后得到一个key
+        //此时通过key清理缓存，达到自动清理缓存的目的
+        //一个方法可以有多个 AopSubscriber
+        [AopSubscriber(Channel = "aaa", Map = "type={type},req.Id={id}")]
+        [AopCache(Key = "ccc_{req.Id}_{type}", Type = CacheTimeType.Minute, Length = 10)]
+        Task<UserInfo> GetUserInfo(int type, Req req);
+    }
+```
+
+
+
+
+
+## 二、单独使用 EventBus
 ### 1、引用包
     <PackageReference Include="AopCache.EventBus.RabbitMQ" Version="1.0.1" />
     <PackageReference Include="AopCache.EventBus.CSRedis" Version="1.0.3" />
