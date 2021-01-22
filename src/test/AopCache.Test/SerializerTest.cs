@@ -44,11 +44,11 @@ namespace AopCache.Test
                 //Json = JsonDocument.Parse(json).RootElement
             };
 
-            var bytes = SerializerHandler.ToBytes(model, model.GetType());
-            Assert.IsTrue(bytes != null && bytes.Length > 0);
+            //var bytes = SerializerHandler.ToBytes(model, model.GetType());
+            //Assert.IsTrue(bytes != null && bytes.Length > 0);
 
-            var newModel = (SerializerModel)SerializerHandler.BytesToObject(bytes, model.GetType());
-            Assert.IsTrue(newModel?.UserInfo != null && newModel.UserInfo.Name == "ad314");
+            //var newModel = (SerializerModel)SerializerHandler.BytesToObject(bytes, model.GetType());
+            //Assert.IsTrue(newModel?.UserInfo != null && newModel.UserInfo.Name == "ad314");
         }
 
         [Test]
@@ -84,9 +84,9 @@ namespace AopCache.Test
             list.Add(model);
             list.Add(model);
 
-            var bytes = SerializerHandler.ToBytes(list, list.GetType());
+            //var bytes = SerializerHandler.ToBytes(list, list.GetType());
 
-            var bytes2 = serializerProvider.SerializeBytes(list, list.GetType());
+            //var bytes2 = serializerProvider.SerializeBytes(list, list.GetType());
 
             
         }

@@ -75,10 +75,10 @@ namespace AopCache.BenchmarkTest
             var result = JsonConvert.DeserializeObject<SampleLittleModel>(JsonConvert.SerializeObject(Model1));
         }
         
-        [Benchmark]
-        public void TestMessagePack()
-        {
-            var result = SerializerHandler.BytesClone(Model1);
-        }
+        //[Benchmark]
+        //public void TestMessagePack()
+        //{
+        //    var result = SerializerHandler.BytesClone(Model1);
+        //}
     }
 }
