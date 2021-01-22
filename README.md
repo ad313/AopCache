@@ -8,6 +8,9 @@ AopCache based on AspectCore
     
     //使用 redis
     <PackageReference Include="AopCache.Redis" Version="0.4.0" />
+    
+    //rabbitmq 触发器
+    <PackageReference Include="AopCache.RabbitMQ" Version="0.4.0" />
 
 ### 2、注入
 ```
