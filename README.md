@@ -42,6 +42,7 @@ public interface ITestService
 
 ```
 ### 4、使用缓存清理触发器
+通过标记 AopPublisher 和 AopSubscriber，使用 EventBus 自动发布和订阅，自动清理缓存。
 ```
     //AopCache
     services.AddAopCache(option =>
@@ -191,5 +192,5 @@ await _eventBusProvider.PublishQueueAsync("xxxxxkey", new List<string>(){"hello 
 
 
 
-## 二、AopCache
-AopCache 使用教程 https://www.cnblogs.com/ad313/p/10642554.html
+## 三、AopCache
+【旧】AopCache 使用教程 https://www.cnblogs.com/ad313/p/10642554.html
