@@ -49,7 +49,12 @@ namespace AopCache.EventBus.RabbitMQ
         /// 异步锁
         /// </summary>
         private readonly ConcurrentDictionary<string, AsyncLock> _lockObjectDictionary = new ConcurrentDictionary<string, AsyncLock>();
-        
+
+        /// <summary>
+        /// Rpc client 标识
+        /// </summary>
+        private readonly ConcurrentDictionary<string, TaskCompletionSource<RpcResult>> _rpcCallbackMapper = new ConcurrentDictionary<string, TaskCompletionSource<RpcResult>>();
+
         public RabbitEventBusProvider(ISerializerProvider serializerProvider,
             IServiceProvider serviceProvider,
             RabbitMqClientProvider rabbitMqClientProvider,
@@ -134,6 +139,119 @@ namespace AopCache.EventBus.RabbitMQ
         }
 
         /// <summary>
+        /// 发布事件 延迟队列
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="seconds">延迟秒数</param>
+        /// <param name="message">数据</param>
+        /// <returns></returns>
+        public async Task DelayPublishAsync<T>(string key, long seconds, EventMessageModel<T> message)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException(nameof(key));
+
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            if (seconds <= 0)
+                throw new ArgumentOutOfRangeException(nameof(seconds));
+
+            var channel = _rabbitMqClientProvider.GetChannel();
+            channel.ConfirmSelect();
+
+            var dic = new Dictionary<string, object>
+            {
+                {"x-expires", (seconds + 60) * 1000},
+                {"x-message-ttl", seconds * 1000}, //队列上消息过期时间，应小于队列过期时间  
+                {"x-dead-letter-exchange", _config.DeadLetterExchange}, //过期消息转向路由  
+                {"x-dead-letter-routing-key", _config.GetDeadLetterRouteKey(key)} //过期消息转向路由相匹配routingkey  
+            };
+
+            var queueKey = _config.GetDeadLetterHostQueueKey(key, seconds);
+
+            channel.QueueDeclare(queue: queueKey,
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                arguments: dic);
+
+            message.Key = key;
+            var body = _serializerProvider.SerializeBytes(message);
+
+            //持久化
+            var properties = channel.BasicProperties();
+
+            //向该消息队列发送消息message
+            channel.BasicPublish(exchange: "",
+                routingKey: queueKey,
+                basicProperties: properties,
+                body: body);
+
+            channel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(5));
+
+            _logger.LogDebug($"RabbitMQ topic message [{queueKey}] has been published. message:{ _serializerProvider.Serialize(message)}");
+
+            _rabbitMqClientProvider.ReturnChannel(channel);
+
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// 发布事件 延迟队列
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="absoluteTime">指定执行时间</param>
+        /// <param name="message">数据</param>
+        /// <returns></returns>
+        public async Task DelayPublishAsync<T>(string key, DateTime absoluteTime, EventMessageModel<T> message)
+        {
+            var seconds = (long)(absoluteTime - DateTime.Now).TotalSeconds;
+            if (seconds <= 0)
+                throw new ArgumentException("absoluteTime must be greater than current time");
+
+            await DelayPublishAsync(key, seconds + 1, message);
+        }
+
+        /// <summary>
+        /// 发布事件 RpcClient
+        /// </summary>
+        /// <typeparam name="T">发送数据</typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="message">数据</param>
+        /// <param name="timeout">超时时间 秒</param>
+        /// <returns></returns>
+        public async Task<RpcResult> RpcClientAsync<T>(string key, T message, int timeout = 30)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException(nameof(key));
+
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+            
+            var channel = _rabbitMqClientProvider.GetChannel();
+            channel.ConfirmSelect();
+
+            var replyQueueName = channel.QueueDeclare(_config.GetRpcClientQueueKey(key)).QueueName;
+            var consumer = new EventingBasicConsumer(channel);
+            consumer.Received += (model, ea) =>
+            {
+                _rabbitMqClientProvider.ReturnChannel(channel);
+
+                if (!_rpcCallbackMapper.TryRemove(ea.BasicProperties.CorrelationId, out TaskCompletionSource<RpcResult> tcs))
+                    return;
+                
+                tcs.TrySetResult(_serializerProvider.Deserialize<RpcResult>(ea.Body.ToArray()));
+            };
+            
+            var result = await RpcClientCallAsync(key, channel, consumer, replyQueueName, message, timeout);
+            _logger.LogDebug($"RabbitMQ rpc client [{key}] receive { _serializerProvider.Serialize(result)}");
+
+            return result;
+        }
+        
+        /// <summary>
         /// 订阅事件
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -146,6 +264,141 @@ namespace AopCache.EventBus.RabbitMQ
                 SubscribeBroadcastInternal(key, handler, false);
             else
                 SubscribeInternal(key, handler, false);
+        }
+        
+        /// <summary>
+        /// 订阅事件 延迟队列
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="handler">订阅处理</param>
+        public void DelaySubscribe<T>(string key, Action<EventMessageModel<T>> handler)
+        {
+            if (handler == null)
+                throw new ArgumentNullException(nameof(handler));
+
+            (IModel channel, string queue, string routeKey) resource = GetDelayResource(key);
+
+            var consumer = new EventingBasicConsumer(resource.channel);
+            consumer.Received += (ch, ea) =>
+            {
+                try
+                {
+                    if (!IsEnable(key))
+                    {
+                        _logger.LogWarning($"{DateTime.Now} 频道【{resource.routeKey}】 已关闭消费");
+                        return;
+                    }
+
+                    _logger.LogDebug($"{DateTime.Now}：频道【{resource.routeKey}】 收到消息： {Encoding.Default.GetString(ea.Body.ToArray())}");
+
+                    handler.Invoke(_serializerProvider.Deserialize<EventMessageModel<T>>(ea.Body.ToArray()));
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, $"{DateTime.Now} RabbitMQ [{resource.routeKey}] 消费异常 {e.Message} ");
+                }
+                finally
+                {
+                    resource.channel.BasicAck(ea.DeliveryTag, false);
+                }
+            };
+
+            resource.channel.BasicConsume(queue: resource.queue, autoAck: false, consumer: consumer);
+        }
+
+        /// <summary>
+        /// 订阅事件 延迟队列
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="handler">订阅处理</param>
+        public void DelaySubscribe<T>(string key, Func<EventMessageModel<T>, Task> handler)
+        {
+            if (handler == null)
+                throw new ArgumentNullException(nameof(handler));
+
+            (IModel channel, string queue, string routeKey) resource = GetDelayResource(key);
+
+            var consumer = new EventingBasicConsumer(resource.channel);
+            consumer.Received += async (ch, ea) =>
+            {
+                try
+                {
+                    if (!IsEnable(key))
+                    {
+                        _logger.LogWarning($"{DateTime.Now} 频道【{resource.routeKey}】 已关闭消费");
+                        return;
+                    }
+
+                    _logger.LogDebug($"{DateTime.Now}：频道【{resource.routeKey}】 收到消息： {Encoding.Default.GetString(ea.Body.ToArray())}");
+
+                    await handler.Invoke(_serializerProvider.Deserialize<EventMessageModel<T>>(ea.Body.ToArray()));
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, $"{DateTime.Now} RabbitMQ [{resource.routeKey}] 消费异常 {e.Message} ");
+                }
+                finally
+                {
+                    resource.channel.BasicAck(ea.DeliveryTag, false);
+                }
+            };
+
+            resource.channel.BasicConsume(queue: resource.queue, autoAck: false, consumer: consumer);
+        }
+
+        /// <summary>
+        /// 订阅事件 RpcServer
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="handler">订阅处理</param>
+        public void RpcServer<T>(string key, Func<T, Task<RpcResult>> handler)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException(nameof(key));
+
+            if (handler == null)
+                throw new ArgumentNullException(nameof(handler));
+
+            _logger.LogWarning($"{DateTime.Now} RabbitMQ RpcServer 启动 " +
+                               $"[{key}] " +
+                               $"......");
+
+            var channel = _rabbitMqClientProvider.Channel;
+
+            channel.QueueDeclare(queue: _config.GetRpcServerQueueKey(key), durable: false, exclusive: false, autoDelete: true, arguments: null);
+
+            //channel.BasicQos(0, 1, false);
+
+            var consumer = new EventingBasicConsumer(channel);
+            channel.BasicConsume(queue: _config.GetRpcServerQueueKey(key), autoAck: false, consumer: consumer);
+            consumer.Received += async (model, ea) =>
+            {
+                var props = ea.BasicProperties;
+                var replyProps = channel.CreateBasicProperties();
+                replyProps.CorrelationId = props.CorrelationId;
+                RpcResult response = null;
+
+                try
+                {
+                    _logger.LogDebug($"{DateTime.Now}：RpcServer [{key}] 收到消息： {Encoding.Default.GetString(ea.Body.ToArray())}");
+                    
+                    response = await handler.Invoke(_serializerProvider.Deserialize<T>(ea.Body.ToArray()));
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, $"{DateTime.Now} RabbitMQ [{key}] 消费异常 {e.Message} ");
+                    
+                    response = new RpcResult($"RpcServer [{key}]-{replyProps.CorrelationId} 消费报错", e);
+                }
+                finally
+                {
+                    channel.BasicPublish(exchange: "", routingKey: props.ReplyTo, basicProperties: replyProps, body: _serializerProvider.SerializeBytes(response));
+                    channel.BasicAck(ea.DeliveryTag, false);
+                }
+            };
         }
 
         /// <summary>
@@ -450,70 +703,70 @@ namespace AopCache.EventBus.RabbitMQ
             _channelEnableDictionary.AddOrUpdate(key, d => enable, (k, value) => enable);
         }
 
-        #region Test
+        //#region Test
 
-        /// <summary>
-        /// 订阅事件 用于单元测试
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="handler">订阅处理</param>
-        public void SubscribeTest<T>(string key, Action<EventMessageModel<T>> handler)
-        {
-            throw new NotImplementedException();
-        }
+        ///// <summary>
+        ///// 订阅事件 用于单元测试
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="key">Key</param>
+        ///// <param name="handler">订阅处理</param>
+        //public void SubscribeTest<T>(string key, Action<EventMessageModel<T>> handler)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        /// <summary>
-        /// 订阅事件 用于单元测试
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="handler">订阅处理</param>
-        public async Task SubscribeTest<T>(string key, Func<EventMessageModel<T>, Task> handler)
-        {
-            throw new NotImplementedException();
-        }
+        ///// <summary>
+        ///// 订阅事件 用于单元测试
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="key">Key</param>
+        ///// <param name="handler">订阅处理</param>
+        //public async Task SubscribeTest<T>(string key, Func<EventMessageModel<T>, Task> handler)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        /// <summary>
-        /// 订阅事件 从队列读取数据 用于单元测试
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="handler">订阅处理</param>
-        public void SubscribeQueueTest<T>(string key, Action<Func<int, List<T>>> handler)
-        {
-            throw new NotImplementedException();
-        }
+        ///// <summary>
+        ///// 订阅事件 从队列读取数据 用于单元测试
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="key">Key</param>
+        ///// <param name="handler">订阅处理</param>
+        //public void SubscribeQueueTest<T>(string key, Action<Func<int, List<T>>> handler)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        /// <summary>
-        /// 订阅事件 从队列读取数据 用于单元测试
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="handler">订阅处理</param>
-        public async Task SubscribeQueueTest<T>(string key, Func<Func<int, Task<List<T>>>, Task> handler)
-        {
-            throw new NotImplementedException();
-        }
+        ///// <summary>
+        ///// 订阅事件 从队列读取数据 用于单元测试
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="key">Key</param>
+        ///// <param name="handler">订阅处理</param>
+        //public async Task SubscribeQueueTest<T>(string key, Func<Func<int, Task<List<T>>>, Task> handler)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        /// <summary>
-        /// 订阅事件 从队列读取数据 分批次消费 用于单元测试
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="length">每次处理条数</param>
-        /// <param name="delay">每次处理间隔 毫秒</param>
-        /// <param name="exceptionHandler">异常处理方式</param>
-        /// <param name="handler">订阅处理</param>
-        /// <param name="error">发生异常时回调</param>
-        /// <param name="completed">本次消费完成回调 最后执行</param>
-        public async Task SubscribeQueueTest<T>(string key, int length, int delay, ExceptionHandlerEnum exceptionHandler, Func<List<T>, Task> handler,
-            Func<Exception, List<T>, Task> error = null, Func<Task> completed = null)
-        {
-            throw new NotImplementedException();
-        }
+        ///// <summary>
+        ///// 订阅事件 从队列读取数据 分批次消费 用于单元测试
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="key">Key</param>
+        ///// <param name="length">每次处理条数</param>
+        ///// <param name="delay">每次处理间隔 毫秒</param>
+        ///// <param name="exceptionHandler">异常处理方式</param>
+        ///// <param name="handler">订阅处理</param>
+        ///// <param name="error">发生异常时回调</param>
+        ///// <param name="completed">本次消费完成回调 最后执行</param>
+        //public async Task SubscribeQueueTest<T>(string key, int length, int delay, ExceptionHandlerEnum exceptionHandler, Func<List<T>, Task> handler,
+        //    Func<Exception, List<T>, Task> error = null, Func<Task> completed = null)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        #endregion
+        //#endregion
 
         public void Dispose()
         {
@@ -525,10 +778,12 @@ namespace AopCache.EventBus.RabbitMQ
 
         private async Task PublishBroadcastAsync<T>(string key, EventMessageModel<T> message)
         {
+            key = FormatBroadcastKey(key);
+
             var channel = _rabbitMqClientProvider.GetChannel();
             channel.ConfirmSelect();
             channel.ExchangeDeclare(key, "fanout");
-
+            
             message.Key = key;
             var body = _serializerProvider.SerializeBytes(message);
 
@@ -616,6 +871,8 @@ namespace AopCache.EventBus.RabbitMQ
 
             if (handler == null)
                 throw new ArgumentNullException(nameof(handler));
+
+            key = FormatBroadcastKey(key);
 
             _logger.LogWarning($"{DateTime.Now} RabbitMQ 广播模式 开始订阅 " +
                                $"[{key}] " +
@@ -735,6 +992,8 @@ namespace AopCache.EventBus.RabbitMQ
                 if (handler == null)
                     throw new ArgumentNullException(nameof(handler));
 
+                key = FormatBroadcastKey(key);
+
                 _logger.LogWarning($"{DateTime.Now} RabbitMQ 广播模式 开始订阅 " +
                                    $"[{key}] " +
                                    $"......");
@@ -776,6 +1035,32 @@ namespace AopCache.EventBus.RabbitMQ
 
                 channel.BasicConsume(queueName, false, consumer);
             }, TaskCreationOptions.LongRunning);
+        }
+
+        private (IModel, string, string) GetDelayResource(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException(nameof(key));
+
+            _logger.LogWarning($"{DateTime.Now} RabbitMQ 开始订阅 死信队列 " +
+                               $"[{_config.DeadLetterExchange}] " +
+                               $"[{_config.GetDeadLetterWorkQueueKey(key)}] " +
+                               $"[PrefetchSize：{_config.PrefetchSize}]" +
+                               $"[PrefetchCount：{_config.PrefetchCount}]" +
+                               $"......");
+
+            var channel = _rabbitMqClientProvider.Channel;
+
+            channel.ExchangeDeclare(exchange: _config.DeadLetterExchange, type: "direct");
+            var queue = _config.GetDeadLetterWorkQueueKey(key);
+            var routeKey = _config.GetDeadLetterRouteKey(key);
+            channel.QueueDeclare(queue, true, false, false, null);
+            channel.QueueBind(queue: queue, exchange: _config.DeadLetterExchange, routingKey: routeKey);
+
+            //限流
+            channel.BasicQos(_config.PrefetchSize, _config.PrefetchCount, false);
+
+            return (channel, queue, routeKey);
         }
 
         private async Task PushToQueueAsync<T>(string key, List<T> data, int length = 1000)
@@ -827,6 +1112,44 @@ namespace AopCache.EventBus.RabbitMQ
             }
 
             _rabbitMqClientProvider.ReturnChannel(channel);
+        }
+
+        private Task<RpcResult> RpcClientCallAsync<T>(string key, IModel channel, EventingBasicConsumer consumer, string queueName, T message, int timeout)
+        {
+            timeout = timeout > 0 ? timeout : 120;
+            var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(timeout));
+
+            var correlationId = Guid.NewGuid().ToString();
+
+            var tcs = new TaskCompletionSource<RpcResult>();
+            _rpcCallbackMapper.TryAdd(correlationId, tcs);
+
+            var props = channel.CreateBasicProperties();
+            props.CorrelationId = correlationId;
+            props.ReplyTo = queueName;
+
+            channel.BasicPublish(
+                exchange: "",
+                routingKey: _config.GetRpcServerQueueKey(key),
+                basicProperties: props,
+                body: _serializerProvider.SerializeBytes(message));
+
+            channel.BasicConsume(
+                consumer: consumer,
+                queue: queueName,
+                autoAck: true);
+
+            channel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(5));
+
+            _logger.LogDebug($"RabbitMQ rpc client [{key}] has been send. message:{ _serializerProvider.Serialize(message)}");
+
+            tokenSource.Token.Register(() =>
+            {
+                if (_rpcCallbackMapper.TryRemove(correlationId, out var tmp))
+                    tmp.SetResult(new RpcResult("由于超时操作被取消", new TimeoutException($"超时时间 {timeout} s")));
+            });
+
+            return tcs.Task;
         }
 
         private string GetChannelQueueKey(string key)
@@ -932,6 +1255,15 @@ namespace AopCache.EventBus.RabbitMQ
                 return obj;
 
             return new AsyncLock();
+        }
+
+
+        private string FormatBroadcastKey(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException(nameof(key));
+
+            return $"aop_cache_broadcast_{key}";
         }
 
         #endregion

@@ -34,6 +34,36 @@ namespace AopCache.Core.Abstractions
         Task PublishQueueAsync<T>(string key, List<T> message);
 
         /// <summary>
+        /// 发布事件 延迟队列
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="seconds">延迟秒数</param>
+        /// <param name="message">数据</param>
+        /// <returns></returns>
+        Task DelayPublishAsync<T>(string key, long seconds, EventMessageModel<T> message);
+
+        /// <summary>
+        /// 发布事件 延迟队列
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="absoluteTime">指定执行时间</param>
+        /// <param name="message">数据</param>
+        /// <returns></returns>
+        Task DelayPublishAsync<T>(string key, DateTime absoluteTime, EventMessageModel<T> message);
+
+        /// <summary>
+        /// 发布事件 RpcClient
+        /// </summary>
+        /// <typeparam name="T">发送数据</typeparam>
+        /// <param name="key">Key 唯一值</param>
+        /// <param name="message">数据</param>
+        /// <param name="timeout">超时时间 秒</param>
+        /// <returns></returns>
+        Task<RpcResult> RpcClientAsync<T>(string key, T message, int timeout = 30);
+
+        /// <summary>
         /// 订阅事件
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -41,6 +71,30 @@ namespace AopCache.Core.Abstractions
         /// <param name="handler">订阅处理</param>
         /// <param name="broadcast">是否广播模式（注：对内存队列和redis无效）</param>
         void Subscribe<T>(string key, Action<EventMessageModel<T>> handler, bool broadcast = false);
+
+        /// <summary>
+        /// 订阅事件 延迟队列
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="handler">订阅处理</param>
+        void DelaySubscribe<T>(string key, Action<EventMessageModel<T>> handler);
+
+        /// <summary>
+        /// 订阅事件 延迟队列
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="handler">订阅处理</param>
+        void DelaySubscribe<T>(string key, Func<EventMessageModel<T>, Task> handler);
+
+        /// <summary>
+        /// RpcServer
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key 唯一</param>
+        /// <param name="handler">订阅处理</param>
+        void RpcServer<T>(string key, Func<T, Task<RpcResult>> handler);
 
         /// <summary>
         /// 订阅事件
@@ -139,54 +193,54 @@ namespace AopCache.Core.Abstractions
         /// <param name="key">为空时表示总开关</param>
         void SetEnable(bool enable, string key = null);
 
-        #region Test
+        //#region Test
 
-        /// <summary>
-        /// 订阅事件 用于单元测试
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="handler">订阅处理</param>
-        void SubscribeTest<T>(string key, Action<EventMessageModel<T>> handler);
+        ///// <summary>
+        ///// 订阅事件 用于单元测试
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="key">Key</param>
+        ///// <param name="handler">订阅处理</param>
+        //void SubscribeTest<T>(string key, Action<EventMessageModel<T>> handler);
 
-        /// <summary>
-        /// 订阅事件 用于单元测试
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="handler">订阅处理</param>
-        Task SubscribeTest<T>(string key, Func<EventMessageModel<T>, Task> handler);
+        ///// <summary>
+        ///// 订阅事件 用于单元测试
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="key">Key</param>
+        ///// <param name="handler">订阅处理</param>
+        //Task SubscribeTest<T>(string key, Func<EventMessageModel<T>, Task> handler);
 
-        /// <summary>
-        /// 订阅事件 从队列读取数据 用于单元测试
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="handler">订阅处理</param>
-        void SubscribeQueueTest<T>(string key, Action<Func<int, List<T>>> handler);
+        ///// <summary>
+        ///// 订阅事件 从队列读取数据 用于单元测试
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="key">Key</param>
+        ///// <param name="handler">订阅处理</param>
+        //void SubscribeQueueTest<T>(string key, Action<Func<int, List<T>>> handler);
 
-        /// <summary>
-        /// 订阅事件 从队列读取数据 用于单元测试
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="handler">订阅处理</param>
-        Task SubscribeQueueTest<T>(string key, Func<Func<int, Task<List<T>>>, Task> handler);
+        ///// <summary>
+        ///// 订阅事件 从队列读取数据 用于单元测试
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="key">Key</param>
+        ///// <param name="handler">订阅处理</param>
+        //Task SubscribeQueueTest<T>(string key, Func<Func<int, Task<List<T>>>, Task> handler);
 
-        /// <summary>
-        /// 订阅事件 从队列读取数据 分批次消费 用于单元测试
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="length">每次处理条数</param>
-        /// <param name="delay">每次处理间隔 毫秒</param>
-        /// <param name="exceptionHandler">异常处理方式</param>
-        /// <param name="handler">订阅处理</param>
-        /// <param name="error">发生异常时回调</param>
-        /// <param name="completed">本次消费完成回调 最后执行</param>
-        Task SubscribeQueueTest<T>(string key, int length, int delay, ExceptionHandlerEnum exceptionHandler, Func<List<T>, Task> handler, Func<Exception, List<T>, Task> error = null, Func<Task> completed = null);
+        ///// <summary>
+        ///// 订阅事件 从队列读取数据 分批次消费 用于单元测试
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="key">Key</param>
+        ///// <param name="length">每次处理条数</param>
+        ///// <param name="delay">每次处理间隔 毫秒</param>
+        ///// <param name="exceptionHandler">异常处理方式</param>
+        ///// <param name="handler">订阅处理</param>
+        ///// <param name="error">发生异常时回调</param>
+        ///// <param name="completed">本次消费完成回调 最后执行</param>
+        //Task SubscribeQueueTest<T>(string key, int length, int delay, ExceptionHandlerEnum exceptionHandler, Func<List<T>, Task> handler, Func<Exception, List<T>, Task> error = null, Func<Task> completed = null);
 
-        #endregion
+        //#endregion
     }
 
     /// <summary>
@@ -224,6 +278,41 @@ namespace AopCache.Core.Abstractions
         {
             Data = data;
             TraceId = trackId ?? Guid.NewGuid().ToString();
+        }
+    }
+    
+    public class RpcResult
+    {
+        /// <summary>
+        /// 是否成功
+        /// </summary>
+        public bool Success { get; set; }
+
+        /// <summary>
+        /// 数据
+        /// </summary>
+        public string Data { get; set; }
+
+        /// <summary>
+        /// 错误消息
+        /// </summary>
+        public string ErrorMessage { get; set; }
+        
+        public RpcResult() { }
+
+        public RpcResult(string data)
+        {
+            Data = data;
+            Success = true;
+        }
+
+        public RpcResult(string data, Exception ex)
+        {
+            if (ex != null)
+                ErrorMessage = ex.Message + (ex.InnerException == null ? "" : "|" + ex.InnerException.Message);
+
+            Data = data;
+            Success = false;
         }
     }
 

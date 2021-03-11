@@ -59,6 +59,36 @@ namespace AopCache.EventBus.RabbitMQ
         /// </summary>
         public string SampleQueuePrefixKey { get; private set; } = "aop.cache.queue.sample.";
 
+        /// <summary>
+        /// 死信队列 交换机
+        /// </summary>
+        public string DeadLetterExchange { get; private set; } = "aop_cache_dead_letter_exchange";
+
+        /// <summary>
+        /// 死信队列 路由key前缀
+        /// </summary>
+        public string DeadLetterPrefixKey { get; private set; } = "aop.cache.dead.letter.route.key_";
+
+        /// <summary>
+        /// 死信队列 宿主队列key前缀
+        /// </summary>
+        public string DeadLetterHostQueuePrefixKey { get; private set; } = "aop.cache.dead.letter.queue.host_";
+
+        /// <summary>
+        /// 死信队列 消费队列key前缀
+        /// </summary>
+        public string DeadLetterWorkQueuePrefixKey { get; private set; } = "aop.cache.dead.letter.queue.work_";
+
+        /// <summary>
+        /// Rpc服务端队列前缀
+        /// </summary>
+        public string RpcServerQueuePrefixKey { get; private set; } = "aop.cache.rpc.server.queue_";
+
+        /// <summary>
+        /// Rpc客户端端队列前缀
+        /// </summary>
+        public string RpcClientQueuePrefixKey { get; private set; } = "aop.cache.rpc.client.queue_";
+
         public void Check()
         {
             if (string.IsNullOrWhiteSpace(ExchangeName))
@@ -75,6 +105,31 @@ namespace AopCache.EventBus.RabbitMQ
 
             if (Port <= 0)
                 throw new ArgumentException(nameof(Port));
+        }
+
+        public string GetDeadLetterRouteKey(string key)
+        {
+            return DeadLetterPrefixKey + key;
+        }
+
+        public string GetDeadLetterHostQueueKey(string key, long seconds)
+        {
+            return DeadLetterHostQueuePrefixKey + $"{seconds}_" + key;
+        }
+
+        public string GetDeadLetterWorkQueueKey(string key)
+        {
+            return DeadLetterWorkQueuePrefixKey + key;
+        }
+
+        public string GetRpcServerQueueKey(string key)
+        {
+            return RpcServerQueuePrefixKey + key;
+        }
+
+        public string GetRpcClientQueueKey(string key)
+        {
+            return RpcClientQueuePrefixKey + key;
         }
     }
 }

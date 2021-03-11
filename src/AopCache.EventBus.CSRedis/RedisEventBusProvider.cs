@@ -86,6 +86,45 @@ namespace AopCache.EventBus.CSRedis
         }
 
         /// <summary>
+        /// 发布事件 延迟队列
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="seconds">延迟秒数</param>
+        /// <param name="message">数据</param>
+        /// <returns></returns>
+        public async Task DelayPublishAsync<T>(string key, long seconds, EventMessageModel<T> message)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 发布事件 延迟队列
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="absoluteTime">指定执行时间</param>
+        /// <param name="message">数据</param>
+        /// <returns></returns>
+        public async Task DelayPublishAsync<T>(string key, DateTime absoluteTime, EventMessageModel<T> message)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 发布事件 RpcClient
+        /// </summary>
+        /// <typeparam name="T">发送数据</typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="message">数据</param>
+        /// <param name="timeout">超时时间 秒</param>
+        /// <returns></returns>
+        public async Task<RpcResult> RpcClientAsync<T>(string key, T message, int timeout = 30)
+        {
+            throw new NotImplementedException();
+        }
+        
+        /// <summary>
         /// 订阅事件
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -95,6 +134,39 @@ namespace AopCache.EventBus.CSRedis
         public void Subscribe<T>(string key, Action<EventMessageModel<T>> handler, bool broadcast = false)
         {
             SubscribeInternal(key, handler, false, false);
+        }
+
+        /// <summary>
+        /// 订阅事件 延迟队列
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="handler">订阅处理</param>
+        public void DelaySubscribe<T>(string key, Action<EventMessageModel<T>> handler)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 订阅事件 延迟队列
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="handler">订阅处理</param>
+        public void DelaySubscribe<T>(string key, Func<EventMessageModel<T>, Task> handler)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 订阅事件 RpcServer
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="handler">订阅处理</param>
+        public void RpcServer<T>(string key, Func<T, Task<RpcResult>> handler)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -560,70 +632,70 @@ namespace AopCache.EventBus.CSRedis
 
         #endregion
 
-        #region Test
+        //#region Test
 
-        /// <summary>
-        /// 订阅事件 用于单元测试
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="handler">订阅处理</param>
-        public void SubscribeTest<T>(string key, Action<EventMessageModel<T>> handler)
-        {
-            SubscribeInternal(key, handler);
-        }
+        ///// <summary>
+        ///// 订阅事件 用于单元测试
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="key">Key</param>
+        ///// <param name="handler">订阅处理</param>
+        //public void SubscribeTest<T>(string key, Action<EventMessageModel<T>> handler)
+        //{
+        //    SubscribeInternal(key, handler);
+        //}
 
-        /// <summary>
-        /// 订阅事件 用于单元测试
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="handler">订阅处理</param>
-        public async Task SubscribeTest<T>(string key, Func<EventMessageModel<T>, Task> handler)
-        {
-            SubscribeInternal(key, handler);
-            await Task.CompletedTask;
-        }
+        ///// <summary>
+        ///// 订阅事件 用于单元测试
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="key">Key</param>
+        ///// <param name="handler">订阅处理</param>
+        //public async Task SubscribeTest<T>(string key, Func<EventMessageModel<T>, Task> handler)
+        //{
+        //    SubscribeInternal(key, handler);
+        //    await Task.CompletedTask;
+        //}
 
-        /// <summary>
-        /// 订阅事件 从队列读取数据 用于单元测试
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="handler">订阅处理</param>
-        public void SubscribeQueueTest<T>(string key, Action<Func<int, List<T>>> handler)
-        {
+        ///// <summary>
+        ///// 订阅事件 从队列读取数据 用于单元测试
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="key">Key</param>
+        ///// <param name="handler">订阅处理</param>
+        //public void SubscribeQueueTest<T>(string key, Action<Func<int, List<T>>> handler)
+        //{
 
-        }
+        //}
 
-        /// <summary>
-        /// 订阅事件 从队列读取数据 用于单元测试
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="handler">订阅处理</param>
-        public async Task SubscribeQueueTest<T>(string key, Func<Func<int, Task<List<T>>>, Task> handler)
-        {
-            await Task.CompletedTask;
-        }
+        ///// <summary>
+        ///// 订阅事件 从队列读取数据 用于单元测试
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="key">Key</param>
+        ///// <param name="handler">订阅处理</param>
+        //public async Task SubscribeQueueTest<T>(string key, Func<Func<int, Task<List<T>>>, Task> handler)
+        //{
+        //    await Task.CompletedTask;
+        //}
 
-        /// <summary>
-        /// 订阅事件 从队列读取数据 分批次消费 用于单元测试
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="length">每次处理条数</param>
-        /// <param name="delay">每次处理间隔 毫秒</param>
-        /// <param name="exceptionHandler">异常处理方式</param>
-        /// <param name="handler">订阅处理</param>
-        /// <param name="error">发生异常时回调</param>
-        /// <param name="completed">本次消费完成回调 最后执行</param>
-        public async Task SubscribeQueueTest<T>(string key, int length, int delay, ExceptionHandlerEnum exceptionHandler, Func<List<T>, Task> handler,
-            Func<Exception, List<T>, Task> error = null, Func<Task> completed = null)
-        {
-            await Task.CompletedTask;
-        }
+        ///// <summary>
+        ///// 订阅事件 从队列读取数据 分批次消费 用于单元测试
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="key">Key</param>
+        ///// <param name="length">每次处理条数</param>
+        ///// <param name="delay">每次处理间隔 毫秒</param>
+        ///// <param name="exceptionHandler">异常处理方式</param>
+        ///// <param name="handler">订阅处理</param>
+        ///// <param name="error">发生异常时回调</param>
+        ///// <param name="completed">本次消费完成回调 最后执行</param>
+        //public async Task SubscribeQueueTest<T>(string key, int length, int delay, ExceptionHandlerEnum exceptionHandler, Func<List<T>, Task> handler,
+        //    Func<Exception, List<T>, Task> error = null, Func<Task> completed = null)
+        //{
+        //    await Task.CompletedTask;
+        //}
 
-        #endregion
+        //#endregion
     }
 }

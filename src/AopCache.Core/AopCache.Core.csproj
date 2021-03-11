@@ -3,14 +3,14 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Description>AopCache 基础核心类库</Description>
+    <Description>AopCache 基础核心类库；IEventBusProvider rabbitmq 新增延迟队列和rpc调用</Description>
     <Authors>ad313</Authors>
     <Company>ad313</Company>
     <Product>AopCache</Product>
     <Copyright>Copyright © ad313</Copyright>
     <PackageProjectUrl>https://github.com/ad313/AopCache</PackageProjectUrl>
     <PackageTags>AopCache</PackageTags>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
     <PackageReleaseNotes>AopCache 基础核心类库</PackageReleaseNotes>
   </PropertyGroup>
 
@@ -23,5 +23,6 @@
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="5.0.0" />
 		<PackageReference Include="System.Text.Json" Version="5.0.0" />
 		<PackageReference Include="System.Threading.Channels" Version="5.0.0" />
+		<!--<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="5.0.2" />-->
 	</ItemGroup>
 </Project>

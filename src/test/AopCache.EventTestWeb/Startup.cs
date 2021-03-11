@@ -37,7 +37,7 @@ namespace AopCache.EventTestWeb
                 option.PrefetchCount = Configuration.GetValue<ushort>("RabbitMQ:PrefetchCount");
             });
 
-            services.AddHostedService<EventHost>();
+            services.AddHostedService<EventHost4>();
             //services.AddHostedService<EventHost2>();
             //services.AddHostedService<EventHost3>();
         }
