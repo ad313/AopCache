@@ -162,7 +162,7 @@ namespace AopCache.EventTestWeb
             watch.Start();
 
             var w2 = Stopwatch.StartNew();
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 1; i++)
             {
                 w2.Restart();
                 var result = await _eventBusProvider.RpcClientAsync("aaa", i);
@@ -324,10 +324,10 @@ namespace AopCache.EventTestWeb
 
             //rpc
             //await CreateRpcService();
-            //await CreateRpcService2();
-            await CreateRpcService3();
+            await CreateRpcService2();
+            //await CreateRpcService3();
 
-            
+
         }
 
 

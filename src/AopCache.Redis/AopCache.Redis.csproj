@@ -1,31 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>0.4.0.0</Version>
-    <Description>AopCache 缓存存储与缓存清理触发器，基于CsRedis的实现</Description>
-    <Copyright>Copyright © ad313</Copyright>
-    <PackageProjectUrl>https://github.com/ad313/AopCache</PackageProjectUrl>
-    <PackageTags>AopCache.Redis</PackageTags>
-    <PackageReleaseNotes>AopCache 缓存存储与缓存清理触发器，基于CsRedis的实现</PackageReleaseNotes>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>ad313</Authors>
-    <Company>ad313</Company>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net5.0;netstandard2.1;</TargetFrameworks>
+		<Version>0.4.0.0</Version>
+		<Description>AopCache 缓存存储与缓存清理触发器，基于CsRedis的实现</Description>
+		<Copyright>Copyright © ad313</Copyright>
+		<PackageProjectUrl>https://github.com/ad313/AopCache</PackageProjectUrl>
+		<PackageTags>AopCache.Redis</PackageTags>
+		<PackageReleaseNotes>AopCache 缓存存储与缓存清理触发器，基于CsRedis的实现</PackageReleaseNotes>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>ad313</Authors>
+		<Company>ad313</Company>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>bin\Debug\netstandard2.1\</OutputPath>
-    <DocumentationFile>bin\Debug\netstandard2.1\AopCache.Redis.xml</DocumentationFile>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<OutputPath>bin\Debug\netstandard2.1\</OutputPath>
+		<DocumentationFile>bin\Debug\netstandard2.1\AopCache.Redis.xml</DocumentationFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CSRedisCore" Version="3.6.2" />
-    <!--<PackageReference Include="MessagePack" Version="2.2.85" />-->
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="CSRedisCore" Version="3.6.6" />
+		<!--<PackageReference Include="MessagePack" Version="2.2.85" />-->
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\AopCache.EventBus.CSRedis\AopCache.EventBus.CSRedis.csproj" />
-    <ProjectReference Include="..\AopCache\AopCache.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\AopCache.EventBus.CSRedis\AopCache.EventBus.CSRedis.csproj" />
+		<ProjectReference Include="..\AopCache\AopCache.csproj" />
+	</ItemGroup>
 
 </Project>

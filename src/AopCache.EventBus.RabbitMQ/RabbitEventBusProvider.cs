@@ -389,9 +389,9 @@ namespace AopCache.EventBus.RabbitMQ
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, $"{DateTime.Now} RabbitMQ [{key}] 消费异常 {e.Message} ");
+                    _logger.LogError(e, $"{DateTime.Now} RabbitMQ RpcServer [{key}] 执行异常 {e.Message} ");
                     
-                    response = new RpcResult($"RpcServer [{key}]-{replyProps.CorrelationId} 消费报错", e);
+                    response = new RpcResult($"RpcServer [{key}] 执行异常", e);
                 }
                 finally
                 {

@@ -52,10 +52,10 @@ namespace AopCache.Web
 
             services.AddAopCache(option =>
             {
-                //option.UseMemoryCacheProvider();
+                option.UseMemoryCacheProvider();
                 //option.AddAopTriggerUseMemoryEventBus();
 
-                option.UseCsRedisCacheProvider("192.168.1.120:30985,password=123456,defaultDatabase=5");
+                //option.UseCsRedisCacheProvider("192.168.1.120:30985,password=123456,defaultDatabase=5");
 
 
                 //option.AddAopTriggerUseRedisEventBus("192.168.1.120:30985,password=123456,defaultDatabase=5");

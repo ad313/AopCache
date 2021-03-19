@@ -1,29 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <Description>基于 CSRedis 的 EventBus</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>ad313</Authors>
-    <Company>ad313</Company>
-    <Product>AopCache</Product>
-    <Copyright>Copyright © ad313</Copyright>
-    <PackageProjectUrl>https://github.com/ad313/AopCache</PackageProjectUrl>
-    <PackageTags>AopCache</PackageTags>
-    <Version>1.0.4</Version>
-    <PackageReleaseNotes>AopCache 基础核心类库</PackageReleaseNotes>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net5.0;netstandard2.1;</TargetFrameworks>
+		<Description>基于 CSRedis 的 EventBus</Description>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>ad313</Authors>
+		<Company>ad313</Company>
+		<Product>AopCache</Product>
+		<Copyright>Copyright © ad313</Copyright>
+		<PackageProjectUrl>https://github.com/ad313/AopCache</PackageProjectUrl>
+		<PackageTags>AopCache</PackageTags>
+		<Version>1.0.4</Version>
+		<PackageReleaseNotes>AopCache 基础核心类库</PackageReleaseNotes>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netstandard2.1\AopCache.EventBus.CSRedis.xml</DocumentationFile>
-    <OutputPath>bin\Debug\netstandard2.1\</OutputPath>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DocumentationFile>bin\Debug\netstandard2.1\AopCache.EventBus.CSRedis.xml</DocumentationFile>
+		<OutputPath>bin\Debug\netstandard2.1\</OutputPath>
+	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CSRedisCore" Version="3.6.2" />
+		<PackageReference Include="CSRedisCore" Version="3.6.6" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\AopCache.Core\AopCache.Core.csproj" />
+		<ProjectReference Include="..\AopCache.Core\AopCache.Core.csproj" />
 	</ItemGroup>
 </Project>
