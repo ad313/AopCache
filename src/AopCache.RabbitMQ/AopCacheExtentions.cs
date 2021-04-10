@@ -1,7 +1,7 @@
 ﻿using AopCache.EventBus.RabbitMQ;
 using AopCache.Implements;
-using AopCache.Runtime;
 using System;
+using DependencyRegistrator = AopCache.Runtime.DependencyRegistrator;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

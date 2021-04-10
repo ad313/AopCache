@@ -1,3 +1,5 @@
+using System;
+using AopCache.Core.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -37,13 +39,18 @@ namespace AopCache.EventTestWeb
                 option.PrefetchCount = Configuration.GetValue<ushort>("RabbitMQ:PrefetchCount");
             });
 
-            services.AddHostedService<EventHost4>();
+            //services.AddHostedService<EventHost4>();
             //services.AddHostedService<EventHost2>();
             //services.AddHostedService<EventHost3>();
+
+            services.AddHostedService<RpcServiceTestHost>();
+
+            services.AddSingleton<IRabbitmqRpcService, TestRpcService>();
+            //services.AddSingleton<TestRpcService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime hostLifetime)
         {
             if (env.IsDevelopment())
             {
@@ -51,6 +58,12 @@ namespace AopCache.EventTestWeb
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "AopCache.EventTestWeb v1"));
             }
+
+            hostLifetime.ApplicationStarted.Register(async () =>
+            {
+                
+
+            });
 
             app.UseRouting();
 

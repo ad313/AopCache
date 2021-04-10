@@ -34,6 +34,10 @@ namespace Microsoft.Extensions.DependencyInjection
             service.AddSingleton<ISerializerProvider, SerializerProvider>();
             service.AddTransient<RabbitMqClientProvider>();
             service.AddSingleton<IEventBusProvider, RabbitEventBusProvider>();
+
+            new DependencyRegistrator().RegisterServices();
+
+            service.AddHostedService<RpcServerInitHost>();
         }
     }
 }
