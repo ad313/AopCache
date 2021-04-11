@@ -1,10 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using AopCache.EventBus.RabbitMQ.Rpc;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace AopCache.EventBus.RabbitMQ
+namespace AopCache.EventBus.RabbitMQ.Runtime
 {
     /// <summary>
     /// 依赖引导器
@@ -53,7 +54,16 @@ namespace AopCache.EventBus.RabbitMQ
         private void RegisterTransientDependency()
         {
             var allClass = Assemblies.SelectMany(d => d.GetTypes().Where(t => t.IsClass)).ToList();
-            RpcServerMethodList = allClass.SelectMany(d => d.GetMethods()).Where(d => d.CustomAttributes.Any(t => t.AttributeType.Name == nameof(RpcServerAttribute))).ToList();
+            var methodInfos = allClass.SelectMany(d => d.GetMethods()).Where(d => d.CustomAttributes.Any(t => t.AttributeType.Name == nameof(RpcServerAttribute))).ToList();
+
+            //去重复
+            var dicMethod = new Dictionary<int, MethodInfo>();
+            methodInfos.ForEach(m =>
+            {
+                dicMethod.TryAdd(m.MetadataToken, m);
+            });
+
+            RpcServerMethodList = dicMethod.Select(d => d.Value).ToList();
 
             var first = RpcServerMethodList.Select(d => d.GetCustomAttribute<RpcServerAttribute>().GetFormatKey()).GroupBy(d => d)
                 .ToDictionary(d => d.Key, d => d.Count()).OrderByDescending(d => d.Value)

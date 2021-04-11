@@ -110,16 +110,8 @@ namespace AopCache.EventBus.CSRedis
         {
             throw new NotImplementedException();
         }
-
-        /// <summary>
-        /// 发布事件 RpcClient
-        /// </summary>
-        /// <typeparam name="T">发送数据</typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="message">数据</param>
-        /// <param name="timeout">超时时间 秒</param>
-        /// <returns></returns>
-        public async Task<RpcResult> RpcClientAsync<T>(string key, T message, int timeout = 30)
+        
+        public Task<RpcResult<T>> RpcClientAsync<T>(string key, object[] message = null, int timeout = 30)
         {
             throw new NotImplementedException();
         }

@@ -214,22 +214,11 @@ namespace AopCache.EventBus.RabbitMQ
             await DelayPublishAsync(key, seconds + 1, message);
         }
 
-        /// <summary>
-        /// 发布事件 RpcClient
-        /// </summary>
-        /// <typeparam name="T">发送数据</typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="message">数据</param>
-        /// <param name="timeout">超时时间 秒</param>
-        /// <returns></returns>
-        public async Task<RpcResult> RpcClientAsync<T>(string key, T message, int timeout = 30)
+        public async Task<RpcResult<T>> RpcClientAsync<T>(string key, object[] message = null, int timeout = 30)
         {
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentNullException(nameof(key));
 
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-            
             var channel = _rabbitMqClientProvider.GetChannel();
             channel.ConfirmSelect();
 
@@ -244,11 +233,22 @@ namespace AopCache.EventBus.RabbitMQ
                 
                 tcs.TrySetResult(_serializerProvider.Deserialize<RpcResult>(ea.Body.ToArray()));
             };
-            
+
             var result = await RpcClientCallAsync(key, channel, consumer, replyQueueName, message, timeout);
             _logger.LogDebug($"RabbitMQ rpc client [{key}] receive { _serializerProvider.Serialize(result)}");
 
-            return result;
+            await Task.Delay(1);
+
+            return new RpcResult<T>()
+            {
+                Data = typeof(T) == typeof(string)
+                    ? (T) ((object) result.Data)
+                    : (string.IsNullOrWhiteSpace(result.Data)
+                        ? default(T)
+                        : _serializerProvider.Deserialize<T>(result.Data)),
+                Success = result.Success,
+                ErrorMessage = result.ErrorMessage
+            };
         }
         
         /// <summary>
@@ -1114,7 +1114,7 @@ namespace AopCache.EventBus.RabbitMQ
             _rabbitMqClientProvider.ReturnChannel(channel);
         }
 
-        private Task<RpcResult> RpcClientCallAsync<T>(string key, IModel channel, EventingBasicConsumer consumer, string queueName, T message, int timeout)
+        private Task<RpcResult> RpcClientCallAsync(string key, IModel channel, EventingBasicConsumer consumer, string queueName, object[] message, int timeout)
         {
             timeout = timeout > 0 ? timeout : 120;
             var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(timeout));
@@ -1146,7 +1146,7 @@ namespace AopCache.EventBus.RabbitMQ
             tokenSource.Token.Register(() =>
             {
                 if (_rpcCallbackMapper.TryRemove(correlationId, out var tmp))
-                    tmp.SetResult(new RpcResult("由于超时操作被取消", new TimeoutException($"超时时间 {timeout} s")));
+                    tmp.SetResult(new RpcResult(null, new TimeoutException($"超时时间 {timeout} s")));
             });
 
             return tcs.Task;

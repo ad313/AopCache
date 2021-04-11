@@ -53,15 +53,33 @@ namespace AopCache.Core.Abstractions
         /// <returns></returns>
         Task DelayPublishAsync<T>(string key, DateTime absoluteTime, EventMessageModel<T> message);
 
+        ///// <summary>
+        ///// 发布事件 RpcClient
+        ///// </summary>
+        ///// <typeparam name="T">发送数据</typeparam>
+        ///// <param name="key">Key 唯一值</param>
+        ///// <param name="message">数据</param>
+        ///// <param name="timeout">超时时间 秒</param>
+        ///// <returns></returns>
+        //Task<RpcResult> RpcClientAsync<T>(string key, T message, int timeout = 30);
+
+        ///// <summary>
+        ///// 发布事件 RpcClient
+        ///// </summary>
+        ///// <param name="key">Key 唯一值</param>
+        ///// <param name="message">数据</param>
+        ///// <param name="timeout">超时时间 秒</param>
+        ///// <returns></returns>
+        //Task<RpcResult> RpcClientAsync(string key, object[] message = null, int timeout = 30);
+
         /// <summary>
         /// 发布事件 RpcClient
         /// </summary>
-        /// <typeparam name="T">发送数据</typeparam>
         /// <param name="key">Key 唯一值</param>
         /// <param name="message">数据</param>
         /// <param name="timeout">超时时间 秒</param>
         /// <returns></returns>
-        Task<RpcResult> RpcClientAsync<T>(string key, T message, int timeout = 30);
+        Task<RpcResult<T>> RpcClientAsync<T>(string key, object[] message = null, int timeout = 30);
 
         /// <summary>
         /// 订阅事件
@@ -280,8 +298,21 @@ namespace AopCache.Core.Abstractions
             TraceId = trackId ?? Guid.NewGuid().ToString();
         }
     }
-    
-    public class RpcResult
+
+    public class RpcResult : RpcResult<string>
+    {
+        public RpcResult() { }
+
+        public RpcResult(string data) : base(data)
+        {
+        }
+
+        public RpcResult(string data, Exception ex) : base(data, ex)
+        {
+        }
+    }
+
+    public class RpcResult<T>
     {
         /// <summary>
         /// 是否成功
@@ -291,22 +322,22 @@ namespace AopCache.Core.Abstractions
         /// <summary>
         /// 数据
         /// </summary>
-        public string Data { get; set; }
+        public T Data { get; set; }
 
         /// <summary>
         /// 错误消息
         /// </summary>
         public string ErrorMessage { get; set; }
-        
+
         public RpcResult() { }
 
-        public RpcResult(string data)
+        public RpcResult(T data)
         {
             Data = data;
             Success = true;
         }
 
-        public RpcResult(string data, Exception ex)
+        public RpcResult(T data, Exception ex)
         {
             if (ex != null)
                 ErrorMessage = ex.Message + (ex.InnerException == null ? "" : "|" + ex.InnerException.Message);

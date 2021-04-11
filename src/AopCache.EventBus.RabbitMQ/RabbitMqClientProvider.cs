@@ -60,14 +60,26 @@ namespace AopCache.EventBus.RabbitMQ
                 VirtualHost = Config.VirtualHost,
                 AutomaticRecoveryEnabled = true
             };
-
+            
             var name = $"{Assembly.GetEntryAssembly()?.GetName().Name.ToLower()}_{Guid.NewGuid()}";
             Connection = ConnectionFactory.CreateConnection(name);
             Connection.ConnectionShutdown += Connection_ConnectionShutdown;
-
+            Connection.ConnectionBlocked += Connection_ConnectionBlocked;
+            Connection.ConnectionUnblocked += Connection_ConnectionUnblocked;
+            
             _logger.LogInformation($"{DateTime.Now} RabbitMQ 连接成功：Host：{Config.HostName}，UserName：{Config.UserName} [{name}]");
 
             Channel = Connection.CreateModel();
+        }
+
+        private void Connection_ConnectionUnblocked(object sender, EventArgs e)
+        {
+            _logger.LogWarning($"{DateTime.Now} RabbitMQ Connection Unblocked......");
+        }
+
+        private void Connection_ConnectionBlocked(object sender, global::RabbitMQ.Client.Events.ConnectionBlockedEventArgs e)
+        {
+            _logger.LogWarning($"{DateTime.Now} RabbitMQ Connection Blocked......");
         }
 
         private void Connection_ConnectionShutdown(object sender, ShutdownEventArgs e)

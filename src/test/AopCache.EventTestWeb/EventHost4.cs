@@ -165,7 +165,7 @@ namespace AopCache.EventTestWeb
             for (int i = 0; i < 1; i++)
             {
                 w2.Restart();
-                var result = await _eventBusProvider.RpcClientAsync("aaa", i);
+                var result = await _eventBusProvider.RpcClientAsync<string>("aaa", new object[] { i });
                 Console.WriteLine($"{result.Data}--{i} {w2.ElapsedMilliseconds}");
             }
             w2.Stop();
@@ -242,7 +242,7 @@ namespace AopCache.EventTestWeb
             for (int i = 0; i < 10; i++)
             {
                 w2.Restart();
-                var result = await _eventBusProvider.RpcClientAsync("aaa", i);
+                var result = await _eventBusProvider.RpcClientAsync<string>("aaa", new object[] { i });
                 Console.WriteLine($"{result.Data}--{i} {w2.ElapsedMilliseconds}");
             }
             w2.Stop();
@@ -250,14 +250,14 @@ namespace AopCache.EventTestWeb
             for (int i = 100; i < 110; i++)
             {
                 w2.Restart();
-                var result = await _eventBusProvider.RpcClientAsync("bbb", i);
+                var result = await _eventBusProvider.RpcClientAsync<string>("bbb", new object[] { i });
                 Console.WriteLine($"{result.Data}--{i} {w2.ElapsedMilliseconds}");
             }
 
             for (int i = 1000; i < 1010; i++)
             {
                 w2.Restart();
-                var result = await _eventBusProvider.RpcClientAsync("ccc", i);
+                var result = await _eventBusProvider.RpcClientAsync<string>("ccc", new object[] { i });
                 Console.WriteLine($"{result.Data}--{i} {w2.ElapsedMilliseconds}");
             }
 

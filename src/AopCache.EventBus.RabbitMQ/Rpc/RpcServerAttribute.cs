@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace AopCache.EventBus.RabbitMQ
+namespace AopCache.EventBus.RabbitMQ.Rpc
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class RpcServerAttribute : Attribute
