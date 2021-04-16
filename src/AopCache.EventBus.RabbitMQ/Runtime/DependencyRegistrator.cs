@@ -1,9 +1,9 @@
-﻿using System;
+﻿using AopCache.EventBus.RabbitMQ.Attributes;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using AopCache.EventBus.RabbitMQ.Rpc;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace AopCache.EventBus.RabbitMQ.Runtime
 {
@@ -25,6 +25,11 @@ namespace AopCache.EventBus.RabbitMQ.Runtime
         /// RpcServer 列表
         /// </summary>
         public static List<MethodInfo> RpcServerMethodList = new List<MethodInfo>();
+
+        /// <summary>
+        /// Subscriber 列表
+        /// </summary>
+        public static List<MethodInfo> SubscriberMethodList = new List<MethodInfo>();
 
         /// <summary>
         /// 初始化
@@ -53,8 +58,16 @@ namespace AopCache.EventBus.RabbitMQ.Runtime
 
         private void RegisterTransientDependency()
         {
-            var allClass = Assemblies.SelectMany(d => d.GetTypes().Where(t => t.IsClass)).ToList();
-            var methodInfos = allClass.SelectMany(d => d.GetMethods()).Where(d => d.CustomAttributes.Any(t => t.AttributeType.Name == nameof(RpcServerAttribute))).ToList();
+            var types = Assemblies.SelectMany(d => d.GetTypes().Where(t => t.IsClass)).ToList();
+
+            RegisterRpcServer(types);
+            RegisterSubscriber(types);
+        }
+
+        private void RegisterRpcServer(List<Type> types)
+        {
+            types ??= Assemblies.SelectMany(d => d.GetTypes().Where(t => t.IsClass)).ToList();
+            var methodInfos = types.SelectMany(d => d.GetMethods()).Where(d => d.CustomAttributes.Any(t => t.AttributeType.Name == nameof(RpcServerAttribute))).ToList();
 
             //去重复
             var dicMethod = new Dictionary<int, MethodInfo>();
@@ -71,6 +84,28 @@ namespace AopCache.EventBus.RabbitMQ.Runtime
 
             if (first.Value > 1)
                 throw new ArgumentException($"RpcServr Key 重复：{first.Key}");
+        }
+
+        private void RegisterSubscriber(List<Type> types)
+        {
+            types ??= Assemblies.SelectMany(d => d.GetTypes().Where(t => t.IsClass)).ToList();
+            var methodInfos = types.SelectMany(d => d.GetMethods()).Where(d => d.CustomAttributes.Any(t => t.AttributeType.Name == nameof(SubscriberAttribute))).ToList();
+
+            //去重复
+            var dicMethod = new Dictionary<int, MethodInfo>();
+            methodInfos.ForEach(m =>
+            {
+                dicMethod.TryAdd(m.MetadataToken, m);
+            });
+
+            SubscriberMethodList = dicMethod.Select(d => d.Value).ToList();
+
+            var first = SubscriberMethodList.Select(d => d.GetCustomAttribute<SubscriberAttribute>().GetFormatKey()).GroupBy(d => d)
+                .ToDictionary(d => d.Key, d => d.Count()).OrderByDescending(d => d.Value)
+                .FirstOrDefault();
+
+            if (first.Value > 1)
+                throw new ArgumentException($"Subscriber Key 重复：{first.Key}");
         }
     }
 }

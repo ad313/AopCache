@@ -2,7 +2,6 @@
 using AopCache.Core.Implements;
 using AopCache.EventBus.RabbitMQ;
 using System;
-using AopCache.EventBus.RabbitMQ.Rpc;
 using AopCache.EventBus.RabbitMQ.Runtime;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -39,7 +38,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             //init rpc
             new DependencyRegistrator().RegisterServices();
-            service.AddHostedService<RpcServerInitHost>();
+            service.AddHostedService<InitHost>();
         }
     }
 }

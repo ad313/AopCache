@@ -1,14 +1,15 @@
 ﻿using AopCache.Core.Abstractions;
 using AopCache.EventBus.RabbitMQ;
-using AopCache.EventBus.RabbitMQ.Rpc;
 using MessagePack;
 using MessagePack.Resolvers;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using AopCache.EventBus.RabbitMQ.Attributes;
 
 namespace AopCache.EventTestWeb
 {
@@ -33,17 +34,18 @@ namespace AopCache.EventTestWeb
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //await Task.Delay(40 * 1000);
+            //var result = await _eventBusProvider.RpcClientAsync<int>("aaaaa", new object[] { "avalue1", 1, new class1 { Id = 1, Money = 11, Name = "sfsf" } });
 
-            var result = await _eventBusProvider.RpcClientAsync<int>("aaaaa", new object[] { "avalue1", 1, new class1 { Id = 1, Money = 11, Name = "sfsf" } });
+            //Console.WriteLine($"result1 {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff")}");
 
-            Console.WriteLine($"result1 {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff")}");
+            ////await Task.Delay(2000);
 
-            //await Task.Delay(2000);
+            //var result2 = await _eventBusProvider.RpcClientAsync<int>("test_aaaaa2", new object[] { "avalue2", 2, new class1 { Id = 2, Money = 11, Name = "sfsf" } });
+            //Console.WriteLine($"result2 {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff")}");
 
-            var result2 = await _eventBusProvider.RpcClientAsync<int>("test_aaaaa2", new object[] { "avalue2", 2, new class1 { Id = 2, Money = 11, Name = "sfsf" } });
-            Console.WriteLine($"result2 {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff")}");
-            //var result3 = await _eventBusProvider.RpcClientAsync<class2>("bbbbb", null);
+
+            await _eventBusProvider.PublishAsync("tst-aaa", new EventMessageModel<class1>(new class1(){Money = 1111m}));
+
         }
 
 
@@ -58,7 +60,7 @@ namespace AopCache.EventTestWeb
 
     public interface IRabbitmqRpcService
     {
-        int Test1(string a, int b, class2 c);
+        //int Test1(string a, int b, class2 c);
     }
 
     public class BaseClass: IRabbitmqRpcService
@@ -70,10 +72,10 @@ namespace AopCache.EventTestWeb
             _provider = provider;
         }
 
-        public int Test1(string a, int b, class2 c)
-        {
-            return 2;
-        }
+        //public int Test1(string a, int b, class2 c)
+        //{
+        //    return 2;
+        //}
     }
 
     public class TestRpcService : BaseClass
@@ -86,8 +88,9 @@ namespace AopCache.EventTestWeb
         }
 
         [RpcServer("aaaaa")]
-        public new int Test1(string a, int b, class2 c)
+        public async Task<int> Test1(string a, int b, class2 c)
         {
+            await Task.Delay(5000);
             return 1;
         }
 
@@ -102,6 +105,14 @@ namespace AopCache.EventTestWeb
         [RpcServer("bbbbb")]
         public class1 Test2()
         {
+            return new class1 { Id = 1, Money = 11, Name = "sfsf" };
+        }
+
+        [Subscriber("tst-aaa")]
+        public async Task<class1> Test3(class1 aaa)
+        {
+            await Task.Delay(5000);
+            Console.WriteLine($"valu:{aaa}");
             return new class1 { Id = 1, Money = 11, Name = "sfsf" };
         }
     }

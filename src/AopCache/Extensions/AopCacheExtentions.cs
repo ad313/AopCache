@@ -63,6 +63,9 @@ namespace Microsoft.Extensions.DependencyInjection
         private static IServiceCollection AddAopCacheCore(this IServiceCollection services)
         {
             services.AddSingleton<ISerializerProvider, SerializerProvider>();
+
+            AopCacheProviderInstance.ServiceProvider = services.BuildServiceProvider();
+
             return services.ConfigureDynamicProxy();
         }
     }

@@ -1,21 +1,21 @@
 ﻿using System;
 
-namespace AopCache.EventBus.RabbitMQ.Rpc
+namespace AopCache.EventBus.RabbitMQ.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class RpcServerAttribute : Attribute
+    public class SubscriberAttribute : Attribute
     {
         /// <summary>
-        /// RpcServer 唯一标识
+        /// Subscriber 唯一标识
         /// </summary>
         public string Key { get; private set; }
 
         /// <summary>
-        /// RpcServer 分组
+        /// Subscriber 分组
         /// </summary>
         public string Group { get; private set; }
 
-        public RpcServerAttribute(string key, string group = null)
+        public SubscriberAttribute(string key, string group = null)
         {
             Key = key;
             Group = group;

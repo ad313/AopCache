@@ -16,11 +16,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache.Core", "AopCache.C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache.EventBus.CSRedis", "AopCache.EventBus.CSRedis\AopCache.EventBus.CSRedis.csproj", "{99BEB92A-950E-43B0-84B2-B04755E09447}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AopCache.EventBus.RabbitMQ", "AopCache.EventBus.RabbitMQ\AopCache.EventBus.RabbitMQ.csproj", "{30BBBFDC-E76A-4616-9C11-25B0DF2F7E20}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache.EventBus.RabbitMQ", "AopCache.EventBus.RabbitMQ\AopCache.EventBus.RabbitMQ.csproj", "{30BBBFDC-E76A-4616-9C11-25B0DF2F7E20}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{0AA11744-0E92-4D3D-B469-710D53466DD5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AopCache.EventTestWeb", "test\AopCache.EventTestWeb\AopCache.EventTestWeb.csproj", "{7CD824A3-EC72-4DBB-85CD-B584FB11B97C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache.EventTestWeb", "test\AopCache.EventTestWeb\AopCache.EventTestWeb.csproj", "{7CD824A3-EC72-4DBB-85CD-B584FB11B97C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache.Web", "test\AopCache.Web\AopCache.Web.csproj", "{4B26EE16-8069-4630-ADFC-241CBD1AC4A9}"
 EndProject
@@ -30,7 +30,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache.BenchmarkTest", "t
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EventBus", "EventBus", "{0D8D20C4-3974-40AA-BAFD-61306146D9B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AopCache.RabbitMQ", "AopCache.RabbitMQ\AopCache.RabbitMQ.csproj", "{C744A97A-F7A3-4966-959F-C540B614F110}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache.RabbitMQ", "AopCache.RabbitMQ\AopCache.RabbitMQ.csproj", "{C744A97A-F7A3-4966-959F-C540B614F110}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AopCache.Test1", "test\AopCache.Test1\AopCache.Test1.csproj", "{F6D42D1C-13DA-43FA-B99C-7BD8A932364E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AopCache.Test2", "test\AopCache.Test2\AopCache.Test2.csproj", "{0489889D-8501-435F-BD2B-5ADEA7545C69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,6 +82,14 @@ Global
 		{C744A97A-F7A3-4966-959F-C540B614F110}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C744A97A-F7A3-4966-959F-C540B614F110}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C744A97A-F7A3-4966-959F-C540B614F110}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6D42D1C-13DA-43FA-B99C-7BD8A932364E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6D42D1C-13DA-43FA-B99C-7BD8A932364E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6D42D1C-13DA-43FA-B99C-7BD8A932364E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6D42D1C-13DA-43FA-B99C-7BD8A932364E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0489889D-8501-435F-BD2B-5ADEA7545C69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0489889D-8501-435F-BD2B-5ADEA7545C69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0489889D-8501-435F-BD2B-5ADEA7545C69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0489889D-8501-435F-BD2B-5ADEA7545C69}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -89,6 +101,8 @@ Global
 		{4B26EE16-8069-4630-ADFC-241CBD1AC4A9} = {0AA11744-0E92-4D3D-B469-710D53466DD5}
 		{D312D199-1AF1-4732-9124-186958998E3A} = {0AA11744-0E92-4D3D-B469-710D53466DD5}
 		{1C022C3C-0A92-4AFA-B08E-C2DA65F2C19B} = {0AA11744-0E92-4D3D-B469-710D53466DD5}
+		{F6D42D1C-13DA-43FA-B99C-7BD8A932364E} = {0AA11744-0E92-4D3D-B469-710D53466DD5}
+		{0489889D-8501-435F-BD2B-5ADEA7545C69} = {0AA11744-0E92-4D3D-B469-710D53466DD5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B1108F3-7C57-4E67-9D55-2ED5300BFBA2}
