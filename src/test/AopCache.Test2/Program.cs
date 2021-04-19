@@ -21,7 +21,7 @@ namespace AopCache.Test2
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.UseUrls("http://*:5555");
+                    webBuilder.UseUrls("http://192.168.0.124:5555");
                 });
     }
 }

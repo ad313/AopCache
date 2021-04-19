@@ -44,8 +44,24 @@ namespace AopCache.EventTestWeb
             //Console.WriteLine($"result2 {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff")}");
 
 
-            await _eventBusProvider.PublishAsync("tst-aaa", new EventMessageModel<class1>(new class1(){Money = 1111m}));
+            try
+            {
+                await _eventBusProvider.PublishAsync("tst-aaa", new EventMessageModel<class1>(new class1(){Money = 1111m}));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
+            await Task.Delay(3000);
+            try
+            {
+                await _eventBusProvider.PublishAsync("tst-aaa", new EventMessageModel<class1>(new class1() { Money = 1111m }));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
 
@@ -111,6 +127,7 @@ namespace AopCache.EventTestWeb
         [Subscriber("tst-aaa")]
         public async Task<class1> Test3(class1 aaa)
         {
+            throw new Exception("qq");
             await Task.Delay(5000);
             Console.WriteLine($"valu:{aaa}");
             return new class1 { Id = 1, Money = 11, Name = "sfsf" };

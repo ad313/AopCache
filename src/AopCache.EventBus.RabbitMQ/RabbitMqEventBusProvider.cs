@@ -17,7 +17,7 @@ namespace AopCache.EventBus.RabbitMQ
     /// <summary>
     /// 基于 RabbitMQ 的发布订阅实现
     /// </summary>
-    public class RabbitEventBusProvider : IEventBusProvider
+    public class RabbitMqEventBusProvider : IEventBusProvider
     {
         /// <summary>
         /// ServiceProvider
@@ -28,7 +28,7 @@ namespace AopCache.EventBus.RabbitMQ
         private readonly RabbitMqClientProvider _rabbitMqClientProvider;
         private readonly RabbitMqClientProvider _rabbitMqClientProviderRead;
         private readonly RabbitMqConfig _config;
-        private readonly ILogger<RabbitEventBusProvider> _logger;
+        private readonly ILogger<RabbitMqEventBusProvider> _logger;
 
         /// <summary>
         /// 总开关默认开启
@@ -55,11 +55,11 @@ namespace AopCache.EventBus.RabbitMQ
         /// </summary>
         private readonly ConcurrentDictionary<string, TaskCompletionSource<RpcResult>> _rpcCallbackMapper = new ConcurrentDictionary<string, TaskCompletionSource<RpcResult>>();
 
-        public RabbitEventBusProvider(ISerializerProvider serializerProvider,
+        public RabbitMqEventBusProvider(ISerializerProvider serializerProvider,
             IServiceProvider serviceProvider,
             RabbitMqClientProvider rabbitMqClientProvider,
             RabbitMqClientProvider rabbitMqClientProviderRead,
-            ILogger<RabbitEventBusProvider> logger)
+            ILogger<RabbitMqEventBusProvider> logger)
         {
             _serializerProvider = serializerProvider;
             _rabbitMqClientProvider = rabbitMqClientProvider;

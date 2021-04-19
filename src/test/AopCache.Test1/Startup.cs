@@ -31,25 +31,25 @@ namespace AopCache.Test1
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "AopCache.Test1", Version = "v1" });
             });
 
-            //services.AddEventBusUseRabbitMq(option =>
-            //{
-            //    option.ExchangeName = Configuration.GetValue<string>("RabbitMQ:ExchangeName");
-            //    option.HostName = Configuration.GetValue<string>("RabbitMQ:HostName");
-            //    option.UserName = Configuration.GetValue<string>("RabbitMQ:UserName");
-            //    option.Password = Configuration.GetValue<string>("RabbitMQ:Password");
-            //    option.Port = Configuration.GetValue<int>("RabbitMQ:Port");
-            //    option.VirtualHost = Configuration.GetValue<string>("RabbitMQ:VirtualHost");
-            //    option.PrefetchSize = Configuration.GetValue<uint>("RabbitMQ:PrefetchSize");
-            //    option.PrefetchCount = Configuration.GetValue<ushort>("RabbitMQ:PrefetchCount");
-            //});
+            services.AddEventBusUseRabbitMq(option =>
+            {
+                option.ExchangeName = Configuration.GetValue<string>("RabbitMQ:ExchangeName");
+                option.HostName = Configuration.GetValue<string>("RabbitMQ:HostName");
+                option.UserName = Configuration.GetValue<string>("RabbitMQ:UserName");
+                option.Password = Configuration.GetValue<string>("RabbitMQ:Password");
+                option.Port = Configuration.GetValue<int>("RabbitMQ:Port");
+                option.VirtualHost = Configuration.GetValue<string>("RabbitMQ:VirtualHost");
+                option.PrefetchSize = Configuration.GetValue<uint>("RabbitMQ:PrefetchSize");
+                option.PrefetchCount = Configuration.GetValue<ushort>("RabbitMQ:PrefetchCount");
+            });
 
             services.AddScoped<TestClass>();
 
             services.AddMemoryCache();
             services.AddAopCache(option =>
             {
-                //option.UseMemoryCacheProvider();
-                option.UseCsRedisCacheProvider("192.168.1.120:30985,password=123456,defaultDatabase=15");
+                option.UseMemoryCacheProvider();
+                //option.UseCsRedisCacheProvider("192.168.1.120:30985,password=123456,defaultDatabase=15");
             });
         }
 

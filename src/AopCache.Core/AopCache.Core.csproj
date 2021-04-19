@@ -4,14 +4,14 @@
 		<!--<TargetFramework>netstandard2.1</TargetFramework>-->
 		<TargetFrameworks>net5.0;netstandard2.1;</TargetFrameworks>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Description>AopCache 基础核心类库；IEventBusProvider rabbitmq 新增延迟队列和rpc调用</Description>
+		<Description>AopCache 基础核心类库；IEventBusProvider rabbitmq 新增延迟队列和rpc调用；添加 AopCacheProviderInstance 静态类，通过它手工获取或移除缓存，内部维护了前缀。</Description>
 		<Authors>ad313</Authors>
 		<Company>ad313</Company>
 		<Product>AopCache</Product>
 		<Copyright>Copyright © ad313</Copyright>
 		<PackageProjectUrl>https://github.com/ad313/AopCache</PackageProjectUrl>
 		<PackageTags>AopCache</PackageTags>
-		<Version>1.0.4</Version>
+		<Version>1.0.4.1</Version>
 		<PackageReleaseNotes>AopCache 基础核心类库</PackageReleaseNotes>
 	</PropertyGroup>
 

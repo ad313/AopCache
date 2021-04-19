@@ -10,7 +10,7 @@ namespace AopCache.EventBus.RabbitMQ.Runtime
     /// <summary>
     /// 依赖引导器
     /// </summary>
-    public class DependencyRegistrator
+    class DependencyRegistrator
     {
         private TypeFinder TypeFinder { get; set; } = new TypeFinder();
 

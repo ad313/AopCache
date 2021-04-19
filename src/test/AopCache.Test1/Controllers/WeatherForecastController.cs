@@ -31,13 +31,13 @@ namespace AopCache.Test1.Controllers
         [RpcServer("rpc-test1")]
         public IEnumerable<WeatherForecast> Get()
         {
-            var v = _testClass.Get();
-            v = _testClass.Get();
-            var ss = AopCacheProviderInstance.Get<Guid>("aaaaa","b").GetAwaiter().GetResult();
+            //var v = _testClass.Get();
+            //v = _testClass.Get();
+            //var ss = AopCacheProviderInstance.Get<Guid>("aaaaa","b").GetAwaiter().GetResult();
 
-            AopCacheProviderInstance.Remove("aaaaa","b");
+            //AopCacheProviderInstance.Remove("aaaaa","b");
 
-            v = _testClass.Get();
+            //v = _testClass.Get();
 
             var rng = new Random();
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast

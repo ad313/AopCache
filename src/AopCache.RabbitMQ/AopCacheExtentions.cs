@@ -23,5 +23,19 @@ namespace Microsoft.Extensions.DependencyInjection
             DependencyRegistrator.ServiceCollection.AddEventBusUseRabbitMq(config);
             DependencyRegistrator.ServiceCollection.AddHostedService<SubscriberWorker>();
         }
+
+        /// <summary>
+        /// 注册 AopCache 缓存清理触发器
+        /// </summary>
+        /// <param name="option"></param>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        public static void AddAopTriggerUseRabbitMqEventBus(this AopCacheOption option, RabbitMqConfig config)
+        {
+            //处理发布订阅
+            new DependencyRegistrator().RegisterServices();
+            DependencyRegistrator.ServiceCollection.AddEventBusUseRabbitMq(config);
+            DependencyRegistrator.ServiceCollection.AddHostedService<SubscriberWorker>();
+        }
     }
 }

@@ -1,27 +1,30 @@
-﻿using System;
+﻿using AopCache.Core.Abstractions;
+using AopCache.EventBus.RabbitMQ.Attributes;
+using AopCache.EventBus.RabbitMQ.Runtime;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using AopCache.Core.Abstractions;
-using AopCache.EventBus.RabbitMQ.Attributes;
-using AopCache.EventBus.RabbitMQ.Runtime;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace AopCache.EventBus.RabbitMQ
 {
-    public class InitHost : BackgroundService
+    public class RabbitMqInitHost : BackgroundService
     {
         private readonly IEventBusProvider _eventBusProvider;
         private readonly ISerializerProvider _serializerProvider;
+        private readonly ILogger<RabbitMqInitHost> _logger;
 
-        public InitHost(IEventBusProvider eventBusProvider, ISerializerProvider serializerProvider)
+        public RabbitMqInitHost(IEventBusProvider eventBusProvider, ISerializerProvider serializerProvider,ILogger<RabbitMqInitHost> logger)
         {
             _eventBusProvider = eventBusProvider;
             _serializerProvider = serializerProvider;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -52,7 +55,7 @@ namespace AopCache.EventBus.RabbitMQ
                         if (isAsync)
                         {
                             var task = result as Task ?? throw new ArgumentException(nameof(result));
-                            await task;
+                            await task.ConfigureAwait(false);
                             result = task.GetType().GetProperty("Result")?.GetValue(task, null);
                         }
 
@@ -62,7 +65,7 @@ namespace AopCache.EventBus.RabbitMQ
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine($"fsfsfs:{e}");
+                        _logger.LogError($"RpcServer Server error：{e.Message}", e);
                         return new RpcResult(null, e);
                     }
                     finally
@@ -104,7 +107,7 @@ namespace AopCache.EventBus.RabbitMQ
                     if (isAsync)
                     {
                         var task = result as Task ?? throw new ArgumentException(nameof(result));
-                        await task;
+                        await task.ConfigureAwait(false);
                     }
                 });
             }

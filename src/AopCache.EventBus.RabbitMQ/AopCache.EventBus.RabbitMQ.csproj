@@ -4,14 +4,15 @@
 		<!--<TargetFramework>netstandard2.1</TargetFramework>-->
 		<TargetFrameworks>net5.0;netstandard2.1;</TargetFrameworks>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Description>基于 RabbitMQ 的 EventBus；IEventBusProvider rabbitmq 新增延迟队列和rpc调用</Description>
+		<Description>基于 RabbitMQ 的 EventBus；IEventBusProvider rabbitmq 新增延迟队列和rpc调用；</Description>
 		<Copyright>Copyright © ad313</Copyright>
 		<Authors>ad313</Authors>
 		<Company>ad313</Company>
 		<PackageProjectUrl>https://github.com/ad313/AopCache</PackageProjectUrl>
 		<PackageTags>AopCache.EventBus.RabbitMQ</PackageTags>
-		<PackageReleaseNotes>基于 RabbitMQ 的 EventBus：普通发布订阅；广播模式；队列模式</PackageReleaseNotes>
-		<Version>1.0.4</Version>
+		<PackageReleaseNotes>基于 RabbitMQ 的 EventBus：普通发布订阅；广播模式；队列模式；添加 RpcServer 和Subscriber 标签，加在方法是自动订阅。添加RpcClient 实现Rpc调用。
+</PackageReleaseNotes>
+		<Version>1.0.4.1</Version>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

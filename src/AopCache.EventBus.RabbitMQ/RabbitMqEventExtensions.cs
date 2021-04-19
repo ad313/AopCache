@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
     /// <summary>
     /// 注册 RabbitMQ EventBus
     /// </summary>
-    public static partial class EventExtensions
+    public static partial class RabbitMqEventExtensions
     {
         /// <summary>
         /// 注册 RabbitMQ EventBus
@@ -34,11 +34,34 @@ namespace Microsoft.Extensions.DependencyInjection
             service.AddSingleton(config);
             service.AddSingleton<ISerializerProvider, SerializerProvider>();
             service.AddTransient<RabbitMqClientProvider>();
-            service.AddSingleton<IEventBusProvider, RabbitEventBusProvider>();
+            service.AddSingleton<IEventBusProvider, RabbitMqEventBusProvider>();
 
             //init rpc
             new DependencyRegistrator().RegisterServices();
-            service.AddHostedService<InitHost>();
+            service.AddHostedService<RabbitMqInitHost>();
+        }
+
+        /// <summary>
+        /// 注册 RabbitMQ EventBus
+        /// </summary>
+        /// <param name="service"></param>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        public static void AddEventBusUseRabbitMq(this IServiceCollection service, RabbitMqConfig config)
+        {
+            if (config == null)
+                throw new ArgumentNullException(nameof(config));
+
+            config.Check();
+
+            service.AddSingleton(config);
+            service.AddSingleton<ISerializerProvider, SerializerProvider>();
+            service.AddTransient<RabbitMqClientProvider>();
+            service.AddSingleton<IEventBusProvider, RabbitMqEventBusProvider>();
+
+            //init rpc
+            new DependencyRegistrator().RegisterServices();
+            service.AddHostedService<RabbitMqInitHost>();
         }
     }
 }

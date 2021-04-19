@@ -10,7 +10,7 @@ namespace AopCache.EventBus.RabbitMQ.Runtime
     /// <summary>
     /// 类型查找器
     /// </summary>
-    public class TypeFinder
+    class TypeFinder
     {
         /// <summary>
         /// 跳过的程序集

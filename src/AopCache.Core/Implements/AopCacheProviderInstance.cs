@@ -49,10 +49,4 @@ namespace AopCache.Core.Implements
             return $"AopCache:{(string.IsNullOrWhiteSpace(group) ? "Default" : group)}:{key}";
         }
     }
-
-    public enum AopCacheType
-    {
-        Memory,
-        Redis
-    }
 }
