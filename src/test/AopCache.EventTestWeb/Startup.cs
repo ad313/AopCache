@@ -43,7 +43,8 @@ namespace AopCache.EventTestWeb
             //services.AddHostedService<EventHost2>();
             //services.AddHostedService<EventHost3>();
 
-            services.AddHostedService<RpcServiceTestHost>();
+            //services.AddHostedService<RpcServiceTestHost>();
+            //services.AddHostedService<BackgroundService1>();
 
             services.AddSingleton<IRabbitmqRpcService, TestRpcService>();
             //services.AddSingleton<TestRpcService>();

@@ -222,7 +222,8 @@ namespace AopCache.EventBus.RabbitMQ
             var channel = _rabbitMqClientProvider.GetChannel();
             channel.ConfirmSelect();
 
-            var replyQueueName = channel.QueueDeclare(_config.GetRpcClientQueueKey(key)).QueueName;
+            //var replyQueueName = channel.QueueDeclare(_config.GetRpcClientQueueKey(key)).QueueName;
+            var replyQueueName = channel.QueueDeclare().QueueName;
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (model, ea) =>
             {
@@ -379,6 +380,7 @@ namespace AopCache.EventBus.RabbitMQ
                 var props = ea.BasicProperties;
                 var replyProps = channel.CreateBasicProperties();
                 replyProps.CorrelationId = props.CorrelationId;
+                
                 RpcResult response = null;
 
                 try

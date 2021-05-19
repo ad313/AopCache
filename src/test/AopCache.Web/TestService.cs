@@ -93,6 +93,21 @@ namespace AopCache.Web
         {
             return Guid.NewGuid().ToString("N");
         }
+
+
+
+        [AopCache(Key = "GetByUserId_{userId}")]
+        [AopSubscriber(Channel = "aaa2_list")]
+        public virtual int GetByUserId(int userId)
+        {
+            return userId;
+        }
+        
+        [AopPublisher(Channel = "aaa2_list")]
+        public virtual string ClearByIdList(string ids)
+        {
+            return Guid.NewGuid().ToString("N");
+        }
     }
 
 

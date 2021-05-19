@@ -51,6 +51,8 @@ namespace AopCache.Test1
                 option.UseMemoryCacheProvider();
                 //option.UseCsRedisCacheProvider("192.168.1.120:30985,password=123456,defaultDatabase=15");
             });
+
+            //services.AddHostedService<BackgroundService1>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

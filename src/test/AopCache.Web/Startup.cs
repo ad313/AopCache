@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using AopCache.Core.Abstractions;
+using AopCache.EventBus.RabbitMQ;
 using AopCache.Implements;
 using AopCache.Runtime;
 using AopCache.Web.Controllers;
@@ -52,25 +53,15 @@ namespace AopCache.Web
 
             services.AddAopCache(option =>
             {
-                option.UseMemoryCacheProvider();
+                //option.UseMemoryCacheProvider();
                 //option.AddAopTriggerUseMemoryEventBus();
 
-                //option.UseCsRedisCacheProvider("192.168.1.120:30985,password=123456,defaultDatabase=5");
+                option.UseCsRedisCacheProvider("192.168.1.120:30985,password=123456,defaultDatabase=5");
 
 
                 //option.AddAopTriggerUseRedisEventBus("192.168.1.120:30985,password=123456,defaultDatabase=5");
 
-                option.AddAopTriggerUseRabbitMqEventBus(config =>
-                {
-                    config.ExchangeName = Configuration.GetValue<string>("RabbitMQ:ExchangeName");
-                    config.HostName = Configuration.GetValue<string>("RabbitMQ:HostName");
-                    config.UserName = Configuration.GetValue<string>("RabbitMQ:UserName");
-                    config.Password = Configuration.GetValue<string>("RabbitMQ:Password");
-                    config.Port = Configuration.GetValue<int>("RabbitMQ:Port");
-                    config.VirtualHost = Configuration.GetValue<string>("RabbitMQ:VirtualHost");
-                    config.PrefetchSize = Configuration.GetValue<uint>("RabbitMQ:PrefetchSize");
-                    config.PrefetchCount = Configuration.GetValue<ushort>("RabbitMQ:PrefetchCount");
-                });
+                option.AddAopTriggerUseRabbitMqEventBus(Configuration.GetSection("RabbitMQ").Get<RabbitMqConfig>());
             });
 
             //MessagePack
