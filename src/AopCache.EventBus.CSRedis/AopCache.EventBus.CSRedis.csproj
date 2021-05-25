@@ -19,6 +19,11 @@
 		<OutputPath>bin\Debug\netstandard2.1\</OutputPath>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
+	  <OutputPath>bin\</OutputPath>
+	  <DocumentationFile>bin\AopCache.EventBus.CSRedis.xml</DocumentationFile>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Include="CSRedisCore" Version="3.6.6" />
 	</ItemGroup>

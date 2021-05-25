@@ -12,13 +12,18 @@
 		<PackageTags>AopCache.EventBus.RabbitMQ</PackageTags>
 		<PackageReleaseNotes>基于 RabbitMQ 的 EventBus：普通发布订阅；广播模式；队列模式；添加 RpcServer 和Subscriber 标签，加在方法是自动订阅。添加RpcClient 实现Rpc调用。
 </PackageReleaseNotes>
-		<Version>1.0.4.2</Version>
+		<Version>1.0.4.3</Version>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<NoWarn>1701;1702;1705;CS1591</NoWarn>
 		<OutputPath>bin\Debug\netstandard2.1\</OutputPath>
 		<DocumentationFile>bin\Debug\netstandard2.1\AopCache.EventBus.RabbitMQ.xml</DocumentationFile>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
+	  <DocumentationFile>bin\AopCache.EventBus.RabbitMQ.xml</DocumentationFile>
+	  <OutputPath>bin\</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -51,7 +51,7 @@ namespace AopCache.EventBus.RabbitMQ
 
                         var result = method.Invoke(instance, pars.ToArray());
 
-                        var isAsync = method.ReturnType.BaseType?.Name == "Task";
+                        var isAsync = method.ReturnType.Name == "Task" || method.ReturnType.BaseType?.Name == "Task";
                         if (isAsync)
                         {
                             var task = result as Task ?? throw new ArgumentException(nameof(result));
@@ -103,7 +103,7 @@ namespace AopCache.EventBus.RabbitMQ
 
                     var result = method.Invoke(instance, pars.ToArray());
 
-                    var isAsync = method.ReturnType.BaseType?.Name == "Task";
+                    var isAsync = method.ReturnType.Name == "Task" || method.ReturnType.BaseType?.Name == "Task";
                     if (isAsync)
                     {
                         var task = result as Task ?? throw new ArgumentException(nameof(result));

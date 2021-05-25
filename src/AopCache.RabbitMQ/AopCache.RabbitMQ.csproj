@@ -17,6 +17,11 @@
 		<DocumentationFile>bin\Debug\netstandard2.1\AopCache.RabbitMQ.xml</DocumentationFile>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
+	  <OutputPath>bin\</OutputPath>
+	  <DocumentationFile>bin\AopCache.RabbitMQ.xml</DocumentationFile>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<ProjectReference Include="..\AopCache.EventBus.RabbitMQ\AopCache.EventBus.RabbitMQ.csproj" />
 		<ProjectReference Include="..\AopCache\AopCache.csproj" />
