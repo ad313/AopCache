@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\AopCache.EventBus.RabbitMQ\AopCache.EventBus.RabbitMQ.csproj" />
+    <ProjectReference Include="..\..\AopCache\AopCache.csproj" />
   </ItemGroup>
 
 </Project>
