@@ -1,12 +1,12 @@
 ﻿using AopCache.Core.Abstractions;
 using AopCache.EventBus.RabbitMQ;
 using Microsoft.Extensions.Hosting;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 
 namespace AopCache.EventTestWeb
 {

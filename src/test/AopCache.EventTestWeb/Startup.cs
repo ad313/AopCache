@@ -1,5 +1,7 @@
 using System;
+using System.Threading.Tasks;
 using AopCache.Core.Abstractions;
+using AopCache.Core.Implements;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -41,13 +43,15 @@ namespace AopCache.EventTestWeb
 
             //services.AddHostedService<EventHost4>();
             //services.AddHostedService<EventHost2>();
-            services.AddHostedService<SampleEventHost>();
+            //services.AddHostedService<SampleEventHost>();
 
             //services.AddHostedService<RpcServiceTestHost>();
             //services.AddHostedService<BackgroundService1>();
 
             //services.AddSingleton<IRabbitmqRpcService, TestRpcService>();
             //services.AddSingleton<TestRpcService>();
+
+            services.AddSingleton<IMemoryEventBusProvider, MemoryEventBusProviderStandard>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -62,8 +66,15 @@ namespace AopCache.EventTestWeb
 
             hostLifetime.ApplicationStarted.Register(async () =>
             {
-                
+                var eventBus = app.ApplicationServices.GetRequiredService<IMemoryEventBusProvider>();
+                eventBus.Subscribe<string>("aaa", a =>
+                {
+                    Console.WriteLine("收到消息" + a.Data);
+                });
 
+                await Task.Delay(1000);
+
+                await eventBus.PublishAsync("aaa", new EventMessageModel<string>(Guid.NewGuid().ToString()));
             });
 
             app.UseRouting();
