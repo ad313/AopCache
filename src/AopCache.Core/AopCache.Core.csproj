@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<!--<TargetFramework>netstandard2.1</TargetFramework>-->
-		<TargetFrameworks>net5.0;netstandard2.1;</TargetFrameworks>
+		<TargetFramework>net5.0</TargetFramework>
+		<LangVersion>9.0</LangVersion>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Description>AopCache 基础核心类库；IEventBusProvider rabbitmq 新增延迟队列和rpc调用；添加 AopCacheProviderInstance 静态类，通过它手工获取或移除缓存，内部维护了前缀。</Description>
 		<Authors>ad313</Authors>
@@ -15,20 +15,9 @@
 		<PackageReleaseNotes>AopCache 基础核心类库</PackageReleaseNotes>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<DocumentationFile>bin\Debug\netstandard2.1\AopCache.Core.xml</DocumentationFile>
-		<OutputPath>bin\Debug\netstandard2.1\</OutputPath>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
-	  <OutputPath>bin\</OutputPath>
-	  <DocumentationFile>bin\AopCache.Core.xml</DocumentationFile>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="5.0.0" />
 		<PackageReference Include="System.Text.Json" Version="5.0.0" />
 		<PackageReference Include="System.Threading.Channels" Version="5.0.0" />
-		<!--<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="5.0.2" />-->
 	</ItemGroup>
 </Project>

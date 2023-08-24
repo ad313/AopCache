@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using AopCache.Core.Abstractions;
-using AopCache.EventBus.RabbitMQ;
-using AopCache.Implements;
-using AopCache.Runtime;
-using AopCache.Web.Controllers;
+﻿using AopCache.Core.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.Threading.Tasks;
+using AopCache.Core.Implements;
 
 namespace AopCache.Web
 {
@@ -35,9 +28,12 @@ namespace AopCache.Web
 
             //注入打了标签的Service
             services.AddTransient<ITestService, TestService>();
-            services.AddTransient<TestSingleClass>();
+            services.AddTransient<TestSingleClass, TestSingleClass_g>();
 
 
+            //services.AddAopCache();
+            services.AddAopCache(d => d.UseRedisCacheProvider("192.168.1.80:32124,password=123456"));
+            
             //自定义存储 这里xxx表示 IAopCacheProvider 的实现            
             //services.AddAopCache<xxx>();    
 
@@ -51,18 +47,18 @@ namespace AopCache.Web
             //services.AddAopCacheUseCsRedis("192.168.1.120:30985,password=123456,defaultDatabase=5");
             //services.AddAopTriggerWithRedis("192.168.1.120:30985,password=123456,defaultDatabase=5");
 
-            services.AddAopCache(option =>
-            {
-                //option.UseMemoryCacheProvider();
-                //option.AddAopTriggerUseMemoryEventBus();
+            //services.AddAopCache(option =>
+            //{
+            //    //option.UseMemoryCacheProvider();
+            //    //option.AddAopTriggerUseMemoryEventBus();
 
-                option.UseCsRedisCacheProvider("192.168.1.120:30985,password=123456,defaultDatabase=5");
+            //    option.UseCsRedisCacheProvider("192.168.1.120:30985,password=123456,defaultDatabase=5");
 
 
-                //option.AddAopTriggerUseRedisEventBus("192.168.1.120:30985,password=123456,defaultDatabase=5");
+            //    //option.AddAopTriggerUseRedisEventBus("192.168.1.120:30985,password=123456,defaultDatabase=5");
 
-                option.AddAopTriggerUseRabbitMqEventBus(Configuration.GetSection("RabbitMQ").Get<RabbitMqConfig>());
-            });
+            //    option.AddAopTriggerUseRabbitMqEventBus(Configuration.GetSection("RabbitMQ").Get<RabbitMqConfig>());
+            //});
 
             //MessagePack
             //services.AddAopCacheUseCsRedisWithMessagePack("192.168.1.110:32350,password=123456,defaultDatabase=5");
@@ -86,51 +82,59 @@ namespace AopCache.Web
 
             hostLifetime.ApplicationStarted.Register(async () =>
             {
-                var provider = app.ApplicationServices.GetService<IEventBusProvider>();
-
-                provider.Subscribe<int>("aqwe", data =>
-                {
-                    Console.WriteLine($"{data.Data}--------------------------------1");
-                });
-
-                provider.Subscribe<int>("aqwe", data =>
-                {
-                    Console.WriteLine($"{data.Data}--------------------------------2");
-                });
-
-                provider.Subscribe<int>("aqwe", data =>
-                {
-                    Console.WriteLine($"{data.Data}--------------------------------3");
-                });
+                var ser = app.ApplicationServices.GetRequiredService<TestSingleClass>();
+                var res1 = ser.GetByUserId(1);
+                res1 = ser.GetByUserId(1);
 
 
-                provider.SubscribeQueue<UserInfo>("abc", 200, 1, ExceptionHandlerEnum.PushToErrorQueueAndContinue,
-                    async data =>
-                    {
-                        Console.WriteLine($"{DateTime.Now} from queue : {data.Count}");
+                return;
 
-                            //foreach (var s in data)
-                            //{
-                            //    Console.WriteLine($"{s}");
-                            //}
 
-                            //await Task.Delay(500);
+                //var provider = app.ApplicationServices.GetService<IEventBusProvider>();
 
-                            //throw new Exception("hahhah");
+                //provider.Subscribe<int>("aqwe", data =>
+                //{
+                //    Console.WriteLine($"{data.Data}--------------------------------1");
+                //});
 
-                            await Task.CompletedTask;
-                    },
-                    async (ex, data) =>
-                    {
-                        Console.WriteLine($"报错了------- : {data.Count}");
-                        await Task.CompletedTask;
+                //provider.Subscribe<int>("aqwe", data =>
+                //{
+                //    Console.WriteLine($"{data.Data}--------------------------------2");
+                //});
 
-                            //throw new Exception("error error");
-                        }, async () =>
-                        {
-                            Console.WriteLine($"over");
-                            await Task.CompletedTask;
-                        });
+                //provider.Subscribe<int>("aqwe", data =>
+                //{
+                //    Console.WriteLine($"{data.Data}--------------------------------3");
+                //});
+
+
+                //provider.SubscribeQueue<UserInfo>("abc", 200, 1, ExceptionHandlerEnum.PushToErrorQueueAndContinue,
+                //    async data =>
+                //    {
+                //        Console.WriteLine($"{DateTime.Now} from queue : {data.Count}");
+
+                //            //foreach (var s in data)
+                //            //{
+                //            //    Console.WriteLine($"{s}");
+                //            //}
+
+                //            //await Task.Delay(500);
+
+                //            //throw new Exception("hahhah");
+
+                //            await Task.CompletedTask;
+                //    },
+                //    async (ex, data) =>
+                //    {
+                //        Console.WriteLine($"报错了------- : {data.Count}");
+                //        await Task.CompletedTask;
+
+                //            //throw new Exception("error error");
+                //        }, async () =>
+                //        {
+                //            Console.WriteLine($"over");
+                //            await Task.CompletedTask;
+                //        });
 
 
                 //await Task.Delay(3000);

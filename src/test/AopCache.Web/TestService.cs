@@ -6,26 +6,26 @@ namespace AopCache.Web
     //接口
     public interface ITestService
     {
-        [AopCache]
-        [AopSubscriber(Channel = "aaa")]
+        //[AopCache(AopTag = true)]
+        //[AopSubscriber(Channel = "aaa")]
         string Get();
 
         //默认时间单位是秒，长度为0，即永不过期
-        [AopCache(Key = "aaa")]
-        [AopSubscriber(Channel = "aaa")]
+        //[AopCache(Key = "aaa")]
+        //[AopSubscriber(Channel = "aaa")]
         string GetByKey();
 
         //设置3秒过期 这里的“{userId}”，占位符。用参数 userId 的值去替换
-        [AopCache(Key = "bbb_{userId}", Length = 3)]
-        [AopSubscriber(Channel = "aaa", Map = "userId={type}")]
+        //[AopCache(Key = "bbb_{userId}", Length = 3)]
+        //[AopSubscriber(Channel = "aaa", Map = "userId={type}")]
         string GetByKeyAndParamter(int userId);
 
         //设置十分钟过期 这里的“{req:Id}”，占位符。用参数 req里面的Id 的值去替换
-        [AopCache(Key = "ccc_{req:Id}_{type}", Type = CacheTimeType.Minute, Length = 10)]
-        [AopSubscriber(Channel = "aaa", Map = "type={type},req:Id={req:Id}")]
+        //[AopCache(Key = "ccc_{req:Id}_{type}", Type = CacheTimeType.Minute, Length = 10)]
+        //[AopSubscriber(Channel = "aaa", Map = "type={type},req:Id={req:Id}")]
         Task<UserInfo> GetUserInfo(int type, Req req);
 
-        [AopPublisher(Channel = "aaa", MessageSource = MessageSource.InParams)]
+        //[AopPublisher(Channel = "aaa", MessageSource = MessageSource.InParams)]
         Task<UserInfo> SetUserInfo(int type, Req req);
     }
 
@@ -47,7 +47,7 @@ namespace AopCache.Web
             return Guid.NewGuid().ToString("N") + "---" + userId;
         }
 
-        public async Task<UserInfo> GetUserInfo(int type, Req req)
+        public virtual async Task<UserInfo> GetUserInfo(int type, Req req)
         {
             return new UserInfo()
             {
@@ -81,14 +81,14 @@ namespace AopCache.Web
     
     public class TestSingleClass
     {
-        [AopCache(Key = "TestSingleClassKey")]
-        [AopSubscriber(Channel = "aaa2")]
+        //[AopCache(Key = "TestSingleClassKey")]
+        //[AopSubscriber(Channel = "aaa2")]
         public virtual string Get()
         {
             return Guid.NewGuid().ToString("N");
         }
         
-        [AopPublisher(Channel = "aaa2")]
+        //[AopPublisher(Channel = "aaa2")]
         public virtual string ClearTestSingleClassCache()
         {
             return Guid.NewGuid().ToString("N");
@@ -96,14 +96,14 @@ namespace AopCache.Web
 
 
 
-        [AopCache(Key = "GetByUserId_{userId}")]
-        [AopSubscriber(Channel = "aaa2_list")]
+        [AopCache(AopTag = true, Key = "GetByUserId_{userId}")]
+        //[AopSubscriber(Channel = "aaa2_list")]
         public virtual int GetByUserId(int userId)
         {
             return userId;
         }
         
-        [AopPublisher(Channel = "aaa2_list")]
+        //[AopPublisher(Channel = "aaa2_list")]
         public virtual string ClearByIdList(string ids)
         {
             return Guid.NewGuid().ToString("N");

@@ -14,16 +14,6 @@
 		<PackageReleaseNotes>AopCache 基础核心类库</PackageReleaseNotes>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<DocumentationFile>bin\Debug\netstandard2.1\AopCache.EventBus.CSRedis.xml</DocumentationFile>
-		<OutputPath>bin\Debug\netstandard2.1\</OutputPath>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
-	  <OutputPath>bin\</OutputPath>
-	  <DocumentationFile>bin\AopCache.EventBus.CSRedis.xml</DocumentationFile>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<PackageReference Include="CSRedisCore" Version="3.6.6" />
 	</ItemGroup>

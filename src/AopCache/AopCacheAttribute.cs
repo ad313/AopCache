@@ -1,13 +1,8 @@
 ﻿using AopCache.Common;
 using AopCache.Core.Abstractions;
-using AopCache.Core.Common;
-using AopCache.Extensions;
-using AspectCore.DependencyInjection;
-using AspectCore.DynamicProxy;
+using Microsoft.Extensions.DependencyInjection;
+using SaiLing.Aop;
 using System;
-using System.Collections.Concurrent;
-using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace AopCache
@@ -16,7 +11,7 @@ namespace AopCache
     /// Aop 缓存
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-    public class AopCacheAttribute : AbstractInterceptorAttribute
+    public class AopCacheAttribute : AopInterceptor
     {
         /// <summary>
         /// 指定缓存键值分组
@@ -37,77 +32,101 @@ namespace AopCache
         /// 时间长度 与时间类型 配合使用 0 表示永不过期
         /// </summary>
         public int Length { get; set; } = 0;
-
-        /// <summary>
-        /// 缓存失效后调用方法时 是否使用线程锁，默认true
-        /// </summary>
-        public bool ThreadLock { get; set; } = false;
         
         /// <summary>
-        /// 包装 Task
+        /// 当前完整Key，包含参数
         /// </summary>
-        private static readonly MethodInfo TaskResultMethod;
-
-        /// <summary>
-        /// 异步锁
-        /// </summary>
-        private readonly AsyncLock _lock = new AsyncLock();
-
-        /// <summary>
-        /// 存储 group key
-        /// </summary>
-        private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, DateTime>> GroupDictionary =
-            new ConcurrentDictionary<string, ConcurrentDictionary<string, DateTime>>();
+        protected string FillKey { get; set; }
 
         /// <summary>
         /// 缓存操作类
         /// </summary>
-        [FromServiceContext]
         public IAopCacheProvider CacheProvider { get; set; }
 
-        static AopCacheAttribute()
+        public AopCacheAttribute()
         {
-            TaskResultMethod = typeof(Task).GetMethods().FirstOrDefault(p => p.Name == "FromResult" && p.ContainsGenericParameters);
+            HasAopNext = false;
+            HasActualNext = false;
+            HasAfter = false;
         }
 
-        /// <summary>
-        /// 处理业务逻辑
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="next"></param>
-        /// <returns></returns>
-        public override async Task Invoke(AspectContext context, AspectDelegate next)
+        public override AopContext Before(AopContext context)
         {
-            //if (string.IsNullOrWhiteSpace(Key))
-            //    Key = context.GetDefaultKey();
+            CacheProvider = context.ServiceProvider.GetService<IAopCacheProvider>();
 
-            var currentCacheKey = Key.FillValue(context.GetParamsDictionary());
-
-            currentCacheKey = FormatPrefix(currentCacheKey);
-
-            //返回值类型
-            var returnType = context.GetReturnType();
-
-            //从缓存取值
-            var cacheValue = await GetCahceValue(currentCacheKey, returnType, context);
-            if (cacheValue != null) return;
+            FillKey = Key.FillValue(context.MethodInputParam);
+            FillKey = FormatPrefix(FillKey);
             
-            //不加锁，直接返回
-            if (!ThreadLock)
+            //从缓存取值 
+            var cache = CacheProvider.Get(FillKey, context.ReturnType).GetAwaiter().GetResult();
+            if (cache != null)
             {
-                await GetDirectValueWithSetCache(context, next, currentCacheKey, returnType);
-                return;
+                context.ReturnValue = cache;
+                HasAopNext = false;
+                HasActualNext = false;
+            }
+            else
+            {
+                HasAopNext = true;
+                HasActualNext = true;
             }
 
-            using (await _lock.LockAsync())
-            {
-                cacheValue = await GetCahceValue(currentCacheKey, returnType, context);
-                if (cacheValue != null) return;
-
-                await GetDirectValueWithSetCache(context, next, currentCacheKey, returnType);
-            }
+            return context;
         }
 
+        /// <summary>执行前操作，异步方法调用</summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public override async ValueTask<AopContext> BeforeAsync(AopContext context)
+        {
+            CacheProvider = context.ServiceProvider.GetService<IAopCacheProvider>();
+
+            FillKey = Key.FillValue(context.MethodInputParam);
+            FillKey = FormatPrefix(FillKey);
+            
+            //从缓存取值 
+            var cache = await CacheProvider.Get(FillKey, context.ReturnType);
+            if (cache != null)
+            {
+                context.ReturnValue = cache;
+                HasAopNext = false;
+                HasActualNext = false;
+            }
+            else
+            {
+                HasAopNext = true;
+                HasActualNext = true;
+            }
+
+            return context;
+        }
+
+        public override AopContext Next(AopContext context)
+        {
+            context = base.Next(context);
+
+            //获取缓存过期时间
+            var limitTime = GetCacheNewTime(Type, Length);
+
+            //加入缓存
+            CacheProvider.Set(FillKey, context.ReturnValue, context.ReturnType, limitTime);
+            
+            return context;
+        }
+
+        public override async ValueTask<AopContext> NextAsync(AopContext context)
+        {
+            context = await base.NextAsync(context);
+
+            //获取缓存过期时间
+            var limitTime = GetCacheNewTime(Type, Length);
+
+            //加入缓存
+            await CacheProvider.Set(FillKey, context.ReturnValue, context.ReturnType, limitTime);
+
+            return context;
+        }
+        
         /// <summary>
         /// 处理Key前缀
         /// </summary>
@@ -117,48 +136,7 @@ namespace AopCache
         {
             return $"AopCache:{(string.IsNullOrWhiteSpace(Group) ? "Default" : Group)}:{key}";
         }
-
-        /// <summary>
-        /// 获取缓存，并处理返回值
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="type"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        private async Task<object> GetCahceValue(string key, Type type, AspectContext context)
-        {
-            //从缓存取值
-            var cacheValue = await CacheProvider.Get(key, type);
-            if (cacheValue != null)
-            {
-                context.ReturnValue = context.IsAsync()
-                    ? TaskResultMethod.MakeGenericMethod(type).Invoke(null, new object[] { cacheValue })
-                    : cacheValue;
-            }
-            return cacheValue;
-        }
-
-        /// <summary>
-        /// 直接调用方法，并把结果加入缓存
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="next"></param>
-        /// <param name="key">缓存key</param>
-        /// <param name="type">缓存值类型</param>
-        /// <returns></returns>
-        public async Task GetDirectValueWithSetCache(AspectContext context, AspectDelegate next, string key, Type type)
-        {
-            //执行方法
-            await next(context);
-
-            //获取缓存过期时间
-            var limitTime = GetCacheNewTime(Type, Length);
-            var value = await context.GetReturnValue();
-
-            //加入缓存
-            await CacheProvider.Set(key, value, type, limitTime);
-        }
-
+        
         /// <summary>
         /// 计算缓存的时间
         /// </summary>

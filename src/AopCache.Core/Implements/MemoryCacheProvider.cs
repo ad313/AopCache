@@ -1,7 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using AopCache.Core.Abstractions;
+﻿using AopCache.Core.Abstractions;
 using Microsoft.Extensions.Caching.Memory;
+using System;
+using System.Threading.Tasks;
 
 namespace AopCache.Core.Implements
 {
@@ -23,7 +23,7 @@ namespace AopCache.Core.Implements
             _cache = cache;
             _serializerProvider = serializerProvider;
         }
-
+        
         /// <summary>
         /// 获取缓存
         /// </summary>

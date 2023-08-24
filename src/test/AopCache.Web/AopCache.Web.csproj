@@ -3,14 +3,25 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>60d6bc8a-b91d-4aa1-bc41-f45bad0b575c</UserSecretsId>
+	  <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
 
-
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\AopCache.Redis\AopCache.Redis.csproj" />
+    <ProjectReference Include="..\..\AopCache\AopCache.csproj" />
+  </ItemGroup>
+
+
+
+  <!--<ItemGroup>
     <ProjectReference Include="..\..\AopCache.RabbitMQ\AopCache.RabbitMQ.csproj" />
     <ProjectReference Include="..\..\AopCache.Redis\AopCache.Redis.csproj" />
-  </ItemGroup>
+  </ItemGroup>-->
 
 </Project>
 

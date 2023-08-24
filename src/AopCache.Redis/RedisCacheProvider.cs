@@ -1,6 +1,7 @@
-﻿using System;
+﻿using AopCache.Core.Abstractions;
+using FreeRedis;
+using System;
 using System.Threading.Tasks;
-using AopCache.Core.Abstractions;
 
 namespace AopCache.Redis
 {
@@ -9,16 +10,21 @@ namespace AopCache.Redis
     /// </summary>
     public class RedisCacheProvider : IAopCacheProvider
     {
+        public static RedisClient RedisClient { get; private set; }
+
+        public static string Conn { get; set; }
+
         private readonly ISerializerProvider _serializerProvider;
 
         public RedisCacheProvider(ISerializerProvider serializerProvider)
         {
             _serializerProvider = serializerProvider;
         }
-
+        
         public async Task<object> Get(string key, Type type)
         {
-            return string.IsNullOrWhiteSpace(key) ? null : _serializerProvider.Deserialize(await RedisHelper.GetAsync<byte[]>(key), type);
+            CheckInit();
+            return string.IsNullOrWhiteSpace(key) ? null : _serializerProvider.Deserialize(await RedisClient.GetAsync<byte[]>(key), type);
         }
 
         public async Task<bool> Set(string key, object value, Type type, DateTime absoluteExpiration)
@@ -28,14 +34,33 @@ namespace AopCache.Redis
                 return false;
             }
 
-            return await RedisHelper.SetAsync(key, _serializerProvider.SerializeBytes(value, type), absoluteExpiration - DateTime.Now);
+            CheckInit();
+
+            await RedisClient.SetAsync(key, _serializerProvider.SerializeBytes(value, type), (int)(absoluteExpiration - DateTime.Now).TotalSeconds);
+
+            return true;
         }
 
         public void Remove(string key)
         {
+            CheckInit();
             if (string.IsNullOrWhiteSpace(key)) return;
-            RedisHelper.Del(key);
+            RedisClient.Del(key);
+        }
+
+        private void CheckInit()
+        {
+            if (RedisClient != null)
+                return;
+
+            if (string.IsNullOrWhiteSpace(Conn))
+                throw new ArgumentNullException(nameof(Conn));
+
+            RedisClient = new RedisClient(Conn)
+            {
+                Serialize = obj => _serializerProvider.Serialize(obj),
+                Deserialize = (json, type) => _serializerProvider.Deserialize(json, type),
+            };
         }
     }
 }
-
