@@ -18,6 +18,11 @@ namespace AopCache
     public class AopCacheAttribute : AbstractInterceptorAttribute
     {
         /// <summary>
+        /// 保留字段
+        /// </summary>
+        public bool AopTag { get; set; }
+
+        /// <summary>
         /// 指定缓存键值分组
         /// </summary>
         public string Group { get; set; } = "Default";

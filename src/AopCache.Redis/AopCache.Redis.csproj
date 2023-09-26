@@ -2,31 +2,21 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.1;net5.0;net6.0;net7.0;</TargetFrameworks>
-		<Version>0.4.0.1</Version>
-		<Description>AopCache 缓存存储与缓存清理触发器，基于CsRedis的实现</Description>
+		<Version>2.0.1</Version>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<Description>AopCache 缓存存储，基于 FreeRedis 的实现</Description>
 		<Copyright>Copyright © ad313</Copyright>
 		<PackageProjectUrl>https://github.com/ad313/AopCache</PackageProjectUrl>
 		<PackageTags>AopCache.Redis</PackageTags>
-		<PackageReleaseNotes>AopCache 缓存存储与缓存清理触发器，基于CsRedis的实现</PackageReleaseNotes>
+		<PackageReleaseNotes>AopCache 缓存存储，基于 FreeRedis 的实现</PackageReleaseNotes>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>ad313</Authors>
 		<Company>ad313</Company>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<OutputPath>bin\Debug\netstandard2.1\</OutputPath>
-		<DocumentationFile>bin\Debug\netstandard2.1\AopCache.Redis.xml</DocumentationFile>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
-		<OutputPath>bin\</OutputPath>
-		<DocumentationFile>bin\AopCache.Redis.xml</DocumentationFile>
+		<DocumentationFile>AopCache.Redis.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!--<PackageReference Include="CSRedisCore" Version="3.6.6" />-->
 		<PackageReference Include="FreeRedis" Version="1.1.10" />
-		<!--<PackageReference Include="MessagePack" Version="2.2.85" />-->
 	</ItemGroup>
 
 	<ItemGroup>

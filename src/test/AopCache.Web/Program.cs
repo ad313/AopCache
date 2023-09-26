@@ -1,4 +1,4 @@
-﻿//using AspectCore.Extensions.Hosting;
+﻿using AspectCore.Extensions.Hosting;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
@@ -13,9 +13,7 @@ namespace AopCache.Web
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                //.UseServiceContext()  // 激活aspectcore
+                .UseServiceContext()  // 激活aspectcore
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
-
-        //.UseServiceProviderFactory(new AspectCoreServiceProviderFactory());
     }
 }

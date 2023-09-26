@@ -7,11 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache.Redis", "AopCache.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache", "AopCache\AopCache.csproj", "{1CAD9535-9720-47AE-9CA7-084A5405270E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DC4CB5EB-C2D5-4598-9030-36A9B4E3CEE4}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AopCache.Core", "AopCache.Core\AopCache.Core.csproj", "{FDFC8CB5-A8A5-4FF5-8B2D-E666BE463CBD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{0AA11744-0E92-4D3D-B469-710D53466DD5}"
@@ -21,6 +16,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AopCache.SourceGenerator", "AopCache.SourceGenerator\AopCache.SourceGenerator.csproj", "{EF9FFF9F-DFA5-4FFE-98A6-C16E1C581CF5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AopCache.SourceGenerator.Redis", "AopCache.SourceGenerator.Redis\AopCache.SourceGenerator.Redis.csproj", "{738AE423-5FDE-4E91-8B22-71A2EEA90229}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AspectCore-Aop", "AspectCore-Aop", "{52AC5B89-CB9E-4406-82FD-1FC900FD22D6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SourceGenerator-Aop", "SourceGenerator-Aop", "{DC36A399-E7AD-4084-A434-9E0FC54EC8E2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{88F4CC05-7ACA-431C-9BB7-417B52546B27}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,7 +58,12 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{C0117122-46F8-4442-8D74-6482BD37B62D} = {52AC5B89-CB9E-4406-82FD-1FC900FD22D6}
+		{1CAD9535-9720-47AE-9CA7-084A5405270E} = {52AC5B89-CB9E-4406-82FD-1FC900FD22D6}
+		{FDFC8CB5-A8A5-4FF5-8B2D-E666BE463CBD} = {88F4CC05-7ACA-431C-9BB7-417B52546B27}
 		{4B26EE16-8069-4630-ADFC-241CBD1AC4A9} = {0AA11744-0E92-4D3D-B469-710D53466DD5}
+		{EF9FFF9F-DFA5-4FFE-98A6-C16E1C581CF5} = {DC36A399-E7AD-4084-A434-9E0FC54EC8E2}
+		{738AE423-5FDE-4E91-8B22-71A2EEA90229} = {DC36A399-E7AD-4084-A434-9E0FC54EC8E2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B1108F3-7C57-4E67-9D55-2ED5300BFBA2}

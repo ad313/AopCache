@@ -22,13 +22,13 @@ namespace AopCache.Web
             services.AddControllersWithViews().SetCompatibilityVersion(CompatibilityVersion.Latest);
 
 
-            ////注入打了标签的Service
-            //services.AddTransient<ITestService, TestService>();
-            //services.AddTransient<TestSingleClass>();
-
             //注入打了标签的Service
-            services.AddTransient<ITestService, TestService_g>();
-            services.AddTransient<TestSingleClass, TestSingleClass_g>();
+            services.AddTransient<ITestService, TestService>();
+            services.AddTransient<TestSingleClass>();
+
+            ////注入打了标签的Service
+            //services.AddTransient<ITestService, TestService_g>();
+            //services.AddTransient<TestSingleClass, TestSingleClass_g>();
 
 
             services.AddAopCache(option =>

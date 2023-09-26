@@ -2,6 +2,15 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net5.0;net6.0;net7.0;</TargetFrameworks>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<DocumentationFile>AopCache.SourceGenerator.Redis.xml</DocumentationFile>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Version>2.0.1</Version>
+		<Description>AopCache 缓存存储，基于 FreeRedis 的实现</Description>
+		<Copyright>Copyright © ad313</Copyright>
+		<PackageProjectUrl>https://github.com/ad313/AopCache</PackageProjectUrl>
+		<PackageReleaseNotes>AopCache 缓存存储，基于 FreeRedis 的实现</PackageReleaseNotes>
+		<Authors>ad313</Authors>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -9,7 +18,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\AopCache.SourceGenerator\AopCache.SourceGenerator.csproj" />
+		<ProjectReference Include="..\AopCache.SourceGenerator\AopCache.SourceGenerator.csproj" />
 	</ItemGroup>
 
 </Project>

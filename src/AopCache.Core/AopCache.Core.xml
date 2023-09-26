@@ -1,0 +1,335 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AopCache.Core</name>
+    </assembly>
+    <members>
+        <member name="T:AopCache.Core.Abstractions.IAopCacheProvider">
+            <summary>
+            Aop 缓存接口
+            </summary>
+        </member>
+        <member name="M:AopCache.Core.Abstractions.IAopCacheProvider.Get(System.String,System.Type)">
+            <summary>
+            获取缓存
+            </summary>
+            <param name="key">key</param>
+            <param name="type">数据类型</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Abstractions.IAopCacheProvider.Set(System.String,System.Object,System.Type,System.DateTime)">
+            <summary>
+            设置缓存
+            </summary>
+            <param name="key">key</param>
+            <param name="value">值</param>
+            <param name="type">数据类型</param>
+            <param name="absoluteExpiration">绝对过期实现</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Abstractions.IAopCacheProvider.Remove(System.String)">
+            <summary>
+            移除缓存
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="T:AopCache.Core.Abstractions.ISerializerProvider">
+            <summary>
+            序列化接口
+            </summary>
+        </member>
+        <member name="M:AopCache.Core.Abstractions.ISerializerProvider.Serialize(System.Object,System.Type)">
+            <summary>
+            序列化
+            </summary>
+            <param name="data"></param>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Abstractions.ISerializerProvider.SerializeBytes(System.Object,System.Type)">
+            <summary>
+            序列化
+            </summary>
+            <param name="data"></param>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Abstractions.ISerializerProvider.Deserialize``1(System.String)">
+            <summary>
+            反序列化
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="json"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Abstractions.ISerializerProvider.Deserialize(System.String,System.Type)">
+            <summary>
+            反序列化
+            </summary>
+            <param name="json"></param>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Abstractions.ISerializerProvider.Deserialize``1(System.Byte[])">
+            <summary>
+            反序列化
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="bytes"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Abstractions.ISerializerProvider.Deserialize(System.Byte[],System.Type)">
+            <summary>
+            反序列化
+            </summary>
+            <param name="bytes"></param>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Abstractions.ISerializerProvider.Clone``1(``0)">
+            <summary>
+            克隆对象
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Abstractions.ISerializerProvider.Clone(System.Object,System.Type)">
+            <summary>
+            克隆对象
+            </summary>
+            <param name="data"></param>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="T:AopCache.Core.Common.AsyncLock">
+            <summary>
+            异步锁
+            </summary>
+        </member>
+        <member name="T:AopCache.Core.Common.CacheTimeType">
+            <summary>
+            缓存的时间类型
+            </summary>
+        </member>
+        <member name="F:AopCache.Core.Common.CacheTimeType.Day">
+            <summary>
+            天
+            </summary>
+        </member>
+        <member name="F:AopCache.Core.Common.CacheTimeType.Hour">
+            <summary>
+            小时
+            </summary>
+        </member>
+        <member name="F:AopCache.Core.Common.CacheTimeType.Minute">
+            <summary>
+            分钟
+            </summary>
+        </member>
+        <member name="F:AopCache.Core.Common.CacheTimeType.Second">
+            <summary>
+            秒
+            </summary>
+        </member>
+        <member name="M:AopCache.Core.Common.CacheTimeHelper.GetCacheNewTime(AopCache.Core.Common.CacheTimeType,System.Int32)">
+            <summary>
+            计算缓存的时间
+            </summary>
+            <param name="type"></param>
+            <param name="length"></param>
+            <returns></returns>
+        </member>
+        <member name="T:AopCache.Core.Common.Helpers">
+            <summary>
+            对象转换成字典
+            </summary>
+        </member>
+        <member name="M:AopCache.Core.Common.Helpers.SplitList``1(System.Collections.Generic.List{``0},System.Int32)">
+            <summary>
+            把list按照指定数量分隔
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="list"></param>
+            <param name="length"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Implements.AopCacheProviderInstance.Get``1(System.String,System.String)">
+            <summary>
+            获取缓存
+            </summary>
+            <param name="key">key</param>
+            <param name="group">分组 默认 Default</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Implements.AopCacheProviderInstance.Remove(System.String,System.String)">
+            <summary>
+            移除缓存
+            </summary>
+            <param name="key"></param>
+            <param name="group"></param>
+            <returns></returns>
+        </member>
+        <member name="T:AopCache.Core.Implements.MemoryCacheProvider">
+            <summary>
+            Aop 内存缓存实现
+            </summary>
+        </member>
+        <member name="M:AopCache.Core.Implements.MemoryCacheProvider.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,AopCache.Core.Abstractions.ISerializerProvider)">
+            <summary>
+            初始化
+            </summary>
+            <param name="cache"></param>
+            <param name="serializerProvider"></param>
+        </member>
+        <member name="M:AopCache.Core.Implements.MemoryCacheProvider.Get(System.String,System.Type)">
+            <summary>
+            获取缓存
+            </summary>
+            <param name="key">key</param>
+            <param name="type">数据类型</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Implements.MemoryCacheProvider.Set(System.String,System.Object,System.Type,System.DateTime)">
+            <summary>
+            设置缓存
+            </summary>
+            <param name="key">key</param>
+            <param name="value">值</param>
+            <param name="type">数据类型</param>
+            <param name="absoluteExpiration">绝对过期实现</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Implements.MemoryCacheProvider.Remove(System.String)">
+            <summary>
+            移除缓存
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="T:AopCache.Core.Implements.SerializerProvider">
+            <summary>
+            序列化接口
+            </summary>
+        </member>
+        <member name="M:AopCache.Core.Implements.SerializerProvider.Serialize(System.Object,System.Type)">
+            <summary>
+            序列化
+            </summary>
+            <param name="data"></param>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Implements.SerializerProvider.SerializeBytes(System.Object,System.Type)">
+            <summary>
+            序列化
+            </summary>
+            <param name="data"></param>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Implements.SerializerProvider.Deserialize``1(System.String)">
+            <summary>
+            反序列化
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="json"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Implements.SerializerProvider.Deserialize(System.String,System.Type)">
+            <summary>
+            反序列化
+            </summary>
+            <param name="json"></param>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Implements.SerializerProvider.Deserialize``1(System.Byte[])">
+            <summary>
+            反序列化
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="bytes"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Implements.SerializerProvider.Deserialize(System.Byte[],System.Type)">
+            <summary>
+            反序列化
+            </summary>
+            <param name="bytes"></param>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Implements.SerializerProvider.Clone``1(``0)">
+            <summary>
+            克隆对象
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Core.Implements.SerializerProvider.Clone(System.Object,System.Type)">
+            <summary>
+            克隆对象
+            </summary>
+            <param name="data"></param>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="T:AopCache.Common.ParamsHelper">
+            <summary>
+            处理参数辅助类
+            </summary>
+        </member>
+        <member name="F:AopCache.Common.ParamsHelper.KeyParamsCache">
+            <summary>
+            每个方法 key中的参数
+            </summary>
+        </member>
+        <member name="F:AopCache.Common.ParamsHelper.Separator">
+            <summary>
+            参数分隔符
+            </summary>
+        </member>
+        <member name="M:AopCache.Common.ParamsHelper.FillValue(System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            格式化字符串中的占位符，用给定的参数值填充
+            </summary>
+            <param name="source">原始字符串</param>
+            <param name="paramDictionary">参数数据字典</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Common.ParamsHelper.GetKeyParams(System.String)">
+            <summary>
+            处理附加的参数
+            </summary>
+            <param name="source"></param>
+        </member>
+        <member name="M:AopCache.Common.ParamsHelper.GetKeyParamsInternal(System.String)">
+            <summary>
+            正则匹配参数，返回参数数组
+            </summary>
+            <param name="source"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Common.ParamsHelper.FillParamValues(System.String,System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            处理附加参数，给占位符填充值
+            </summary>
+            <param name="source">原始字符串</param>
+            <param name="keys">附加的参数名称数组</param>
+            <param name="pars">参数字段</param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.Common.ParamsHelper.FillParamValues(System.String,System.Collections.Generic.Dictionary{System.String,System.String},System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            处理附加参数，给占位符填充值
+            </summary>
+            <param name="source">原始字符串</param>
+            <param name="dicMaps">附加的参数名称数组</param>
+            <param name="pars">参数字段</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
