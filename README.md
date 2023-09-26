@@ -9,7 +9,7 @@
     //使用 redis
     <PackageReference Include="AopCache.Redis" Version="2.0.1" />
     
-### 1.2、基于 SourceGenerator 的 Mic.Aop（https://github.com/ad313/mic/tree/develop/src/Mic.Aop）
+### 1.2、基于 SourceGenerator 的 Mic.Aop：https://github.com/ad313/mic/tree/develop/src/Mic.Aop
     //最小化使用 使用 MemoryCache
     <PackageReference Include="AopCache.SourceGenerator" Version="2.0.1" />
     
