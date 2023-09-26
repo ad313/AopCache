@@ -1,7 +1,6 @@
 ﻿using AopCache.Common;
 using AopCache.Core.Abstractions;
 using AopCache.Core.Common;
-using AopCache.Extensions;
 using AspectCore.DependencyInjection;
 using AspectCore.DynamicProxy;
 using System;
@@ -18,6 +17,11 @@ namespace AopCache
     [AttributeUsage(AttributeTargets.Method)]
     public class AopCacheAttribute : AbstractInterceptorAttribute
     {
+        /// <summary>
+        /// 保留字段
+        /// </summary>
+        public bool AopTag { get; set; }
+
         /// <summary>
         /// 指定缓存键值分组
         /// </summary>
@@ -51,7 +55,7 @@ namespace AopCache
         /// <summary>
         /// 异步锁
         /// </summary>
-        private readonly AsyncLock _lock = new AsyncLock();
+        private static readonly AsyncLock Lock = new AsyncLock();
 
         /// <summary>
         /// 存储 group key
@@ -78,9 +82,6 @@ namespace AopCache
         /// <returns></returns>
         public override async Task Invoke(AspectContext context, AspectDelegate next)
         {
-            //if (string.IsNullOrWhiteSpace(Key))
-            //    Key = context.GetDefaultKey();
-
             var currentCacheKey = Key.FillValue(context.GetParamsDictionary());
 
             currentCacheKey = FormatPrefix(currentCacheKey);
@@ -99,7 +100,7 @@ namespace AopCache
                 return;
             }
 
-            using (await _lock.LockAsync())
+            using (await Lock.LockAsync())
             {
                 cacheValue = await GetCahceValue(currentCacheKey, returnType, context);
                 if (cacheValue != null) return;
@@ -152,64 +153,11 @@ namespace AopCache
             await next(context);
 
             //获取缓存过期时间
-            var limitTime = GetCacheNewTime(Type, Length);
+            var limitTime = CacheTimeHelper.GetCacheNewTime(Type, Length);
             var value = await context.GetReturnValue();
 
             //加入缓存
             await CacheProvider.Set(key, value, type, limitTime);
         }
-
-        /// <summary>
-        /// 计算缓存的时间
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="length"></param>
-        /// <returns></returns>
-        private DateTime GetCacheNewTime(CacheTimeType type, int length)
-        {
-            if (length <= 0) return DateTime.MaxValue;
-
-            var limitTime = DateTime.Now;
-            switch (type)
-            {
-                case CacheTimeType.Day:
-                    limitTime = limitTime.AddDays(length);
-                    break;
-                case CacheTimeType.Hour:
-                    limitTime = limitTime.AddHours(length);
-                    break;
-                case CacheTimeType.Minute:
-                    limitTime = limitTime.AddMinutes(length);
-                    break;
-                case CacheTimeType.Second:
-                    limitTime = limitTime.AddSeconds(length);
-                    break;
-            }
-
-            return limitTime;
-        }
-    }
-
-    /// <summary>
-    /// 缓存的时间类型
-    /// </summary>
-    public enum CacheTimeType
-    {
-        /// <summary>
-        /// 天
-        /// </summary>
-        Day = 1,
-        /// <summary>
-        /// 小时
-        /// </summary>
-        Hour = 2,
-        /// <summary>
-        /// 分钟
-        /// </summary>
-        Minute = 3,
-        /// <summary>
-        /// 秒
-        /// </summary>
-        Second = 4
     }
 }

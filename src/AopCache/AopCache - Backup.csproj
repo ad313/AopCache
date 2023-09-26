@@ -1,11 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.1;net5.0;net6.0;net7.0;</TargetFrameworks>
-		<AssemblyVersion>2.0.1</AssemblyVersion>
-		<FileVersion>2.0.1</FileVersion>
-		<Version>2.0.1</Version>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<TargetFrameworks>net5.0;netstandard2.1;</TargetFrameworks>
+		<AssemblyVersion>0.4.0.1</AssemblyVersion>
+		<FileVersion>0.4.0.1</FileVersion>
+		<Version>0.4.0.1</Version>
 		<Authors>ad313</Authors>
 		<Description>基于 AspectCore 的简易缓存组件。通过在方法上加 [AopCache]标记实现自动缓存。可以自定义缓存key，缓存时间。默认是 MemoryCache。也可以自己实现 IAopCacheProvider 接口并注入，自定义缓存存储。</Description>
 		<PackageProjectUrl>https://github.com/ad313/AopCache</PackageProjectUrl>
@@ -14,12 +13,24 @@
 		<Copyright>Copyright © ad313</Copyright>
 		<PackageTags>AopCache</PackageTags>
 		<PackageReleaseNotes>基于 AspectCore 的简易缓存组件。通过在方法上加 [AopCache]标记实现自动缓存。可以自定义缓存key，缓存时间。默认是 MemoryCache。也可以自己实现 IAopCacheProvider 接口并注入，自定义缓存存储。</PackageReleaseNotes>
+		<OutputType>Library</OutputType>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DocumentationFile>bin\Debug\netstandard2.1\AopCache.xml</DocumentationFile>
+		<GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+		<OutputPath>bin\Debug\netstandard2.1\</OutputPath>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
+	  <OutputPath>bin\</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AspectCore.Core" Version="2.4.0" />
-		<PackageReference Include="AspectCore.Extensions.DependencyInjection" Version="2.4.0" />
-		<PackageReference Include="AspectCore.Extensions.Hosting" Version="2.4.0" />
+		<PackageReference Include="AspectCore.Core" Version="2.2.0" />
+		<PackageReference Include="AspectCore.Extensions.DependencyInjection" Version="2.2.0" />
+		<!--<PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />-->
+		<PackageReference Include="AspectCore.Extensions.Hosting" Version="2.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>

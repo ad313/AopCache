@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AopCache.SourceGenerator</name>
+    </assembly>
+    <members>
+        <member name="T:AopCache.AopCacheAttribute">
+            <summary>
+            Aop 缓存
+            </summary>
+        </member>
+        <member name="P:AopCache.AopCacheAttribute.Group">
+            <summary>
+            指定缓存键值分组
+            </summary>
+        </member>
+        <member name="P:AopCache.AopCacheAttribute.Key">
+            <summary>
+            指定缓存键值 可以附加参数 如 UserInfo_{model.Name}_{type}
+            </summary>
+        </member>
+        <member name="P:AopCache.AopCacheAttribute.Type">
+            <summary>
+            缓存时间类型 默认秒
+            </summary>
+        </member>
+        <member name="P:AopCache.AopCacheAttribute.Length">
+            <summary>
+            时间长度 与时间类型 配合使用 0 表示永不过期
+            </summary>
+        </member>
+        <member name="P:AopCache.AopCacheAttribute.FillKey">
+            <summary>
+            当前完整Key，包含参数
+            </summary>
+        </member>
+        <member name="P:AopCache.AopCacheAttribute.CacheProvider">
+            <summary>
+            缓存操作类
+            </summary>
+        </member>
+        <member name="M:AopCache.AopCacheAttribute.BeforeAsync(Mic.Aop.AopContext)">
+            <summary>执行前操作，异步方法调用</summary>
+            <param name="context"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AopCache.AopCacheAttribute.FormatPrefix(System.String)">
+            <summary>
+            处理Key前缀
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Extensions.DependencyInjection.AopCacheExtensions">
+            <summary>
+            注册AopCache
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using AopCache.Core.Abstractions;
 using AopCache.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
-using AopCache.Core.Abstractions;
 
 namespace AopCache.Web.Controllers
 {
@@ -16,16 +14,14 @@ namespace AopCache.Web.Controllers
         private TestSingleClass TestSingleClass { get; set; }
 
         private IAopCacheProvider AopCacheProvider { get; set; }
-        private IEventBusProvider EventBusProvider { get; }
 
-        public HomeController(ITestService testService, TestSingleClass testSingleClass, IAopCacheProvider aopCacheProvider, IEventBusProvider eventBusProvider)
+        public HomeController(ITestService testService, TestSingleClass testSingleClass, IAopCacheProvider aopCacheProvider)
         {
             TestService = testService;
 
             TestSingleClass = testSingleClass;
 
             AopCacheProvider = aopCacheProvider;
-            EventBusProvider = eventBusProvider;
         }
 
         /// <summary>
@@ -149,6 +145,16 @@ namespace AopCache.Web.Controllers
 
             TestSingleClass.ClearTestSingleClassCache();
 
+
+            //await Task.Delay(2000);
+
+
+            var r1 = TestSingleClass.GetByUserId(1);
+            var r2 = TestSingleClass.GetByUserId(2);
+            var r3 = TestSingleClass.GetByUserId(3);
+
+            TestSingleClass.ClearByIdList("1,2,3");
+
             return Content(sb.ToString());
         }
 
@@ -157,6 +163,12 @@ namespace AopCache.Web.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        //[RpcServer("aaaaabbbbb")]
+        //public async Task<DateTime> Get()
+        //{
+        //    return DateTime.Now;
+        //}
     }
 
 }

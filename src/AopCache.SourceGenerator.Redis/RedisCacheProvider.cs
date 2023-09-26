@@ -1,9 +1,9 @@
-﻿using AopCache.Core.Abstractions;
-using FreeRedis;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using AopCache.Core.Abstractions;
+using FreeRedis;
 
-namespace AopCache.Redis
+namespace AopCache.SourceGenerator.Redis
 {
     /// <summary>
     /// Aop CsRedis 缓存实现
