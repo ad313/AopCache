@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<!--<TargetFramework>netstandard2.1</TargetFramework>-->
-		<TargetFrameworks>net5.0;netstandard2.1;</TargetFrameworks>
+		<TargetFrameworks>netstandard2.1;net5.0;net6.0;net7.0;</TargetFrameworks>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Description>AopCache 基础核心类库；IEventBusProvider rabbitmq 新增延迟队列和rpc调用；添加 AopCacheProviderInstance 静态类，通过它手工获取或移除缓存，内部维护了前缀。</Description>
 		<Authors>ad313</Authors>

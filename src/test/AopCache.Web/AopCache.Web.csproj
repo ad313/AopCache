@@ -5,11 +5,12 @@
     <UserSecretsId>60d6bc8a-b91d-4aa1-bc41-f45bad0b575c</UserSecretsId>
   </PropertyGroup>
 
-
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\AopCache.RabbitMQ\AopCache.RabbitMQ.csproj" />
-    <ProjectReference Include="..\..\AopCache.Redis\AopCache.Redis.csproj" />
+    <ProjectReference Include="..\..\AopCache.SourceGenerator.Redis\AopCache.SourceGenerator.Redis.csproj" />
   </ItemGroup>
 
 </Project>

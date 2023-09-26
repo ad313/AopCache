@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net5.0;netstandard2.1;</TargetFrameworks>
+		<TargetFrameworks>netstandard2.1;net5.0;net6.0;net7.0;</TargetFrameworks>
 		<Version>0.4.0.1</Version>
 		<Description>AopCache 缓存存储与缓存清理触发器，基于CsRedis的实现</Description>
 		<Copyright>Copyright © ad313</Copyright>
@@ -19,17 +19,17 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
-	  <OutputPath>bin\</OutputPath>
-	  <DocumentationFile>bin\AopCache.Redis.xml</DocumentationFile>
+		<OutputPath>bin\</OutputPath>
+		<DocumentationFile>bin\AopCache.Redis.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CSRedisCore" Version="3.6.6" />
+		<!--<PackageReference Include="CSRedisCore" Version="3.6.6" />-->
+		<PackageReference Include="FreeRedis" Version="1.1.10" />
 		<!--<PackageReference Include="MessagePack" Version="2.2.85" />-->
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\AopCache.EventBus.CSRedis\AopCache.EventBus.CSRedis.csproj" />
 		<ProjectReference Include="..\AopCache\AopCache.csproj" />
 	</ItemGroup>
 

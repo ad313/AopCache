@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using AopCache.Core.Abstractions;
 using AopCache.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
-using AopCache.Core.Abstractions;
-using AopCache.EventBus.RabbitMQ.Attributes;
 
 namespace AopCache.Web.Controllers
 {
@@ -17,16 +14,14 @@ namespace AopCache.Web.Controllers
         private TestSingleClass TestSingleClass { get; set; }
 
         private IAopCacheProvider AopCacheProvider { get; set; }
-        private IEventBusProvider EventBusProvider { get; }
 
-        public HomeController(ITestService testService, TestSingleClass testSingleClass, IAopCacheProvider aopCacheProvider, IEventBusProvider eventBusProvider)
+        public HomeController(ITestService testService, TestSingleClass testSingleClass, IAopCacheProvider aopCacheProvider)
         {
             TestService = testService;
 
             TestSingleClass = testSingleClass;
 
             AopCacheProvider = aopCacheProvider;
-            EventBusProvider = eventBusProvider;
         }
 
         /// <summary>
@@ -151,7 +146,7 @@ namespace AopCache.Web.Controllers
             TestSingleClass.ClearTestSingleClassCache();
 
 
-            await Task.Delay(2000);
+            //await Task.Delay(2000);
 
 
             var r1 = TestSingleClass.GetByUserId(1);
