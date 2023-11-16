@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.1;net5.0;net6.0;net7.0;</TargetFrameworks>
-		<Version>2.0.1</Version>
+		<TargetFrameworks>netstandard2.1;net5.0;net6.0;net7.0;net8.0</TargetFrameworks>
+		<Version>2.0.2</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<Description>AopCache 缓存存储，基于 FreeRedis 的实现</Description>
 		<Copyright>Copyright © ad313</Copyright>
@@ -16,7 +16,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="FreeRedis" Version="1.1.10" />
+		<PackageReference Include="FreeRedis" Version="1.2.5" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net5.0;net6.0;net7.0;</TargetFrameworks>
+		<TargetFrameworks>net5.0;net6.0;net7.0;net8.0</TargetFrameworks>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<DocumentationFile>AopCache.SourceGenerator.xml</DocumentationFile>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<Version>2.0.1</Version>
+		<Version>2.0.2</Version>
 		<Description>基于 SourceGenerator 的简易缓存组件。通过在方法上加 [AopCache]标记实现自动缓存。可以自定义缓存key，缓存时间。默认是 MemoryCache。也可以自己实现 IAopCacheProvider 接口并注入，自定义缓存存储。</Description>
 		<PackageProjectUrl>https://github.com/ad313/AopCache</PackageProjectUrl>
 		<Copyright>Copyright © ad313</Copyright>
@@ -14,7 +14,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Mic.Aop" Version="2.0.0" />
+		<PackageReference Include="Mic.Aop" Version="2.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>

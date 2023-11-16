@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.1;net5.0;net6.0;net7.0;</TargetFrameworks>
-		<AssemblyVersion>2.0.1</AssemblyVersion>
-		<FileVersion>2.0.1</FileVersion>
-		<Version>2.0.1</Version>
+		<TargetFrameworks>netstandard2.1;net5.0;net6.0;net7.0;net8.0</TargetFrameworks>
+		<AssemblyVersion>2.0.2</AssemblyVersion>
+		<FileVersion>2.0.2</FileVersion>
+		<Version>2.0.2</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<Authors>ad313</Authors>
 		<Description>基于 AspectCore 的简易缓存组件。通过在方法上加 [AopCache]标记实现自动缓存。可以自定义缓存key，缓存时间。默认是 MemoryCache。也可以自己实现 IAopCacheProvider 接口并注入，自定义缓存存储。</Description>
