@@ -4,6 +4,7 @@ using AopCache.Core.Common;
 using Mic.Aop;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 
 namespace AopCache
@@ -105,6 +106,8 @@ namespace AopCache
         public override AopContext Next(AopContext context)
         {
             context = base.Next(context);
+            if (context.Exception != null)
+                throw ExceptionDispatchInfo.Capture(context.Exception).SourceException;
 
             //获取缓存过期时间
             var limitTime = CacheTimeHelper.GetCacheNewTime(Type, Length);
@@ -118,6 +121,8 @@ namespace AopCache
         public override async ValueTask<AopContext> NextAsync(AopContext context)
         {
             context = await base.NextAsync(context);
+            if (context.Exception != null)
+                throw ExceptionDispatchInfo.Capture(context.Exception).SourceException;
 
             //获取缓存过期时间
             var limitTime = CacheTimeHelper.GetCacheNewTime(Type, Length);
